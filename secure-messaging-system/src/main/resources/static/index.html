@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Messaging System</title>
+    <style>
+        :root {
+            --navy-950: #061a3a;
+            --navy-900: #082452;
+            --navy-800: #0b2f6b;
+            --blue-700: #155eef;
+            --blue-600: #2563eb;
+            --blue-100: #dbeafe;
+            --blue-50: #eff6ff;
+            --sky-50: #f1f7ff;
+            --card: #ffffff;
+            --text: #0b1f44;
+            --muted: #52627a;
+            --border: #d7e4f7;
+            --green: #16a34a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.12), transparent 34%),
+                linear-gradient(135deg, #f8fbff 0%, #eaf3ff 55%, #dcecff 100%);
+            color: var(--text);
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 270px 1fr;
+        }
+
+        aside {
+            background: linear-gradient(180deg, var(--navy-950), var(--navy-900) 55%, var(--navy-800));
+            color: #ffffff;
+            padding: 22px 18px;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            box-shadow: 8px 0 30px rgba(6, 26, 58, 0.25);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 34px;
+        }
+
+        .shield {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #3b82f6, #0b4fc6);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), 0 10px 22px rgba(0,0,0,0.2);
+            font-size: 26px;
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            line-height: 1.15;
+            margin: 0;
+        }
+
+        .nav-link {
+            width: 100%;
+            border: 0;
+            color: #e8f1ff;
+            background: transparent;
+            text-align: left;
+            padding: 14px 16px;
+            margin: 6px 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, #2563eb, #0f4cc4);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.22);
+            margin: 18px 0;
+        }
+
+        .security-note {
+            margin-top: 28px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 18px;
+            background: rgba(255,255,255,0.07);
+            text-align: center;
+            line-height: 1.55;
+        }
+
+        .security-note strong {
+            display: block;
+            margin: 8px 0;
+        }
+
+        .content {
+            min-width: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--navy-950), var(--navy-800));
+            color: white;
+            padding: 24px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 30px rgba(6, 26, 58, 0.18);
+        }
+
+        header h2 {
+            margin: 0 0 6px;
+            font-size: 34px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            margin: 0;
+            color: #d6e8ff;
+        }
+
+        .online-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            font-weight: 700;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 5px rgba(34,197,94,0.15);
+        }
+
+        main {
+            max-width: 1240px;
+            margin: 24px auto;
+            padding: 0 26px 32px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .hero {
+            overflow: hidden;
+            position: relative;
+            min-height: 230px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 45%, #dbeafe 100%);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 34px;
+            box-shadow: 0 16px 36px rgba(8, 36, 82, 0.12);
+        }
+
+        .hero h2 {
+            margin: 0;
+            font-size: 36px;
+            line-height: 1.18;
+            letter-spacing: -0.7px;
+        }
+
+        .hero p {
+            max-width: 580px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .hero-art {
+            min-height: 170px;
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 52% 44%, rgba(37,99,235,0.25) 0 10%, transparent 11%),
+                radial-gradient(circle at 28% 32%, rgba(37,99,235,0.18) 0 7%, transparent 8%),
+                radial-gradient(circle at 70% 68%, rgba(37,99,235,0.18) 0 7%, transparent 8%),
+                linear-gradient(145deg, rgba(219,234,254,0.3), rgba(147,197,253,0.45));
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+
+        .hero-art::before {
+            content: "🔐";
+            width: 120px;
+            height: 120px;
+            display: grid;
+            place-items: center;
+            border-radius: 35px;
+            font-size: 62px;
+            background: linear-gradient(135deg, #2563eb, #0b3f9f);
+            box-shadow: 0 18px 40px rgba(37,99,235,0.28);
+        }
+
+        .hero-art::after {
+            content: "✉️    👤    🔑";
+            position: absolute;
+            inset: 18px;
+            display: grid;
+            place-items: center;
+            color: #1d4ed8;
+            font-size: 34px;
+            letter-spacing: 34px;
+            opacity: 0.95;
+        }
+
+        .quick-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            margin: 4px 0 -4px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .action-card, section {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 14px 30px rgba(8, 36, 82, 0.10);
+            backdrop-filter: blur(8px);
+        }
+
+        .action-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 240px;
+        }
+
+        .action-icon {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 14px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #eff6ff, #bfdbfe);
+            color: #0b4fc6;
+            font-size: 32px;
+            box-shadow: inset 0 0 0 1px rgba(37,99,235,0.18);
+        }
+
+        .action-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .action-card p {
+            color: var(--muted);
+            margin: 0 0 14px;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(300px, 1fr));
+            gap: 22px;
+        }
+
+        h2, h3 { color: var(--text); }
+        h2 { margin: 0 0 18px; font-size: 27px; }
+
+        label {
+            display: block;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-weight: 800;
+        }
+
+        input, textarea, select, button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbdaf0;
+            font-size: 15px;
+        }
+
+        input, textarea {
+            background: #ffffff;
+            color: #071b3d;
+            outline-color: #2563eb;
+        }
+
+        textarea { min-height: 110px; resize: vertical; }
+
+        button {
+            margin-top: 14px;
+            background: linear-gradient(135deg, var(--blue-600), #0346b8);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(37,99,235,0.20);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 24px rgba(37,99,235,0.28);
+        }
+
+        pre {
+            background: linear-gradient(135deg, #eaf3ff, #f8fbff);
+            color: #082452;
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            min-height: 52px;
+            font-family: Consolas, Monaco, monospace;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .success { color: #047857; font-weight: bold; }
+        .error { color: #b91c1c; font-weight: bold; }
+
+        .status-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            align-items: center;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .status-item span {
+            color: var(--green);
+        }
+
+        footer {
+            text-align: center;
+            color: #d8e9ff;
+            background: linear-gradient(135deg, var(--navy-950), var(--navy-800));
+            padding: 18px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1050px) {
+            .app-shell { grid-template-columns: 1fr; }
+            aside { position: relative; min-height: auto; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+            .hero { grid-template-columns: 1fr; }
+            .hero-art { margin-top: 16px; }
+        }
+
+        @media (max-width: 720px) {
+            header { align-items: flex-start; flex-direction: column; gap: 16px; }
+            header h2 { font-size: 28px; }
+            main { padding: 0 14px 24px; }
+            .grid, .quick-actions, .status-strip { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <aside>
+        <div class="brand">
+            <div class="shield">🔐</div>
+            <h1>Secure Messaging<br/>System</h1>
+        </div>
+
+        <button class="nav-link active" onclick="scrollToTop()">🏠 Dashboard</button>
+        <button class="nav-link" onclick="loadHealth()">🖥️ Check Server</button>
+        <button class="nav-link" onclick="loadUsers()">👥 Load Users</button>
+        <button class="nav-link" onclick="document.getElementById('sendCard').scrollIntoView({behavior:'smooth'})">✈️ Encrypt & Send</button>
+        <button class="nav-link" onclick="document.getElementById('inboxCard').scrollIntoView({behavior:'smooth'})">✉️ Decrypt Inbox</button>
+        <button class="nav-link" onclick="loadEncryptedMessages()">🔒 View Encrypted Records</button>
+        <div class="nav-divider"></div>
+        <button class="nav-link" onclick="document.getElementById('statusStrip').scrollIntoView({behavior:'smooth'})">ℹ️ System Status</button>
+
+        <div class="security-note">
+            <div style="font-size:34px;">🛡️</div>
+            <strong>Secure. Private. Protected.</strong>
+            End-to-end encrypted messaging demo built with Spring Boot and Java.
+        </div>
+    </aside>
+
+    <div class="content">
+        <header>
+            <div>
+                <h2>Secure Messaging System</h2>
+                <p>Hybrid RSA + AES encryption with digital signatures</p>
+            </div>
+            <div class="online-pill"><span class="dot"></span> System Online</div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div>
+                    <h2>Welcome to<br/>Secure Messaging System</h2>
+                    <p>
+                        This web demo keeps the original Java secure messaging logic and exposes it through a Spring Boot interface.
+                        Default users are Alice and Bob.
+                    </p>
+                    <p>🛡️ Your messages are encrypted, signed, and verified.</p>
+                </div>
+                <div class="hero-art" aria-label="security illustration"></div>
+            </section>
+
+            <h2 class="quick-title">⚡ Quick Actions</h2>
+            <div class="quick-actions">
+                <div class="action-card">
+                    <div class="action-icon">🖥️</div>
+                    <h3>Check Server</h3>
+                    <p>Verify server status and connectivity.</p>
+                    <button onclick="loadHealth()">Check Now</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">👥</div>
+                    <h3>Load Users</h3>
+                    <p>Load registered users from the demo state.</p>
+                    <button onclick="loadUsers()">Load Users</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">✈️</div>
+                    <h3>Encrypt and Send</h3>
+                    <p>Jump to the encrypted message form.</p>
+                    <button onclick="document.getElementById('sendCard').scrollIntoView({behavior:'smooth'})">Send Message</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">✉️</div>
+                    <h3>Decrypt Inbox</h3>
+                    <p>Jump to the receiver inbox section.</p>
+                    <button onclick="document.getElementById('inboxCard').scrollIntoView({behavior:'smooth'})">View Inbox</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">🔒</div>
+                    <h3>View Encrypted Records</h3>
+                    <p>Inspect stored encrypted messages.</p>
+                    <button onclick="loadEncryptedMessages()">View Records</button>
+                </div>
+            </div>
+
+            <section>
+                <h2>Project Status</h2>
+                <p class="note">
+                    Use the buttons below to test server health and the demo users before sending messages.
+                </p>
+                <button onclick="loadHealth()">Check Server</button>
+                <button onclick="loadUsers()">Load Users</button>
+                <pre id="statusOutput">Click a button to begin.</pre>
+            </section>
+
+            <div class="grid">
+                <section>
+                    <h2>👤 Register User</h2>
+                    <label>Username</label>
+                    <input id="registerUsername" placeholder="Example: Charlie" />
+                    <label>Password</label>
+                    <input id="registerPassword" type="password" placeholder="Enter password" />
+                    <button onclick="registerUser()">Register User</button>
+                    <pre id="registerOutput"></pre>
+                </section>
+
+                <section id="sendCard">
+                    <h2>✈️ Send Encrypted Message</h2>
+                    <label>Sender</label>
+                    <input id="sender" value="Alice" />
+                    <label>Receiver</label>
+                    <input id="receiver" value="Bob" />
+                    <label>Message</label>
+                    <textarea id="message">Hello Bob! Secure hybrid message with digital signature.</textarea>
+                    <button onclick="sendMessage()">Encrypt & Send</button>
+                    <pre id="sendOutput"></pre>
+                </section>
+            </div>
+
+            <div class="grid">
+                <section id="inboxCard">
+                    <h2>✉️ Read Inbox</h2>
+                    <label>Receiver Username</label>
+                    <input id="inboxUser" value="Bob" />
+                    <button onclick="loadInbox()">Decrypt Inbox</button>
+                    <pre id="inboxOutput"></pre>
+                </section>
+
+                <section>
+                    <h2>🔒 Encrypted Repository View</h2>
+                    <p class="note">Shows the stored encrypted payload, encrypted AES session key, IV, and digital signature.</p>
+                    <button onclick="loadEncryptedMessages()">View Encrypted Records</button>
+                    <pre id="encryptedOutput"></pre>
+                </section>
+            </div>
+
+            <section id="statusStrip" class="status-strip">
+                <div class="status-item">✅ Server: <span>Online</span></div>
+                <div class="status-item">✅ Encryption: <span>Active</span></div>
+                <div class="status-item">✅ Signatures: <span>Enabled</span></div>
+                <div class="status-item">✅ Storage: <span>In Memory</span></div>
+            </section>
+        </main>
+
+        <footer>© 2026 Secure Messaging System | Built with Spring Boot & Java</footer>
+    </div>
+</div>
+
+<script>
+    async function api(path, options = {}) {
+        const response = await fetch(path, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Request failed');
+        }
+        return data;
+    }
+
+    function write(id, value, isError = false) {
+        const element = document.getElementById(id);
+        element.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+        element.className = isError ? 'error' : '';
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function loadHealth() {
+        try { write('statusOutput', await api('/api/health')); }
+        catch (e) { write('statusOutput', e.message, true); }
+    }
+
+    async function loadUsers() {
+        try { write('statusOutput', await api('/api/users')); }
+        catch (e) { write('statusOutput', e.message, true); }
+    }
+
+    async function registerUser() {
+        try {
+            const result = await api('/api/users/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: document.getElementById('registerUsername').value,
+                    password: document.getElementById('registerPassword').value
+                })
+            });
+            write('registerOutput', result);
+        } catch (e) { write('registerOutput', e.message, true); }
+    }
+
+    async function sendMessage() {
+        try {
+            const result = await api('/api/messages/send', {
+                method: 'POST',
+                body: JSON.stringify({
+                    sender: document.getElementById('sender').value,
+                    receiver: document.getElementById('receiver').value,
+                    message: document.getElementById('message').value
+                })
+            });
+            write('sendOutput', result);
+        } catch (e) { write('sendOutput', e.message, true); }
+    }
+
+    async function loadInbox() {
+        try {
+            const result = await api('/api/messages/inbox', {
+                method: 'POST',
+                body: JSON.stringify({ username: document.getElementById('inboxUser').value })
+            });
+            write('inboxOutput', result);
+        } catch (e) { write('inboxOutput', e.message, true); }
+    }
+
+    async function loadEncryptedMessages() {
+        try { write('encryptedOutput', await api('/api/messages/encrypted')); }
+        catch (e) { write('encryptedOutput', e.message, true); }
+    }
+</script>
+</body>
+</html>

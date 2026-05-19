@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: secure-messaging-system
+    env: docker
+    plan: free
+    autoDeploy: true
