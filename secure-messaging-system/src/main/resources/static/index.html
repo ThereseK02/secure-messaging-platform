@@ -27,8 +27,8 @@
             margin: 0;
             font-family: "Segoe UI", Arial, sans-serif;
             background:
-                radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.12), transparent 34%),
-                linear-gradient(135deg, #f8fbff 0%, #eaf3ff 55%, #dcecff 100%);
+                    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.12), transparent 34%),
+                    linear-gradient(135deg, #f8fbff 0%, #eaf3ff 55%, #dcecff 100%);
             color: var(--text);
         }
 
@@ -199,10 +199,10 @@
             min-height: 170px;
             border-radius: 18px;
             background:
-                radial-gradient(circle at 52% 44%, rgba(37,99,235,0.25) 0 10%, transparent 11%),
-                radial-gradient(circle at 28% 32%, rgba(37,99,235,0.18) 0 7%, transparent 8%),
-                radial-gradient(circle at 70% 68%, rgba(37,99,235,0.18) 0 7%, transparent 8%),
-                linear-gradient(145deg, rgba(219,234,254,0.3), rgba(147,197,253,0.45));
+                    radial-gradient(circle at 52% 44%, rgba(37,99,235,0.25) 0 10%, transparent 11%),
+                    radial-gradient(circle at 28% 32%, rgba(37,99,235,0.18) 0 7%, transparent 8%),
+                    radial-gradient(circle at 70% 68%, rgba(37,99,235,0.18) 0 7%, transparent 8%),
+                    linear-gradient(145deg, rgba(219,234,254,0.3), rgba(147,197,253,0.45));
             display: grid;
             place-items: center;
             position: relative;
@@ -465,34 +465,31 @@
                     <div class="action-icon">🖥️</div>
                     <h3>Check Server</h3>
                     <p>Verify server status and connectivity.</p>
-                    <button onclick="loadHealth()">Check Now</button>
+                    <button onclick="document.getElementById('statusOutput').scrollIntoView({ behavior: 'smooth', block: 'center' }); loadHealth();">Check Now</button>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">👥</div>
                     <h3>Load Users</h3>
                     <p>Load registered users from the demo state.</p>
-                    <button onclick="loadUsers()">Load Users</button>
+                    <button onclick="document.getElementById('statusOutput').scrollIntoView({ behavior: 'smooth', block: 'center' }); loadUsers();">Load Users</button>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">✈️</div>
                     <h3>Encrypt and Send</h3>
                     <p>Jump to the encrypted message form.</p>
-                    <button onclick="document.getElementById('sendCard').scrollIntoView({behavior:'smooth'})">Send Message</button>
+                    <button onclick="document.getElementById('sendCard').scrollIntoView({ behavior: 'smooth', block: 'start' });">Send Message</button>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">✉️</div>
                     <h3>Decrypt Inbox</h3>
                     <p>Jump to the receiver inbox section.</p>
-                    <button class="nav-link"
-                            onclick="document.getElementById('inboxCard').scrollIntoView({ behavior: 'smooth', block: 'start' });">
-                        View Inbox
-                    </button>
+                    <button onclick="document.getElementById('inboxCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); loadInbox();">View Inbox</button>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">🔒</div>
                     <h3>View Encrypted Records</h3>
                     <p>Inspect stored encrypted messages.</p>
-                    <button onclick="loadEncryptedMessages()">View Records</button>
+                    <button onclick="document.getElementById('encryptedCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); loadEncryptedMessages();">View Records</button>
                 </div>
             </div>
 
@@ -501,8 +498,6 @@
                 <p class="note">
                     Use the buttons below to test server health and the demo users before sending messages.
                 </p>
-                <button onclick="loadHealth()">Check Server</button>
-                <button onclick="loadUsers()">Load Users</button>
                 <pre id="statusOutput">Click a button to begin.</pre>
             </section>
 
