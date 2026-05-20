@@ -125,7 +125,13 @@ server.port=${PORT:8080}
 ```
 
 This allows it to use port 8080 locally and Render's assigned port in production.
+## Live Cloud Deployment
 
+Application URL:
+
+```text
+https://secure-messaging-platform-v2.onrender.com/
+```
 ## API Endpoints
 
 | Method | Endpoint | Purpose |
