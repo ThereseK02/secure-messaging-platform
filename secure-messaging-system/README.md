@@ -26,6 +26,16 @@ Open in browser:
 http://localhost:8081
 
 ```
+### Docker Features
+- Containerized Spring Boot backend
+- Docker image publishing through Docker Hub
+- Public container repository
+- Render cloud deployment support
+- Cross-environment portability
+
+### Docker Hub Repository
+
+![Docker Hub Repository](screenshots/docker_hub_repository.png)
 
 ## Features
 
