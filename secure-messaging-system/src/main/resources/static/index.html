@@ -408,12 +408,25 @@
             <h1>Secure Messaging<br/>System</h1>
         </div>
 
-        <button class="nav-link active" onclick="scrollToTop()">🏠 Dashboard</button>
-        <button class="nav-link" onclick="loadHealth()">🖥️ Check Server</button>
-        <button class="nav-link" onclick="loadUsers()">👥 Load Users</button>
+        <button class="nav-link active"
+                onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+            🏠 Dashboard
+        </button>
+
+        <button class="nav-link"
+                onclick="document.getElementById('statusOutput').scrollIntoView({ behavior: 'smooth', block: 'center' }); loadHealth();">
+            🖥️ Check Server
+        </button>
+        <button class="nav-link"
+                onclick="document.getElementById('statusOutput').scrollIntoView({ behavior: 'smooth', block: 'center' }); loadUsers();">
+            👥 Load Users
+        </button>
         <button class="nav-link" onclick="document.getElementById('sendCard').scrollIntoView({behavior:'smooth'})">✈️ Encrypt & Send</button>
         <button class="nav-link" onclick="document.getElementById('inboxCard').scrollIntoView({behavior:'smooth'})">✉️ Decrypt Inbox</button>
-        <button class="nav-link" onclick="loadEncryptedMessages()">🔒 View Encrypted Records</button>
+        <button class="nav-link"
+                onclick="document.getElementById('encryptedCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); loadEncryptedMessages();">
+            🔒 View Encrypted Records
+        </button>
         <div class="nav-divider"></div>
         <button class="nav-link" onclick="document.getElementById('statusStrip').scrollIntoView({behavior:'smooth'})">ℹ️ System Status</button>
 
@@ -470,7 +483,10 @@
                     <div class="action-icon">✉️</div>
                     <h3>Decrypt Inbox</h3>
                     <p>Jump to the receiver inbox section.</p>
-                    <button onclick="document.getElementById('inboxCard').scrollIntoView({behavior:'smooth'})">View Inbox</button>
+                    <button class="nav-link"
+                            onclick="document.getElementById('inboxCard').scrollIntoView({ behavior: 'smooth', block: 'start' });">
+                        View Inbox
+                    </button>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">🔒</div>
@@ -523,7 +539,7 @@
                     <pre id="inboxOutput"></pre>
                 </section>
 
-                <section>
+                <section id="encryptedCard">
                     <h2>🔒 Encrypted Repository View</h2>
                     <p class="note">Shows the stored encrypted payload, encrypted AES session key, IV, and digital signature.</p>
                     <button onclick="loadEncryptedMessages()">View Encrypted Records</button>
