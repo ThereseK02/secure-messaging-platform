@@ -2,6 +2,31 @@
 
 A Java secure messaging demonstration that uses hybrid encryption with RSA, AES, and digital signatures. The original console-based application has been wrapped with a simple Spring Boot web interface so it can run locally, be published on GitHub, and be deployed using Docker/Render.
 
+## Docker Hub badge
+
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-secure--messaging--platform-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/theresek02/secure-messaging-platform)
+
+## Docker Deployment
+
+Pull the Docker image:
+
+```bash
+docker pull theresek02/secure-messaging-platform:latest
+```
+
+Run the container:
+
+```bash
+docker run -p 8081:8080 theresek02/secure-messaging-platform:latest
+```
+
+Open in browser:
+
+```text
+http://localhost:8081
+
+```
+
 ## Features
 
 - User registration with RSA key pair generation
