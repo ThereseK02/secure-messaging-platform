@@ -1,4 +1,4 @@
-package com.securemessaging.web;
+package com.securemessaging.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

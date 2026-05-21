@@ -1,5 +1,5 @@
 package com.securemessaging.web;
-import com.securemessaging.security.JwtService;
+import com.securemessaging.security.JwtUtil;
 import com.securemessaging.core.SecureMessagingSystem.AuthService;
 import com.securemessaging.core.SecureMessagingSystem.MessageRepository;
 import com.securemessaging.core.SecureMessagingSystem.MessagingService;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DemoState {
 
-    private final JwtService jwtService = new JwtService();
+    private final JwtUtil jwtUtil = new JwtUtil();
     private final UserRepository userRepository = new UserRepository();
     private final MessageRepository messageRepository = new MessageRepository();
 
@@ -44,8 +44,8 @@ public class DemoState {
             authService.register(username, password);
         }
     }
-    public JwtService getJwtService() {
-        return jwtService;
+    public JwtUtil getJwtUtil() {
+        return jwtUtil;
     }
     public UserRepository getUserRepository() {
         return userRepository;
