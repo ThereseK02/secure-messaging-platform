@@ -1,5 +1,5 @@
 package com.securemessaging.service;
-
+import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.core.SecureMessagingSystem.User;
 import com.securemessaging.entity.UserEntity;
 import com.securemessaging.mapper.UserMapper;
@@ -25,5 +25,17 @@ public class DatabaseUserService {
 
     public boolean existsByUsername(String username) {
         return repository.existsById(username);
+    }
+    public boolean validateLogin(String username, String password) throws Exception {
+        var user = repository.findById(username);
+
+        if (user.isEmpty()) {
+            return false;
+        }
+
+        SecureMessagingSystem.PasswordHasher hasher =
+                new SecureMessagingSystem.PasswordHasher();
+
+        return hasher.verify(password, user.get().getPasswordHash());
     }
 }
