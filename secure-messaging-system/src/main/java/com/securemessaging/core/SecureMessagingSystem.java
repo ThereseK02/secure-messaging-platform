@@ -11,7 +11,8 @@
  * Original Date: March 12, 2026
  */
 package com.securemessaging.core;
-
+import com.securemessaging.service.DatabaseMessagingService;
+import com.securemessaging.service.DatabaseUserService;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -313,12 +314,16 @@ public class SecureMessagingSystem {
 
     public static class AuthService {
 
+        private final DatabaseUserService databaseUserService;
         private final UserRepository repository;
         private final PasswordHasher hasher = new PasswordHasher();
         private final RSAService rsaService = new RSAService();
 
-        public AuthService(UserRepository repository) {
+        public AuthService(UserRepository repository,
+                           DatabaseUserService databaseUserService) {
+
             this.repository = repository;
+            this.databaseUserService = databaseUserService;
         }
 
         public User register(String username, String password) throws Exception {
@@ -337,6 +342,7 @@ public class SecureMessagingSystem {
             );
 
             repository.save(user);
+            databaseUserService.saveUser(user);
             return user;
         }
 
@@ -386,18 +392,23 @@ public class SecureMessagingSystem {
 
     public static class MessagingService {
 
+        private final DatabaseMessagingService databaseMessagingService;
         private final HybridEncryptionService encryptionService = new HybridEncryptionService();
         private final MessageRepository repository;
         private final UserRepository users;
 
-        public MessagingService(MessageRepository repository, UserRepository users) {
+        public MessagingService(MessageRepository repository,
+                                UserRepository users,
+                                DatabaseMessagingService databaseMessagingService) {
             this.repository = repository;
             this.users = users;
+            this.databaseMessagingService = databaseMessagingService;
         }
 
         public void sendMessage(String text, User sender, User receiver) throws Exception {
             EncryptedMessage encrypted = encryptionService.encrypt(text, sender, receiver);
             repository.save(encrypted);
+            databaseMessagingService.saveEncryptedMessage(encrypted);
         }
 
         public List<DecryptedMessageView> receiveMessages(User receiver) throws Exception {

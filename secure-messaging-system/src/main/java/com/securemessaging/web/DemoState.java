@@ -1,5 +1,5 @@
 package com.securemessaging.web;
-
+import com.securemessaging.security.JwtService;
 import com.securemessaging.core.SecureMessagingSystem.AuthService;
 import com.securemessaging.core.SecureMessagingSystem.MessageRepository;
 import com.securemessaging.core.SecureMessagingSystem.MessagingService;
@@ -11,11 +11,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class DemoState {
 
+    private final JwtService jwtService = new JwtService();
     private final UserRepository userRepository = new UserRepository();
     private final MessageRepository messageRepository = new MessageRepository();
-    private final AuthService authService = new AuthService(userRepository);
-    private final MessagingService messagingService = new MessagingService(messageRepository, userRepository);
 
+    private final com.securemessaging.service.DatabaseUserService databaseUserService;
+    private final com.securemessaging.service.DatabaseMessagingService databaseMessagingService;
+
+    private final AuthService authService;
+    private final MessagingService messagingService;
+
+    public DemoState(com.securemessaging.service.DatabaseUserService databaseUserService,
+                     com.securemessaging.service.DatabaseMessagingService databaseMessagingService) {
+
+        this.databaseUserService = databaseUserService;
+        this.databaseMessagingService = databaseMessagingService;
+
+        this.authService =
+                new AuthService(userRepository, databaseUserService);
+
+        this.messagingService =
+                new MessagingService(messageRepository, userRepository, databaseMessagingService);
+    }
     @PostConstruct
     public void initializeDemoUsers() throws Exception {
         ensureUser("Alice", "password123");
@@ -27,7 +44,9 @@ public class DemoState {
             authService.register(username, password);
         }
     }
-
+    public JwtService getJwtService() {
+        return jwtService;
+    }
     public UserRepository getUserRepository() {
         return userRepository;
     }
