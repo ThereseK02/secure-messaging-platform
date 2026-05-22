@@ -1,5 +1,8 @@
 package com.securemessaging.controller;
 
+import com.securemessaging.core.SecureMessagingSystem;
+import com.securemessaging.service.DatabaseUserService;
+import com.securemessaging.service.DatabaseMessagingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +12,15 @@ import java.util.Map;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class MessagingController {
+
+    private final DatabaseMessagingService databaseMessagingService;
+    private final DatabaseUserService databaseUserService;
+
+    public MessagingController(DatabaseMessagingService databaseMessagingService,
+                               DatabaseUserService databaseUserService) {
+        this.databaseMessagingService = databaseMessagingService;
+        this.databaseUserService = databaseUserService;
+    }
 
     @GetMapping("/messages")
     public ResponseEntity<?> getMessages() {
@@ -50,13 +62,7 @@ public class MessagingController {
                 .getName();
 
         return ResponseEntity.ok(
-                Map.of(
-                        "receiver", receiver,
-                        "messages", new String[]{
-                                "Encrypted message available",
-                                "Digital signature verified"
-                        }
-                )
+                databaseMessagingService.findInbox(receiver)
         );
     }
 
@@ -80,20 +86,37 @@ public class MessagingController {
     }
 
     @PostMapping("/messages/send")
-    public ResponseEntity<?> send(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> send(@RequestBody Map<String, String> request) throws Exception {
 
-        String sender = org.springframework.security.core.context.SecurityContextHolder
+        String senderUsername = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getName();
 
+        String receiverUsername = request.get("receiver");
+        String messageText = request.get("message");
+
+        SecureMessagingSystem.User sender =
+                databaseUserService.findDomainUser(senderUsername);
+
+        SecureMessagingSystem.User receiver =
+                databaseUserService.findDomainUser(receiverUsername);
+
+        SecureMessagingSystem.HybridEncryptionService encryptionService =
+                new SecureMessagingSystem.HybridEncryptionService();
+
+        SecureMessagingSystem.EncryptedMessage encryptedMessage =
+                encryptionService.encrypt(messageText, sender, receiver);
+
+        databaseMessagingService.saveEncryptedMessage(encryptedMessage);
+
         return ResponseEntity.ok(
                 Map.of(
-                        "status", "Message endpoint working",
-                        "sender", sender,
-                        "receiver", request.get("receiver"),
-                        "message", request.get("message")
+                        "status", "Encrypted message saved successfully",
+                        "sender", senderUsername,
+                        "receiver", receiverUsername
                 )
         );
     }
+
 }

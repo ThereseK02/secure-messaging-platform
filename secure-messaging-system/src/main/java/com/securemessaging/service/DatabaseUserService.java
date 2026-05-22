@@ -38,4 +38,14 @@ public class DatabaseUserService {
 
         return hasher.verify(password, user.get().getPasswordHash());
     }
+    public SecureMessagingSystem.User findDomainUser(String username) {
+        var user = repository.findById(username);
+
+        if (user.isEmpty()) {
+            throw new RuntimeException("User not found: " + username);
+        }
+
+        return UserMapper.toDomain(user.get());
+    }
+
 }
