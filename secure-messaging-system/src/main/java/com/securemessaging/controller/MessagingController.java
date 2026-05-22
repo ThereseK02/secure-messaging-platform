@@ -16,6 +16,7 @@ public class MessagingController {
                 Map.of("status", "Messages endpoint working")
         );
     }
+
     @GetMapping("/health")
     public ResponseEntity<?> healthCheck() {
 
@@ -41,17 +42,12 @@ public class MessagingController {
     }
 
     @PostMapping("/messages/inbox")
-    public ResponseEntity<?> inbox(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> inbox() {
 
-        String receiver = request.get("receiver");
-
-        if (receiver == null || receiver.isBlank()) {
-            receiver = request.get("username");
-        }
-
-        if (receiver == null || receiver.isBlank()) {
-            receiver = "Unknown receiver";
-        }
+        String receiver = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
         return ResponseEntity.ok(
                 Map.of(
@@ -63,6 +59,7 @@ public class MessagingController {
                 )
         );
     }
+
     @GetMapping("/users")
     public ResponseEntity<?> users() {
         return ResponseEntity.ok(
@@ -84,10 +81,16 @@ public class MessagingController {
 
     @PostMapping("/messages/send")
     public ResponseEntity<?> send(@RequestBody Map<String, String> request) {
+
+        String sender = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
         return ResponseEntity.ok(
                 Map.of(
                         "status", "Message endpoint working",
-                        "sender", request.get("sender"),
+                        "sender", sender,
                         "receiver", request.get("receiver"),
                         "message", request.get("message")
                 )
