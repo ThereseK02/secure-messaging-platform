@@ -118,5 +118,17 @@ public class MessagingController {
                 )
         );
     }
-
+    @GetMapping("/")
+    public ResponseEntity<?> home() {
+        return ResponseEntity.ok(
+                Map.of(
+                        "application", "Secure Messaging System",
+                        "status", "Running",
+                        "deployment", "Render",
+                        "apiHealth", "/api/health",
+                        "register", "/api/users/register",
+                        "login", "/users/login"
+                )
+        );
+    }
 }
