@@ -1,5 +1,5 @@
 package com.securemessaging.security;
-
+import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -11,8 +11,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY =
-            "securemessagingjwtsecretkeymustbeatleast32chars";
+    @Value("${app.jwt.secret}")
+    private String SECRET_KEY;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
