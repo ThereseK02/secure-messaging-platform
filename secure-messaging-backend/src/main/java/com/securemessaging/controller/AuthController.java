@@ -29,4 +29,14 @@ public class AuthController {
                 new LoginResponse(token)
         );
     }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody LoginRequest request) {
+
+        authService.register(
+                request.username(),
+                request.password()
+        );
+
+        return ResponseEntity.ok("Registration successful");
+    }
 }

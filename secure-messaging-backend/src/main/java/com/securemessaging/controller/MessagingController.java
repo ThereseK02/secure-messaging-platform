@@ -1,5 +1,12 @@
 package com.securemessaging.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.securemessaging.entity.EncryptedMessageEntity;
+import com.securemessaging.mapper.EncryptedMessageMapper;
+import com.securemessaging.core.SecureMessagingSystem.EncryptedMessage;
+import com.securemessaging.core.SecureMessagingSystem.DecryptedMessageView;
 import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
@@ -130,5 +137,54 @@ public class MessagingController {
                         "login", "/users/login"
                 )
         );
+    }
+    @PostMapping("/messages/inbox/decrypted")
+    public ResponseEntity<?> decryptedInbox() throws Exception {
+
+        String receiverUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        List<EncryptedMessageEntity> encryptedEntities =
+                databaseMessagingService.findInbox(receiverUsername);
+
+        List<DecryptedMessageView> decryptedMessages =
+                new ArrayList<>();
+
+        SecureMessagingSystem.HybridEncryptionService encryptionService =
+                new SecureMessagingSystem.HybridEncryptionService();
+
+        SecureMessagingSystem.User receiver =
+                databaseUserService.findDomainUser(receiverUsername);
+
+        for (EncryptedMessageEntity entity : encryptedEntities) {
+
+            EncryptedMessage encryptedMessage =
+                    EncryptedMessageMapper.toDomain(entity);
+
+            SecureMessagingSystem.User sender =
+                    databaseUserService.findDomainUser(
+                            encryptedMessage.getSender()
+                    );
+
+            String decryptedText =
+                    encryptionService.decrypt(
+                            encryptedMessage,
+                            receiver,
+                            sender
+                    );
+
+            decryptedMessages.add(
+                    new DecryptedMessageView(
+                            encryptedMessage.getSender(),
+                            encryptedMessage.getReceiver(),
+                            decryptedText,
+                            entity.getTimestamp()
+                    )
+            );
+        }
+
+        return ResponseEntity.ok(decryptedMessages);
     }
 }
