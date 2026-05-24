@@ -33,7 +33,7 @@ public class DemoState {
         this.messagingService =
                 new MessagingService(messageRepository, userRepository, databaseMessagingService);
     }
-    @PostConstruct
+ // @PostConstruct
     public void initializeDemoUsers() throws Exception {
         ensureUser("Alice", "password123");
         ensureUser("Bob", "secure456");

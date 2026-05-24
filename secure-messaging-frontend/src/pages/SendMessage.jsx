@@ -13,7 +13,7 @@ export default function SendMessage() {
             const token = localStorage.getItem("token");
 
             await api.post(
-                "/api/messages/send",
+                  "/api/messages/send",
                 {
                     receiver: recipient,
                     message: message

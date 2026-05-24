@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build: .
+    container_name: secure-messaging-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://44.249.176.34:8080
+    restart: unless-stopped

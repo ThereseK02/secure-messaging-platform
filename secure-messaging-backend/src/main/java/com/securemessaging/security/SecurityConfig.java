@@ -60,7 +60,9 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(
                 List.of(
-                        "http://localhost:5173"
+                        "http://localhost:5173",
+                        "http://44.249.176.34"
+
                 )
         );
 

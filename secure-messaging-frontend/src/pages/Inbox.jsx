@@ -15,7 +15,7 @@ export default function Inbox() {
             const token = localStorage.getItem("token");
 
             const response = await api.post(
-                "/api/messages/inbox/decrypted",
+    "/api/messages/inbox/decrypted",
                 {},
                 {
                     headers: {
@@ -135,7 +135,7 @@ export default function Inbox() {
                         padding: "10px 18px",
                         borderRadius: "8px",
                         border: "none",
-                        backgroundColor: "#ef4444",
+                        background: "linear-gradient(90deg, #9333ea, #ec4899)",
                         color: "white",
                         cursor: "pointer",
                         fontWeight: "bold"

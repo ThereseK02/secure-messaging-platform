@@ -122,7 +122,7 @@ export default function Dashboard() {
                             padding: "12px",
                             borderRadius: "8px",
                             border: "none",
-                            backgroundColor: "#ef4444",
+                            background: "linear-gradient(90deg, #9333ea, #ec4899)",
                             color: "white",
                             fontWeight: "bold",
                             cursor: "pointer"

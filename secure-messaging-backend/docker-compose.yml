@@ -1,0 +1,11 @@
+services:
+  backend:
+    build: .
+    container_name: secure-messaging-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d87hgjfavr4c73cgge5g-a.oregon-postgres.render.com:5432/secure_messaging_g504
+      SPRING_DATASOURCE_USERNAME: secure_messaging_g504_user
+      SPRING_DATASOURCE_PASSWORD:  u2JaSQyDExR0ucTTATrULyLDlEdkoTe0	
+    restart: unless-stopped

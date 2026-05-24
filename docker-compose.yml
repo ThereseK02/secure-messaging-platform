@@ -1,0 +1,26 @@
+environment:
+      POSTGRES_DB: secure_messaging
+      POSTGRES_USER: secure_user
+      POSTGRES_PASSWORD: secure_password
+    volumes:
+      - secure_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./secure-messaging-backend
+    container_name: secure-backend
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/secure_messaging
+      SPRING_DATASOURCE_USERNAME: secure_user
+      SPRING_DATASOURCE_PASSWORD: secure_password
+      JWT_SECRET: securemessagingjwtsecretkeymustbeatleast32chars
+    ports:
+      - "8080:8080"
+
+volumes:
+
+  secure_pgdata:
+
