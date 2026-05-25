@@ -10,6 +10,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import java.util.List;
+import org.springframework.web.cors.CorsConfiguration;
+
 
 @Configuration
 public class SecurityConfig {
@@ -23,28 +26,54 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",
-                                "/health",
-                                "/api/health",
-                                "/users/register",
-                                "/users/login",
-                                "/api/users/register",
-                                "/api/users/login"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                );
+ http
+        .csrf(csrf -> csrf.disable())
 
-        return http.build();
-    }
+        .cors(cors -> cors.configurationSource(request -> {
+            CorsConfiguration config = new CorsConfiguration();
+
+            config.setAllowedOrigins(List.of(
+
+            	    "http://44.249.176.34:5173",
+    "https://brain-secure-messaging.com",
+    "https://www.brain-secure-messaging.com"
+));
+
+            config.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+            ));
+
+            config.setAllowedHeaders(List.of("*"));
+
+            config.setAllowCredentials(true);
+
+            return config;
+        }))
+
+        .authorizeHttpRequests(auth -> auth
+		.requestMatchers(
+    			"/users/**",
+    			"/api/users/**",
+    			"/messages/**",
+    			"/api/messages/**",
+    			"/send/**",
+    			"/api/send/**",
+    			"/chat/**",
+    			"/api/chat/**",
+    			"/ws/**",
+    			"/error"
+		).permitAll()	
+
+            .anyRequest().authenticated()
+        );
+
+    return http.build();
+}
+
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -61,7 +90,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        "http://44.249.176.34"
+                "http://44.249.176.34:5173",
+                "http://44.249.176.34"
 
                 )
         );
