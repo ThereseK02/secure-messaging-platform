@@ -19,15 +19,17 @@ jobs:
           script: |
            script: |
               cd /home/ec2-user/secure-messaging-platform
-              git status
-              git log --oneline -3
               git pull origin main
-              grep -n "secure-messaging-logo" secure-messaging-frontend/src/pages/Register.js
-              docker compose down
+
+              docker compose down --rmi all --volumes --remove-orphans
+
+              docker system prune -af
+
               rm -rf secure-messaging-frontend/dist
+
               docker compose build --no-cache
+
               docker compose up -d
-              docker compose exec -T frontend sh -c "grep -R \"secure-messaging-logo\" /usr/share/nginx/html || true"
-              docker compose exec -T frontend sh -c "grep -R \"Development test account\" /usr/share/nginx/html || true"
+
               docker ps
           
