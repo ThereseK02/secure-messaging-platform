@@ -1,4 +1,8 @@
-environment:
+services:
+  postgres:
+    image: postgres:17
+    container_name: secure-postgres
+    environment:
       POSTGRES_DB: secure_messaging
       POSTGRES_USER: secure_user
       POSTGRES_PASSWORD: secure_password
@@ -20,7 +24,14 @@ environment:
     ports:
       - "8080:8080"
 
-volumes:
+  frontend:
+    build: ./secure-messaging-frontend
+    container_name: secure-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
 
+volumes:
   secure_pgdata:
 
