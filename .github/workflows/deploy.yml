@@ -24,6 +24,7 @@ jobs:
               git pull origin main
               grep -n "secure-messaging-logo" secure-messaging-frontend/src/pages/Register.js
               docker compose down
+              rm -rf secure-messaging-frontend/dist
               docker compose build --no-cache
               docker compose up -d
               docker ps
