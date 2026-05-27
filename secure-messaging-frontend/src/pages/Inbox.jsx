@@ -20,9 +20,12 @@ export default function Inbox() {
                 }
             );
 
-            const sortedMessages = [...response.data].sort((a, b) =>
-                b.timestamp.localeCompare(a.timestamp)
-            );
+            const sortedMessages = response.data
+                .map((message) => ({
+                    ...message,
+                    timestampValue: message.timestamp || ""
+                }))
+                .sort((a, b) => b.timestampValue.localeCompare(a.timestampValue));
 
             setMessages(sortedMessages);
         } catch (error) {
