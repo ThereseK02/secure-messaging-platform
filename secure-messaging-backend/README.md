@@ -160,7 +160,30 @@ curl -X POST http://localhost:8080/api/messages/send \
   -H "Content-Type: application/json" \
   -d '{"sender":"Alice","receiver":"Bob","message":"Hello Bob"}'
 ```
+## Production Monitoring Commands
 
+Check running containers:
+
+```bash
+docker ps
+
+View backend logs:
+
+docker logs secure-backend --tail 100
+
+View frontend logs:
+
+docker logs secure-frontend --tail 100
+
+View database logs:
+
+docker logs secure-postgres --tail 100
+
+Check backend health:
+
+curl https://www.brain-secure-messaging.com/health
+
+--- 
 ## Academic Note
 
 This project is intended for educational demonstration of hybrid encryption, digital signatures, and secure messaging architecture. For production use, the system would need stronger password storage, authenticated encryption such as AES-GCM, persistent storage, session management, HTTPS enforcement, secure key storage, and additional security controls.
