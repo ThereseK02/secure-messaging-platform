@@ -24,7 +24,9 @@ export default function Inbox() {
                 }
             );
 
-            setMessages(response.data);
+            setMessages(
+                response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            );
 
         } catch (error) {
 
@@ -148,7 +150,7 @@ export default function Inbox() {
 
             <div style={{ marginTop: "30px" }}>
 
-                {[...messages].reverse().map((message) =>  (
+                {messages.map((message, index) =>(
 
                     <div
                         key={index}
