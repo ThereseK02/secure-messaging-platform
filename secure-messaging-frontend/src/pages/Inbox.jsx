@@ -20,8 +20,8 @@ export default function Inbox() {
                 }
             );
 
-            const sortedMessages = [...response.data].sort(
-                (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+            const sortedMessages = [...response.data].sort((a, b) =>
+                b.timestamp.localeCompare(a.timestamp)
             );
 
             setMessages(sortedMessages);
