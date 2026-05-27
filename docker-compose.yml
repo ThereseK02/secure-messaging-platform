@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:17
     container_name: secure-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: secure_messaging
       POSTGRES_USER: secure_user
