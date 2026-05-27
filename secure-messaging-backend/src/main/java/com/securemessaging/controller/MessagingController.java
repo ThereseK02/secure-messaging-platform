@@ -2,6 +2,7 @@ package com.securemessaging.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.securemessaging.entity.EncryptedMessageEntity;
 import com.securemessaging.mapper.EncryptedMessageMapper;
@@ -12,8 +13,6 @@ import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping({"", "/api"})
@@ -38,7 +37,6 @@ public class MessagingController {
 
     @GetMapping("/health")
     public ResponseEntity<?> healthCheck() {
-
         return ResponseEntity.ok(
                 Map.of(
                         "server", "Online",
@@ -51,7 +49,6 @@ public class MessagingController {
 
     @GetMapping("/messages/encrypted")
     public ResponseEntity<?> encryptedRecords() {
-
         return ResponseEntity.ok(
                 Map.of(
                         "repository", "Encrypted repository accessible",
@@ -62,7 +59,6 @@ public class MessagingController {
 
     @PostMapping("/messages/inbox")
     public ResponseEntity<?> inbox() {
-
         String receiver = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -94,7 +90,6 @@ public class MessagingController {
 
     @PostMapping("/messages/send")
     public ResponseEntity<?> send(@RequestBody Map<String, String> request) throws Exception {
-
         String senderUsername = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -125,6 +120,7 @@ public class MessagingController {
                 )
         );
     }
+
     @GetMapping("/")
     public ResponseEntity<?> home() {
         return ResponseEntity.ok(
@@ -138,9 +134,9 @@ public class MessagingController {
                 )
         );
     }
+
     @PostMapping("/messages/inbox/decrypted")
     public ResponseEntity<?> decryptedInbox() throws Exception {
-
         String receiverUsername = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -159,7 +155,6 @@ public class MessagingController {
                 databaseUserService.findDomainUser(receiverUsername);
 
         for (EncryptedMessageEntity entity : encryptedEntities) {
-
             EncryptedMessage encryptedMessage =
                     EncryptedMessageMapper.toDomain(entity);
 
@@ -184,6 +179,10 @@ public class MessagingController {
                     )
             );
         }
+
+        decryptedMessages.sort(
+                (a, b) -> b.timestamp().compareTo(a.timestamp())
+        );
 
         return ResponseEntity.ok(decryptedMessages);
     }
