@@ -25,9 +25,10 @@ export default function Inbox() {
             );
             console.log("Inbox API response:", response.data);
             setMessages(
-                response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                [...response.data].sort(
+                    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+                )
             );
-
         } catch (error) {
 
             console.error(error);
