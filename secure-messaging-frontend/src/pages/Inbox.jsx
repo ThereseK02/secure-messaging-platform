@@ -20,12 +20,9 @@ export default function Inbox() {
                 }
             );
 
-            const sortedMessages = response.data
-                .map((message) => ({
-                    ...message,
-                    timestampValue: message.timestamp || ""
-                }))
-                .sort((a, b) => b.timestampValue.localeCompare(a.timestampValue));
+            const sortedMessages = [...response.data].sort((a, b) =>
+                String(b.timestamp).localeCompare(String(a.timestamp))
+            );
 
             setMessages(sortedMessages);
         } catch (error) {
@@ -77,7 +74,14 @@ export default function Inbox() {
             >
                 <button onClick={() => navigate("/dashboard")}>Dashboard</button>
                 <button onClick={() => navigate("/send")}>Send Message</button>
-                <button onClick={loadInbox}>Refresh Messages</button>
+                <button
+                    onClick={async () => {
+                        await loadInbox();
+                        alert("Inbox refreshed");
+                    }}
+                >
+                    Refresh Messages
+                </button>
                 <button onClick={handleLogout}>Logout</button>
             </div>
 
