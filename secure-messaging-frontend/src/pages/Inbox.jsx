@@ -6,7 +6,7 @@ export default function Inbox() {
     const [messages, setMessages] = useState([]);
     const navigate = useNavigate();
 
-    async function loadInbox() {
+    async function loadInbox(showAlert = false) {
         try {
             const token = localStorage.getItem("token");
 
@@ -25,6 +25,10 @@ export default function Inbox() {
             );
 
             setMessages(sortedMessages);
+
+            if (showAlert) {
+                alert("Inbox refreshed");
+            }
         } catch (error) {
             console.error(error);
             alert("Failed to load inbox");
@@ -34,7 +38,9 @@ export default function Inbox() {
     useEffect(() => {
         loadInbox();
 
-        const interval = setInterval(loadInbox, 5000);
+        const interval = setInterval(() => {
+            loadInbox();
+        }, 5000);
 
         return () => clearInterval(interval);
     }, []);
@@ -74,24 +80,14 @@ export default function Inbox() {
             >
                 <button onClick={() => navigate("/dashboard")}>Dashboard</button>
                 <button onClick={() => navigate("/send")}>Send Message</button>
-                <button
-                    onClick={async () => {
-                        await loadInbox();
-                        alert("Inbox refreshed");
-                    }}
-                >
-                    Refresh Messages
-                </button>
+                <button onClick={() => loadInbox(true)}>Refresh Messages</button>
                 <button onClick={handleLogout}>Logout</button>
             </div>
 
             <div style={{ marginTop: "30px" }}>
-                {[...messages]
-                    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-                    .map((message, index) => (
-
+                {messages.map((message, index) => (
                     <div
-                        key={message.id || index}
+                        key={message.id || `${message.sender}-${message.timestamp}-${index}`}
                         style={{
                             backgroundColor: "#0f172a",
                             padding: "24px",
