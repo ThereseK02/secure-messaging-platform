@@ -82,7 +82,10 @@ export default function Inbox() {
             </div>
 
             <div style={{ marginTop: "30px" }}>
-                {messages.map((message, index) => (
+                {[...messages]
+                    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+                    .map((message, index) => (
+
                     <div
                         key={message.id || index}
                         style={{
