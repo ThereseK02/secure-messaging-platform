@@ -21,8 +21,7 @@ public class HealthController {
     public Map<String, String> health() {
 
         return Map.of(
-                "status", "Secure Messaging API is running",
-                "version", "production"
+                "status", "UP"
         );
     }
 }
