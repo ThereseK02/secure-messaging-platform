@@ -148,7 +148,7 @@ export default function Inbox() {
 
             <div style={{ marginTop: "30px" }}>
 
-                {messages.map((msg, index) => (
+                {[...messages].reverse().map((message) =>  (
 
                     <div
                         key={index}
