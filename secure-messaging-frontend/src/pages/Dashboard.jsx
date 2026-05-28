@@ -117,6 +117,21 @@ export default function Dashboard() {
                     </button>
 
                     <button
+                        onClick={() => navigate("/groups")}
+                        style={{
+                            backgroundColor: "#1e3a8a",
+                            color: "#ffffff",
+                            border: "2px solid #38bdf8",
+                            borderRadius: "14px",
+                            padding: "14px 22px",
+                            fontWeight: "700",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Group Chat
+                    </button>
+
+                    <button
                         onClick={handleLogout}
                         style={{
                             padding: "12px",
@@ -138,3 +153,4 @@ export default function Dashboard() {
         </div>
     );
 }
+

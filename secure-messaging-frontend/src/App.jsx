@@ -1,3 +1,5 @@
+
+import GroupChat from "./pages/GroupChat";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -22,6 +24,8 @@ function App() {
                 <Route path="/send" element={<SendMessage />} />
 
                 <Route path="/inbox" element={<Inbox />} />
+
+		<Route path="/groups" element={<GroupChat />} />
 
             </Routes>
 

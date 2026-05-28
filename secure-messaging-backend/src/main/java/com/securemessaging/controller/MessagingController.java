@@ -1,4 +1,14 @@
+
 package com.securemessaging.controller;
+
+import java.time.LocalDateTime;
+
+import com.securemessaging.entity.GroupEntity;
+import com.securemessaging.entity.GroupMemberEntity;
+import com.securemessaging.entity.GroupMessageEntity;
+import com.securemessaging.repository.GroupEntityRepository;
+import com.securemessaging.repository.GroupMemberEntityRepository;
+import com.securemessaging.repository.GroupMessageEntityRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +31,22 @@ public class MessagingController {
 
     private final DatabaseMessagingService databaseMessagingService;
     private final DatabaseUserService databaseUserService;
+    private final GroupEntityRepository groupRepository;
+    private final GroupMemberEntityRepository groupMemberRepository;
+    private final GroupMessageEntityRepository groupMessageRepository;	
 
-    public MessagingController(DatabaseMessagingService databaseMessagingService,
-                               DatabaseUserService databaseUserService) {
-        this.databaseMessagingService = databaseMessagingService;
-        this.databaseUserService = databaseUserService;
-    }
+
+public MessagingController(DatabaseMessagingService databaseMessagingService,
+                           DatabaseUserService databaseUserService,
+                           GroupEntityRepository groupRepository,
+                           GroupMemberEntityRepository groupMemberRepository,
+                           GroupMessageEntityRepository groupMessageRepository) {
+    this.databaseMessagingService = databaseMessagingService;
+    this.databaseUserService = databaseUserService;
+    this.groupRepository = groupRepository;
+    this.groupMemberRepository = groupMemberRepository;
+    this.groupMessageRepository = groupMessageRepository;
+}
 
     @GetMapping("/messages")
     public ResponseEntity<?> getMessages() {
@@ -188,4 +208,135 @@ public class MessagingController {
 
         return ResponseEntity.ok(decryptedMessages);
     }
+@PostMapping("/groups/create")
+public ResponseEntity<?> createGroup(@RequestBody Map<String, String> request) {
+    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    String groupName = request.get("groupName");
+
+    GroupEntity group = new GroupEntity(
+            groupName,
+            currentUsername,
+            LocalDateTime.now()
+    );
+
+    GroupEntity savedGroup = groupRepository.save(group);
+
+    groupMemberRepository.save(
+            new GroupMemberEntity(savedGroup.getId(), currentUsername)
+    );
+
+    return ResponseEntity.ok(
+            Map.of(
+                    "status", "Group created successfully",
+                    "groupId", savedGroup.getId(),
+                    "groupName", savedGroup.getGroupName()
+            )
+    );
+}
+
+@GetMapping("/groups/my-groups")
+public ResponseEntity<?> myGroups() {
+    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    List<GroupMemberEntity> memberships =
+            groupMemberRepository.findByUsername(currentUsername);
+
+    List<GroupEntity> groups = new ArrayList<>();
+
+    for (GroupMemberEntity membership : memberships) {
+        groupRepository.findById(membership.getGroupId())
+                .ifPresent(groups::add);
+    }
+
+    return ResponseEntity.ok(groups);
+}
+
+@PostMapping("/groups/{groupId}/join")
+public ResponseEntity<?> joinGroup(@PathVariable("groupId") Long groupId) {
+    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    if (groupRepository.findById(groupId).isEmpty()) {
+        return ResponseEntity.badRequest().body(
+                Map.of("error", "Group not found")
+        );
+    }
+
+    if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isPresent()) {
+        return ResponseEntity.ok(
+                Map.of("status", "Already a group member")
+        );
+    }
+
+    groupMemberRepository.save(
+            new GroupMemberEntity(groupId, currentUsername)
+    );
+
+    return ResponseEntity.ok(
+            Map.of(
+                    "status", "Joined group successfully",
+                    "groupId", groupId
+            )
+    );
+}
+
+@PostMapping("/groups/{groupId}/send")
+public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
+                                          @RequestBody Map<String, String> request) {
+    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+        return ResponseEntity.status(403).body(
+                Map.of("error", "You are not a member of this group")
+        );
+    }
+
+    String messageText = request.get("message");
+
+    GroupMessageEntity message = new GroupMessageEntity(
+            groupId,
+            currentUsername,
+            messageText,
+            LocalDateTime.now()
+    );
+
+    groupMessageRepository.save(message);
+
+    return ResponseEntity.ok(
+            Map.of(
+                    "status", "Group message sent",
+                    "groupId", groupId
+            )
+    );
+}
+
+@GetMapping("/groups/{groupId}/messages")
+public ResponseEntity<?> getGroupMessages(@PathVariable("groupId") Long groupId) {
+    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+        return ResponseEntity.status(403).body(
+                Map.of("error", "You are not a member of this group")
+        );
+    }
+
+    return ResponseEntity.ok(
+            groupMessageRepository.findByGroupIdOrderByTimestampAsc(groupId)
+    );
+}
 }

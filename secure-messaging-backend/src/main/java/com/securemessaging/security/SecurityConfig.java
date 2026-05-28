@@ -54,30 +54,34 @@ public class SecurityConfig {
             return config;
         }))
 
-        .authorizeHttpRequests(auth -> auth
-		.requestMatchers(
+.authorizeHttpRequests(auth -> auth
+                .requestMatchers(
                         "/",
-			"/api/health",
-			"/api/auth/**",
-			"/auth/**",
-			"/users/**",
-    			"/api/users/**",
-    			"/messages/**",
-    			"/api/messages/**",
-    			"/send/**",
-    			"/api/send/**",
-    			"/chat/**",
-    			"/api/chat/**",
-    			"/ws/**",
-    			"/error"
-		).permitAll()	
-
-            .anyRequest().authenticated()
+                        "/api/health",
+                        "/api/auth/**",
+                        "/auth/**",
+                        "/users/**",
+                        "/api/users/**",
+                        "/messages/**",
+                        "/api/messages/**",
+                        "/send/**",
+                        "/api/send/**",
+                        "/chat/**",
+                        "/api/chat/**",
+                        "/api/groups/**",
+                        "/groups/**",
+                        "/ws/**",
+                        "/error"
+                ).permitAll()
+                .anyRequest().authenticated()
+        )
+        .addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
         );
 
     return http.build();
 }
-
 
     @Bean
     public AuthenticationManager authenticationManager(
