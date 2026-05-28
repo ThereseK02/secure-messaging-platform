@@ -15,6 +15,7 @@ services:
   backend:
     build: ./secure-messaging-backend
     container_name: secure-backend
+    restart: unless-stopped
     depends_on:
       - postgres
     environment:
@@ -28,11 +29,11 @@ services:
   frontend:
     build: ./secure-messaging-frontend
     container_name: secure-frontend
+    restart: unless-stopped
     depends_on:
       - backend
     ports:
-      - "5173:80"
+      - "5173:5173"
 
 volumes:
   secure_pgdata:
-

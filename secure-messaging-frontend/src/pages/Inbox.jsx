@@ -3,170 +3,154 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function Inbox() {
+  const [messages, setMessages] = useState([]);
+  const navigate = useNavigate();
 
-    const [messages, setMessages] = useState([]);
+  async function loadInbox(showAlert = false) {
+    try {
+      const token = localStorage.getItem("token");
 
-    const navigate = useNavigate();
+      const response = await api.post(
+        "/api/messages/inbox/decrypted",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    async function loadInbox(showAlert = false) {
+      const sortedMessages = [...response.data].sort((a, b) =>
+        String(b.timestamp).localeCompare(String(a.timestamp))
+      );
 
-        try {
-
-            const token = localStorage.getItem("token");
-
-            const response = await api.post(
-                "/api/messages/inbox/decrypted",
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            const sortedMessages = [...response.data].sort(
-                (a, b) =>
-                    String(b.timestamp).localeCompare(
-                        String(a.timestamp)
-                    )
-            );
-
-            setMessages(sortedMessages);
-
-            if (showAlert) {
-                alert("Inbox refreshed");
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert("Failed to load inbox");
-        }
+      setMessages(sortedMessages);
+      if (showAlert) alert("Inbox refreshed");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to load inbox");
     }
+  }
 
-    useEffect(() => {
+  useEffect(() => {
+    loadInbox();
+    const interval = setInterval(loadInbox, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-        loadInbox();
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate("/");
+  }
 
-        const interval = setInterval(() => {
+  const buttonStyle = {
+    backgroundColor: "#1e3a8a",
+    color: "#ffffff",
+    border: "2px solid #38bdf8",
+    borderRadius: "14px",
+    padding: "14px 22px",
+    fontWeight: "700",
+    fontSize: "16px",
+    cursor: "pointer",
+    width: "180px",
+    height: "54px",
+    boxShadow: "0 0 10px rgba(56, 189, 248, 0.25)",
+  };
 
-            loadInbox();
+  const logoutStyle = {
+    ...buttonStyle,
+    background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+    color: "#ffffff",
+    border: "none",
+  };
 
-        }, 5000);
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#020617",
+        color: "#ffffff",
+        padding: "40px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <h1
+        style={{
+          color: "#38bdf8",
+          fontSize: "56px",
+          marginBottom: "20px",
+        }}
+      >
+        Inbox
+      </h1>
 
-        return () => clearInterval(interval);
+      <div
+        style={{
+          display: "flex",
+          gap: "18px",
+          marginBottom: "30px",
+          flexWrap: "wrap",
+        }}
+      >
+        <button style={buttonStyle} onClick={() => navigate("/dashboard")}>
+          Dashboard
+        </button>
 
-    }, []);
+        <button style={buttonStyle} onClick={() => navigate("/send")}>
+          Send Message
+        </button>
 
-    function handleLogout() {
+        <button style={buttonStyle} onClick={() => loadInbox(true)}>
+          Refresh Messages
+        </button>
 
-        localStorage.removeItem("token");
+        <button style={logoutStyle} onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
 
-        navigate("/");
-    }
-
-    return (
-
-        <div
+      <div style={{ marginTop: "30px" }}>
+        {messages.map((message, index) => (
+          <div
+            key={message.id || index}
             style={{
-                minHeight: "100vh",
-                backgroundColor: "#020617",
-                color: "white",
-                padding: "40px",
-                fontFamily: "Arial, sans-serif",
+              backgroundColor: "#0f172a",
+              padding: "24px",
+              borderRadius: "14px",
+              marginBottom: "24px",
+              border: "1px solid #1e293b",
+              boxShadow: "0 0 12px rgba(56,189,248,0.08)",
+              textAlign: "left",
+              maxWidth: "700px",
             }}
-        >
-
-            <h1
-                style={{
-                    color: "#38bdf8",
-                    fontSize: "56px",
-                    marginBottom: "20px",
-                }}
+          >
+            <p
+              style={{
+                color: "#38bdf8",
+                fontWeight: "bold",
+                fontSize: "20px",
+              }}
             >
-                Inbox
-            </h1>
+              {message.sender}
+            </p>
 
-            <div
-                style={{
-                    display: "flex",
-                    gap: "12px",
-                    marginBottom: "30px",
-                    flexWrap: "wrap",
-                }}
+            <p
+              style={{
+                fontSize: "18px",
+                lineHeight: "1.5",
+                color: "#f8fafc",
+              }}
             >
+              {message.message}
+            </p>
 
-                <button onClick={() => navigate("/dashboard")}>
-                    Dashboard
-                </button>
-
-                <button onClick={() => navigate("/send")}>
-                    Send Message
-                </button>
-
-                <button onClick={() => loadInbox(true)}>
-                    Refresh Messages
-                </button>
-
-                <button onClick={handleLogout}>
-                    Logout
-                </button>
-
-            </div>
-
-            <div style={{ marginTop: "30px" }}>
-
-                {messages.map((message, index) => (
-
-                    <div
-                        key={message.id || index}
-                        style={{
-                            backgroundColor: "#0f172a",
-                            padding: "24px",
-                            borderRadius: "14px",
-                            marginBottom: "24px",
-                            border: "1px solid #1e293b",
-                            boxShadow: "0 0 12px rgba(56,189,248,0.08)",
-                            textAlign: "left",
-                            maxWidth: "700px",
-                        }}
-                    >
-
-                        <p
-                            style={{
-                                color: "#38bdf8",
-                                fontWeight: "bold"
-                            }}
-                        >
-                            {message.sender}
-                        </p>
-
-                        <p
-                            style={{
-                                fontSize: "18px",
-                                lineHeight: "1.5",
-                                color: "#f8fafc",
-                            }}
-                        >
-                            {message.message}
-                        </p>
-
-                        <p
-                            style={{
-                                fontSize: "12px",
-                                color: "#94a3b8"
-                            }}
-                        >
-                            {message.timestamp}
-                        </p>
-
-                    </div>
-
-                ))}
-
-            </div>
-
-        </div>
-    );
+            <p
+              style={{
+                fontSize: "12px",
+                color: "#94a3b8",
+              }}
+            >
+              {message.timestamp}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

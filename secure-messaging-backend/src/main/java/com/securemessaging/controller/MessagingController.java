@@ -121,7 +121,9 @@ public class MessagingController {
         );
     }
 
-    @GetMapping("/")
+
+	
+    @GetMapping("/api")
     public ResponseEntity<?> home() {
         return ResponseEntity.ok(
                 Map.of(
