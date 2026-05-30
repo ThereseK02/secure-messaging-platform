@@ -168,6 +168,10 @@ This architecture provides a clear separation of concerns between the presentati
 
 \- Vite
 
+\- React Router
+
+\- Axios
+
 \- JavaScript
 
 \- HTML5
@@ -1222,7 +1226,7 @@ Demonstrates the production deployment environment hosted on AWS EC2 using Docke
 
 
 
-!\[Class Diagram](diagrams/class\_diagram.png)
+!\[Class Diagram](diagrams/design_class\_diagram.png)
 
 
 
