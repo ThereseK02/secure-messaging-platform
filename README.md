@@ -215,21 +215,13 @@ This architecture provides a clear separation of concerns between the presentati
 
 
 ```text
-
 secure-messaging-platform/
-
-â”œâ”€â”€ secure-messaging-backend/
-
-â”œâ”€â”€ secure-messaging-frontend/
-
-â”œâ”€â”€ screenshots/
-
-â”œâ”€â”€ diagrams/
-
-â”œâ”€â”€ docker-compose.yml
-
-â””â”€â”€ README.md
-
+├─ secure-messaging-backend/
+├─ secure-messaging-frontend/
+├─ screenshots/
+├─ diagrams/
+├─ docker-compose.yml
+└─ README.md
 ```
 
 ---
