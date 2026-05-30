@@ -1,8 +1,8 @@
-\# Secure Messaging Platform
+﻿# Secure Messaging Platform
 
 
 
-\## Project Overview
+## Project Overview
 
 
 
@@ -18,99 +18,99 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 
 
-\---
+---
 
 
 
-\## Table of Contents
+## Table of Contents
 
 
 
-\- \[Project Overview](#project-overview)
+- [Project Overview](#project-overview)
 
-\- \[Table of Contents](#table-of-contents)
+- [Table of Contents](#table-of-contents)
 
-\- \[Key Features](#key-features)
+- [Key Features](#key-features)
 
-\- \[System Architecture](#system-architecture)
+- [System Architecture](#system-architecture)
 
-\- \[Technology Stack](#technology-stack)
+- [Technology Stack](#technology-stack)
 
-\- \[Project Structure](#project-structure)
+- [Project Structure](#project-structure)
 
-\- \[Database Design](#database-design)
+- [Database Design](#database-design)
 
-\- \[Security Features](#security-features)
+- [Security Features](#security-features)
 
-\- \[Authentication Workflow](#authentication-workflow)
+- [Authentication Workflow](#authentication-workflow)
 
-\- \[Messaging Features](#messaging-features)
+- [Messaging Features](#messaging-features)
 
-\- \[Group Messaging](#group-messaging)
+- [Group Messaging](#group-messaging)
 
-\- \[Deployment Architecture](#deployment-architecture)
+- [Deployment Architecture](#deployment-architecture)
 
-\- \[Monitoring and Logging](#monitoring-and-logging)
+- [Monitoring and Logging](#monitoring-and-logging)
 
-\- \[CI/CD Pipeline](#cicd-pipeline)
+- [CI/CD Pipeline](#cicd-pipeline)
 
-\- \[Screenshots](#screenshots)
+- [Screenshots](#screenshots)
 
-\- \[Diagrams](#diagrams)
+- [Diagrams](#diagrams)
 
-\- \[Key Contributions](#key-contributions)
+- [Key Contributions](#key-contributions)
 
-\- \[Future Improvements](#future-improvements)
+- [Future Improvements](#future-improvements)
 
-\- \[Learning Outcomes](#learning-outcomes)
+- [Learning Outcomes](#learning-outcomes)
 
-\- \[Final Conclusion](#final-conclusion)
+- [Final Conclusion](#final-conclusion)
 
-\- \[Author](#author)
+- [Author](#author)
 
-\---
-
-
-
-\## Key Features
+---
 
 
 
-\- User registration and login
-
-\- JSON Web Token (JWT)-based authentication and authorization
-
-\- Secure password storage with BCrypt
-
-\- Private messaging between users
-
-\- Group messaging functionality
-
-\- MySQL database persistence
-
-\- Spring Security integration
-
-\- RESTful API architecture
-
-\- Docker containerization
-
-\- AWS EC2 deployment
-
-\- Nginx reverse proxy configuration
-
-\- HTTPS/SSL support
-
-\- GitHub Actions CI/CD automation
-
-\- Monitoring and backend logging
+## Key Features
 
 
 
-\---
+- User registration and login
+
+- JSON Web Token (JWT)-based authentication and authorization
+
+- Secure password storage with BCrypt
+
+- Private messaging between users
+
+- Group messaging functionality
+
+- MySQL database persistence
+
+- Spring Security integration
+
+- RESTful API architecture
+
+- Docker containerization
+
+- AWS EC2 deployment
+
+- Nginx reverse proxy configuration
+
+- HTTPS/SSL support
+
+- GitHub Actions CI/CD automation
+
+- Monitoring and backend logging
 
 
 
-\## System Architecture
+---
+
+
+
+## System Architecture
 
 
 
@@ -122,7 +122,7 @@ The frontend provides the user interface for authentication, private messaging, 
 
 
 
-!\[System Architecture](diagrams/system\_architecture.png)
+![System Architecture](diagrams/system_architecture.png)
 
 
 
@@ -134,83 +134,83 @@ This architecture provides a clear separation of concerns between the presentati
 
 
 
-\---
+---
 
 
 
-\## Technology Stack
+## Technology Stack
 
 
 
-\### Backend
+### Backend
 
 
 
-\- Java 17
+- Java 17
 
-\- Spring Boot
+- Spring Boot
 
-\- Spring Security
+- Spring Security
 
-\- Hibernate / JPA
+- Hibernate / JPA
 
-\- JWT Authentication
+- JWT Authentication
 
-\- Maven
-
-
-
-\### Frontend
+- Maven
 
 
 
-\- React
-
-\- Vite
-
-\- React Router
-
-\- Axios
-
-\- JavaScript
-
-\- HTML5
-
-\- CSS3
+### Frontend
 
 
 
-\### Database
+- React
+
+- Vite
+
+- React Router
+
+- Axios
+
+- JavaScript
+
+- HTML5
+
+- CSS3
 
 
 
-\- MySQL
+### Database
 
 
 
-\### DevOps \& Cloud
+- MySQL
 
 
 
-\- Docker
-
-\- Docker Compose
-
-\- AWS EC2
-
-\- Nginx
-
-\- GitHub Actions
-
-\- HTTPS / SSL
+### DevOps & Cloud
 
 
 
-\---
+- Docker
+
+- Docker Compose
+
+- AWS EC2
+
+- Nginx
+
+- GitHub Actions
+
+- HTTPS / SSL
 
 
 
-\## Project Structure
+---
+
+
+
+## Project Structure
 
 
 
@@ -218,33 +218,33 @@ This architecture provides a clear separation of concerns between the presentati
 
 secure-messaging-platform/
 
-├── secure-messaging-backend/
+â”œâ”€â”€ secure-messaging-backend/
 
-├── secure-messaging-frontend/
+â”œâ”€â”€ secure-messaging-frontend/
 
-├── screenshots/
+â”œâ”€â”€ screenshots/
 
-├── diagrams/
+â”œâ”€â”€ diagrams/
 
-├── docker-compose.yml
+â”œâ”€â”€ docker-compose.yml
 
-└── README.md
+â””â”€â”€ README.md
 
 ```
 
-\---
+---
 
 
 
-\## Database Design
+## Database Design
 
 
 
-\#### Database Diagram
+#### Database Diagram
 
 
 
-!\[Database Diagram](diagrams/database\_diagram.png)
+![Database Diagram](diagrams/database_diagram.png)
 
 
 
@@ -252,11 +252,11 @@ Illustrates the relational database structure used by the platform, including us
 
 
 
-\---
+---
 
 
 
-\## Security Features
+## Security Features
 
 
 
@@ -264,77 +264,77 @@ The Secure Messaging Platform implements multiple layers of security to protect 
 
 
 
-\### JSON Web Token (JWT) Authentication
+### JSON Web Token (JWT) Authentication
 
 
 
-\- Authenticates users after successful login
+- Authenticates users after successful login
 
-\- Issues a JWT token for protected requests
+- Issues a JWT token for protected requests
 
-\- Requires valid tokens for secured API access
+- Requires valid tokens for secured API access
 
-\- Prevents unauthorized users from accessing private messaging features
-
-
-
-\### Spring Security
+- Prevents unauthorized users from accessing private messaging features
 
 
 
-\- Protects backend REST endpoints
-
-\- Separates public routes from protected routes
-
-\- Allows public access to registration and login
-
-\- Requires authentication for messaging, dashboard, and group communication features
+### Spring Security
 
 
 
-\### Password Protection
+- Protects backend REST endpoints
+
+- Separates public routes from protected routes
+
+- Allows public access to registration and login
+
+- Requires authentication for messaging, dashboard, and group communication features
 
 
 
-\- Hashes passwords using BCrypt
-
-\- Avoids storing plain-text passwords
-
-\- Improves credential security in the database
+### Password Protection
 
 
 
-\### Protected REST APIs
+- Hashes passwords using BCrypt
+
+- Avoids storing plain-text passwords
+
+- Improves credential security in the database
 
 
 
-\- Validates authentication before processing sensitive requests
-
-\- Rejects unauthorized API calls
-
-\- Protects user messages, inbox data, and group messaging endpoints
+### Protected REST APIs
 
 
 
-\### Secure Deployment
+- Validates authentication before processing sensitive requests
+
+- Rejects unauthorized API calls
+
+- Protects user messages, inbox data, and group messaging endpoints
 
 
 
-\- Uses Nginx as a reverse proxy
-
-\- Supports HTTPS/SSL in production
-
-\- Runs services inside Docker containers
-
-\- Deploys the application on AWS EC2
+### Secure Deployment
 
 
 
-\---
+- Uses Nginx as a reverse proxy
+
+- Supports HTTPS/SSL in production
+
+- Runs services inside Docker containers
+
+- Deploys the application on AWS EC2
 
 
 
-\## Authentication Workflow
+---
+
+
+
+## Authentication Workflow
 
 
 
@@ -342,61 +342,61 @@ The authentication workflow controls how users register, log in, and access prot
 
 
 
-\### Registration
+### Registration
 
 
 
-\- A new user creates an account through the registration page.
+- A new user creates an account through the registration page.
 
-\- The backend receives the registration request through a REST API endpoint.
+- The backend receives the registration request through a REST API endpoint.
 
-\- The password is hashed using BCrypt before being stored.
+- The password is hashed using BCrypt before being stored.
 
-\- User information is persisted in the MySQL database.
-
-
-
-\### Login
+- User information is persisted in the MySQL database.
 
 
 
-\- A registered user logs in with valid credentials.
-
-\- The backend verifies the submitted password against the stored BCrypt hash.
-
-\- If authentication succeeds, the backend generates a JWT token.
-
-\- The frontend stores the token and uses it for future protected API requests.
+### Login
 
 
 
-\### Protected Access
+- A registered user logs in with valid credentials.
+
+- The backend verifies the submitted password against the stored BCrypt hash.
+
+- If authentication succeeds, the backend generates a JWT token.
+
+- The frontend stores the token and uses it for future protected API requests.
 
 
 
-\- The user can access secured pages such as the dashboard, private messaging, inbox, and group messaging.
-
-\- Each protected request includes the JWT token.
-
-\- Spring Security validates the token before allowing access to backend resources.
+### Protected Access
 
 
 
-\### Authentication Screenshots
+- The user can access secured pages such as the dashboard, private messaging, inbox, and group messaging.
+
+- Each protected request includes the JWT token.
+
+- Spring Security validates the token before allowing access to backend resources.
 
 
 
-\- `screenshots/authentication/01\_register\_page.png`
-
-\- `screenshots/authentication/02\_login\_page.png`
-
-\- `screenshots/authentication/03\_dashboard\_jwt\_authenticated.png`
-
-\---
+### Authentication Screenshots
 
 
 
-\## Messaging Features
+- `screenshots/authentication/01_register_page.png`
+
+- `screenshots/authentication/02_login_page.png`
+
+- `screenshots/authentication/03_dashboard_jwt_authenticated.png`
+
+---
+
+
+
+## Messaging Features
 
 
 
@@ -404,7 +404,7 @@ The Secure Messaging Platform enables authenticated users to exchange private me
 
 
 
-\### Secure Message Delivery
+### Secure Message Delivery
 
 
 
@@ -412,7 +412,7 @@ Users can compose and send private messages to other registered users through th
 
 
 
-\### Inbox Management
+### Inbox Management
 
 
 
@@ -420,7 +420,7 @@ Incoming messages are displayed in the user's inbox, allowing users to review re
 
 
 
-\### Conversation Tracking
+### Conversation Tracking
 
 
 
@@ -428,7 +428,7 @@ The platform maintains message records within the database, enabling users to vi
 
 
 
-\### Database Persistence
+### Database Persistence
 
 
 
@@ -436,7 +436,7 @@ Messages are stored in MySQL using Hibernate/JPA, ensuring reliable data persist
 
 
 
-\### User Experience
+### User Experience
 
 
 
@@ -456,21 +456,21 @@ The messaging interface was designed to provide a straightforward communication 
 
 
 
-\### Messaging Screenshots
+### Messaging Screenshots
 
 
 
-\- `screenshots/messaging/04\_send\_secure\_message.png`
+- `screenshots/messaging/04_send_secure_message.png`
 
-\- `screenshots/messaging/05\_inbox\_decrypted\_messages.png`
+- `screenshots/messaging/05_inbox_decrypted_messages.png`
 
-\- `screenshots/messaging/06\_message\_exchange.png`
+- `screenshots/messaging/06_message_exchange.png`
 
-\---
+---
 
 
 
-\## Group Messaging
+## Group Messaging
 
 
 
@@ -478,7 +478,7 @@ The Secure Messaging Platform extends traditional one-to-one communication by pr
 
 
 
-\### Group Creation
+### Group Creation
 
 
 
@@ -486,7 +486,7 @@ Authenticated users can create new groups and establish collaborative communicat
 
 
 
-\### Group Membership
+### Group Membership
 
 
 
@@ -494,7 +494,7 @@ Users can join existing groups and become active participants in group discussio
 
 
 
-\### Group Communication
+### Group Communication
 
 
 
@@ -502,7 +502,7 @@ Group members can send messages that are visible to all participants within the 
 
 
 
-\### Message History
+### Message History
 
 
 
@@ -510,7 +510,7 @@ The platform maintains a complete history of group conversations. Messages are p
 
 
 
-\### Database Management
+### Database Management
 
 
 
@@ -518,7 +518,7 @@ Group messages and membership information are stored using Hibernate/JPA and MyS
 
 
 
-\### Group Messaging Workflow
+### Group Messaging Workflow
 
 
 
@@ -534,19 +534,19 @@ Group messages and membership information are stored using Hibernate/JPA and MyS
 
 
 
-\### Group Messaging Screenshots
+### Group Messaging Screenshots
 
 
 
-\- `screenshots/group-messaging/15\_group\_chat\_overview.png`
+- `screenshots/group-messaging/15_group_chat_overview.png`
 
-\- `screenshots/group-messaging/16\_group\_messages.png`
+- `screenshots/group-messaging/16_group_messages.png`
 
-\---
+---
 
 
 
-\## Deployment Architecture
+## Deployment Architecture
 
 
 
@@ -554,7 +554,7 @@ The Secure Messaging Platform was designed using a containerized deployment arch
 
 
 
-\### Containerized Infrastructure
+### Containerized Infrastructure
 
 
 
@@ -562,7 +562,7 @@ The application is packaged and deployed using Docker containers. Containerizati
 
 
 
-\### Docker Compose Orchestration
+### Docker Compose Orchestration
 
 
 
@@ -570,7 +570,7 @@ Docker Compose is used to manage and coordinate the application's services, incl
 
 
 
-\### Cloud Deployment
+### Cloud Deployment
 
 
 
@@ -578,7 +578,7 @@ The platform evolved through multiple deployment stages, beginning with local Do
 
 
 
-\### AWS EC2 Hosting
+### AWS EC2 Hosting
 
 
 
@@ -586,7 +586,7 @@ The production environment is hosted on AWS EC2, providing a reliable cloud infr
 
 
 
-\### Nginx Reverse Proxy
+### Nginx Reverse Proxy
 
 
 
@@ -594,7 +594,7 @@ Nginx serves as a reverse proxy between users and the backend services. Incoming
 
 
 
-\### HTTPS and Domain Configuration
+### HTTPS and Domain Configuration
 
 
 
@@ -602,7 +602,7 @@ The platform supports HTTPS-secured communication, ensuring that data exchanged 
 
 
 
-\### Deployment Workflow
+### Deployment Workflow
 
 
 
@@ -622,27 +622,27 @@ The platform supports HTTPS-secured communication, ensuring that data exchanged 
 
 
 
-\### Deployment Screenshots
+### Deployment Screenshots
 
 
 
-\- `screenshots/deployment/10\_docker\_local\_deployment.png`
+- `screenshots/deployment/10_docker_local_deployment.png`
 
-\- `screenshots/deployment/11\_render\_cloud\_deployment.png`
+- `screenshots/deployment/11_render_cloud_deployment.png`
 
-\- `screenshots/deployment/12\_server\_status\_response.png`
+- `screenshots/deployment/12_server_status_response.png`
 
-\- `screenshots/deployment/13\_docker\_hub\_repository.png`
+- `screenshots/deployment/13_docker_hub_repository.png`
 
-\- `screenshots/deployment/17\_docker\_containers\_running.png`
+- `screenshots/deployment/17_docker_containers_running.png`
 
-\- `screenshots/deployment/18\_production\_https\_domain.png`
+- `screenshots/deployment/18_production_https_domain.png`
 
-\- `screenshots/deployment/19\_aws\_ec2\_deployment.png`
+- `screenshots/deployment/19_aws_ec2_deployment.png`
 
-\---
+---
 
-\## Monitoring and Logging
+## Monitoring and Logging
 
 
 
@@ -650,7 +650,7 @@ Monitoring and logging play an important role in maintaining application reliabi
 
 
 
-\### Backend Logging
+### Backend Logging
 
 
 
@@ -658,7 +658,7 @@ The Spring Boot backend generates detailed runtime logs that provide visibility 
 
 
 
-\### Hibernate SQL Monitoring
+### Hibernate SQL Monitoring
 
 
 
@@ -666,7 +666,7 @@ Hibernate SQL logging was enabled during development and testing to monitor data
 
 
 
-\### Docker Log Management
+### Docker Log Management
 
 
 
@@ -674,7 +674,7 @@ Application logs can be accessed through Docker, providing centralized visibilit
 
 
 
-\### Production Troubleshooting
+### Production Troubleshooting
 
 
 
@@ -682,19 +682,19 @@ Backend logs were extensively used throughout deployment and testing phases to:
 
 
 
-\- Verify successful API requests
+- Verify successful API requests
 
-\- Monitor database connectivity
+- Monitor database connectivity
 
-\- Validate group messaging operations
+- Validate group messaging operations
 
-\- Troubleshoot authentication issues
+- Troubleshoot authentication issues
 
-\- Confirm container health and application startup
+- Confirm container health and application startup
 
 
 
-\### Observability Benefits
+### Observability Benefits
 
 
 
@@ -702,19 +702,19 @@ The logging infrastructure provides several operational benefits:
 
 
 
-\- Faster issue identification
+- Faster issue identification
 
-\- Improved debugging capabilities
+- Improved debugging capabilities
 
-\- Enhanced deployment verification
+- Enhanced deployment verification
 
-\- Better visibility into database operations
+- Better visibility into database operations
 
-\- Simplified maintenance and monitoring
+- Simplified maintenance and monitoring
 
 
 
-\### Monitoring Workflow
+### Monitoring Workflow
 
 
 
@@ -732,21 +732,21 @@ The logging infrastructure provides several operational benefits:
 
 
 
-\### Monitoring and Logging Screenshot
+### Monitoring and Logging Screenshot
 
 
 
-\- `screenshots/deployment/21\_backend\_logs.png`
+- `screenshots/deployment/21_backend_logs.png`
 
 
 
 The screenshot demonstrates backend runtime monitoring through Hibernate SQL logs, showing successful database queries related to group messaging functionality and confirming communication between the Spring Boot application and the MySQL database.
 
-\---
+---
 
 
 
-\## CI/CD Pipeline
+## CI/CD Pipeline
 
 
 
@@ -754,7 +754,7 @@ The Secure Messaging Platform incorporates a Continuous Integration and Continuo
 
 
 
-\### GitHub Actions Automation
+### GitHub Actions Automation
 
 
 
@@ -762,7 +762,7 @@ GitHub Actions is used to automate deployment workflows whenever code changes ar
 
 
 
-\### Continuous Integration
+### Continuous Integration
 
 
 
@@ -770,13 +770,13 @@ The CI process automatically validates project updates by:
 
 
 
-\- Pulling the latest source code from GitHub
+- Pulling the latest source code from GitHub
 
-\- Building the application components
+- Building the application components
 
-\- Verifying project configuration
+- Verifying project configuration
 
-\- Preparing deployment artifacts
+- Preparing deployment artifacts
 
 
 
@@ -784,7 +784,7 @@ This helps identify issues early in the development lifecycle and improves code 
 
 
 
-\### Continuous Deployment
+### Continuous Deployment
 
 
 
@@ -792,7 +792,7 @@ After successful validation, the deployment workflow can automatically update th
 
 
 
-\### DevOps Benefits
+### DevOps Benefits
 
 
 
@@ -800,19 +800,19 @@ Implementing CI/CD provides several advantages:
 
 
 
-\- Faster software delivery
+- Faster software delivery
 
-\- Reduced deployment errors
+- Reduced deployment errors
 
-\- Consistent deployment procedures
+- Consistent deployment procedures
 
-\- Improved development productivity
+- Improved development productivity
 
-\- Better collaboration through version control automation
+- Better collaboration through version control automation
 
 
 
-\### Deployment Workflow
+### Deployment Workflow
 
 
 
@@ -830,51 +830,51 @@ Implementing CI/CD provides several advantages:
 
 
 
-\### CI/CD Technologies
+### CI/CD Technologies
 
 
 
-\- GitHub Actions
+- GitHub Actions
 
-\- GitHub Repository Management
+- GitHub Repository Management
 
-\- Docker
+- Docker
 
-\- Docker Compose
+- Docker Compose
 
-\- AWS EC2
+- AWS EC2
 
-\- Nginx
-
-
-
-\### CI/CD Pipeline Screenshot
+- Nginx
 
 
 
-\- `screenshots/deployment/20\_github\_actions\_pipeline.png`
+### CI/CD Pipeline Screenshot
+
+
+
+- `screenshots/deployment/20_github_actions_pipeline.png`
 
 
 
 The GitHub Actions workflow demonstrates the automated deployment pipeline used to build, validate, and deploy application updates, supporting a modern DevOps-oriented software development process.
 
-\---
+---
 
 
 
-\## Screenshots
+## Screenshots
 
 
 
-\### Authentication
+### Authentication
 
 
 
-\#### User Registration
+#### User Registration
 
 
 
-!\[User Registration](screenshots/authentication/01\_register\_page.png)
+![User Registration](screenshots/authentication/01_register_page.png)
 
 
 
@@ -882,11 +882,11 @@ New users can create an account through the registration interface.
 
 
 
-\#### User Login
+#### User Login
 
 
 
-!\[User Login](screenshots/authentication/02\_login\_page.png)
+![User Login](screenshots/authentication/02_login_page.png)
 
 
 
@@ -894,11 +894,11 @@ Users authenticate using their registered credentials and receive a JSON Web Tok
 
 
 
-\#### Authenticated Dashboard
+#### Authenticated Dashboard
 
 
 
-!\[Authenticated Dashboard](screenshots/authentication/03\_dashboard\_jwt\_authenticated.png)
+![Authenticated Dashboard](screenshots/authentication/03_dashboard_jwt_authenticated.png)
 
 
 
@@ -906,19 +906,19 @@ Successful authentication grants access to protected application features and me
 
 
 
-\---
+---
 
 
 
-\### Private Messaging
+### Private Messaging
 
 
 
-\#### Send Secure Message
+#### Send Secure Message
 
 
 
-!\[Send Secure Message](screenshots/messaging/04\_send\_secure\_message.png)
+![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
 
 
 
@@ -926,11 +926,11 @@ Authenticated users can compose and send secure private messages.
 
 
 
-\#### Inbox Management
+#### Inbox Management
 
 
 
-!\[Inbox Management](screenshots/messaging/05\_inbox\_decrypted\_messages.png)
+![Inbox Management](screenshots/messaging/05_inbox_decrypted_messages.png)
 
 
 
@@ -938,11 +938,11 @@ The inbox provides centralized access to received messages and communication his
 
 
 
-\#### Message Exchange
+#### Message Exchange
 
 
 
-!\[Message Exchange](screenshots/messaging/06\_message\_exchange.png)
+![Message Exchange](screenshots/messaging/06_message_exchange.png)
 
 
 
@@ -950,19 +950,19 @@ Demonstrates secure communication between registered platform users.
 
 
 
-\---
+---
 
 
 
-\### Security Features
+### Security Features
 
 
 
-\#### Encrypted Message Processing
+#### Encrypted Message Processing
 
 
 
-!\[Encrypted Message Processing](screenshots/security/07\_encrypted\_send\_message.png)
+![Encrypted Message Processing](screenshots/security/07_encrypted_send_message.png)
 
 
 
@@ -970,11 +970,11 @@ Illustrates secure message handling and encryption-related functionality.
 
 
 
-\#### Message Decryption
+#### Message Decryption
 
 
 
-!\[Message Decryption](screenshots/security/08\_decrypt\_inbox.png)
+![Message Decryption](screenshots/security/08_decrypt_inbox.png)
 
 
 
@@ -982,11 +982,11 @@ Shows secure retrieval and processing of stored messages.
 
 
 
-\#### Repository Storage Verification
+#### Repository Storage Verification
 
 
 
-!\[Repository Storage Verification](screenshots/security/09\_encrypted\_repository\_view.png)
+![Repository Storage Verification](screenshots/security/09_encrypted_repository_view.png)
 
 
 
@@ -994,19 +994,19 @@ Demonstrates database-level message persistence and storage validation.
 
 
 
-\---
+---
 
 
 
-\### Deployment and Infrastructure
+### Deployment and Infrastructure
 
 
 
-\#### Local Docker Deployment
+#### Local Docker Deployment
 
 
 
-!\[Local Docker Deployment](screenshots/deployment/10\_docker\_local\_deployment.png)
+![Local Docker Deployment](screenshots/deployment/10_docker_local_deployment.png)
 
 
 
@@ -1014,11 +1014,11 @@ Application deployment using Docker containers in a local environment.
 
 
 
-\#### Cloud Deployment
+#### Cloud Deployment
 
 
 
-!\[Cloud Deployment](screenshots/deployment/11\_render\_cloud\_deployment.png)
+![Cloud Deployment](screenshots/deployment/11_render_cloud_deployment.png)
 
 
 
@@ -1026,11 +1026,11 @@ Demonstrates deployment in a cloud-hosted environment.
 
 
 
-\#### Server Status Verification
+#### Server Status Verification
 
 
 
-!\[Server Status Verification](screenshots/deployment/12\_server\_status\_response.png)
+![Server Status Verification](screenshots/deployment/12_server_status_response.png)
 
 
 
@@ -1038,11 +1038,11 @@ Confirms application availability and backend responsiveness.
 
 
 
-\#### Docker Hub Repository
+#### Docker Hub Repository
 
 
 
-!\[Docker Hub Repository](screenshots/deployment/13\_docker\_hub\_repository.png)
+![Docker Hub Repository](screenshots/deployment/13_docker_hub_repository.png)
 
 
 
@@ -1050,19 +1050,19 @@ Container image management and distribution through Docker Hub.
 
 
 
-\---
+---
 
 
 
-\### Platform Overview
+### Platform Overview
 
 
 
-\#### Dashboard Overview
+#### Dashboard Overview
 
 
 
-!\[Dashboard Overview](screenshots/legacy-development/14\_dashboard\_overview.png)
+![Dashboard Overview](screenshots/legacy-development/14_dashboard_overview.png)
 
 
 
@@ -1070,19 +1070,19 @@ Overview of the platform interface and navigation workflow.
 
 
 
-\---
+---
 
 
 
-\### Group Messaging
+### Group Messaging
 
 
 
-\#### Group Chat Overview
+#### Group Chat Overview
 
 
 
-!\[Group Chat Overview](screenshots/group-messaging/15\_group\_chat\_overview.png)
+![Group Chat Overview](screenshots/group-messaging/15_group_chat_overview.png)
 
 
 
@@ -1090,11 +1090,11 @@ Introduction to collaborative communication through group messaging.
 
 
 
-\#### Group Communication
+#### Group Communication
 
 
 
-!\[Group Communication](screenshots/group-messaging/16\_group\_messages.png)
+![Group Communication](screenshots/group-messaging/16_group_messages.png)
 
 
 
@@ -1102,19 +1102,19 @@ Demonstrates message exchange among multiple participants within a group.
 
 
 
-\---
+---
 
 
 
-\### Production Deployment
+### Production Deployment
 
 
 
-\#### Running Containers
+#### Running Containers
 
 
 
-!\[Running Containers](screenshots/deployment/17\_docker\_containers\_running.png)
+![Running Containers](screenshots/deployment/17_docker_containers_running.png)
 
 
 
@@ -1122,11 +1122,11 @@ Shows active Docker containers supporting the deployed application.
 
 
 
-\#### HTTPS Production Deployment
+#### HTTPS Production Deployment
 
 
 
-!\[HTTPS Production Deployment](screenshots/deployment/18\_production\_https\_domain.png)
+![HTTPS Production Deployment](screenshots/deployment/18_production_https_domain.png)
 
 
 
@@ -1134,11 +1134,11 @@ Demonstrates secure HTTPS access to the deployed application.
 
 
 
-\#### AWS EC2 Deployment
+#### AWS EC2 Deployment
 
 
 
-!\[AWS EC2 Deployment](screenshots/deployment/19\_aws\_ec2\_deployment.png)
+![AWS EC2 Deployment](screenshots/deployment/19_aws_ec2_deployment.png)
 
 
 
@@ -1146,11 +1146,11 @@ Shows the production environment hosted on Amazon Web Services Elastic Compute C
 
 
 
-\#### GitHub Actions CI/CD Pipeline
+#### GitHub Actions CI/CD Pipeline
 
 
 
-!\[GitHub Actions Pipeline](screenshots/deployment/20\_github\_actions\_pipeline.png)
+![GitHub Actions Pipeline](screenshots/deployment/20_github_actions_pipeline.png)
 
 
 
@@ -1158,11 +1158,11 @@ Demonstrates Continuous Integration and Continuous Deployment (CI/CD) automation
 
 
 
-\#### Backend Monitoring and Logs
+#### Backend Monitoring and Logs
 
 
 
-!\[Backend Monitoring and Logs](screenshots/deployment/21\_backend\_logs.png)
+![Backend Monitoring and Logs](screenshots/deployment/21_backend_logs.png)
 
 
 
@@ -1170,23 +1170,23 @@ Shows backend runtime monitoring through Hibernate SQL logs, validating successf
 
 
 
-\---
+---
 
 
 
-\## Diagrams
+## Diagrams
 
 
 
-\### System Design
+### System Design
 
 
 
-\#### System Architecture Diagram
+#### System Architecture Diagram
 
 
 
-!\[System Architecture Diagram](diagrams/system\_architecture.png)
+![System Architecture Diagram](diagrams/system_architecture.png)
 
 
 
@@ -1194,19 +1194,19 @@ Illustrates the interaction between the React frontend, Spring Boot backend, MyS
 
 
 
-\---
+---
 
 
 
-\### Deployment Architecture
+### Deployment Architecture
 
 
 
-\#### Production Deployment Architecture
+#### Production Deployment Architecture
 
 
 
-!\[Deployment Architecture](diagrams/deployment\_architecture.png)
+![Deployment Architecture](diagrams/deployment_architecture.png)
 
 
 
@@ -1214,19 +1214,19 @@ Demonstrates the production deployment environment hosted on AWS EC2 using Docke
 
 
 
-\---
+---
 
 
 
-\### UML Design
+### UML Design
 
 
 
-\#### Design Class Diagram
+#### Design Class Diagram
 
 
 
-!\[Class Diagram](diagrams/design_class\_diagram.png)
+![Class Diagram](diagrams/design_class_diagram.png)
 
 
 
@@ -1234,11 +1234,11 @@ Demonstrates the original object-oriented design of the Secure Messaging System 
 
 
 
-\---
+---
 
 
 
-\## Key Contributions
+## Key Contributions
 
 
 
@@ -1246,79 +1246,79 @@ Throughout this project, I was responsible for the complete software development
 
 
 
-\### Backend Development
+### Backend Development
 
 
 
-\- Designed and implemented RESTful APIs (Representational State Transfer Application Programming Interfaces) using Spring Boot.
+- Designed and implemented RESTful APIs (Representational State Transfer Application Programming Interfaces) using Spring Boot.
 
-\- Integrated Spring Security and JWT (JSON Web Token) authentication.
+- Integrated Spring Security and JWT (JSON Web Token) authentication.
 
-\- Developed private messaging and group messaging functionality.
+- Developed private messaging and group messaging functionality.
 
-\- Configured Hibernate and JPA (Java Persistence API) for database persistence.
+- Configured Hibernate and JPA (Java Persistence API) for database persistence.
 
-\- Designed database entities, repositories, services, and controller layers.
+- Designed database entities, repositories, services, and controller layers.
 
-\- Implemented secure communication workflows between frontend and backend services.
-
-
-
-\### Frontend Development
+- Implemented secure communication workflows between frontend and backend services.
 
 
 
-\- Built a responsive user interface using React and Vite.
-
-\- Developed authentication, messaging, inbox, and group chat pages.
-
-\- Integrated frontend components with backend REST APIs.
-
-\- Improved user experience through intuitive navigation and communication workflows.
-
-\- Implemented secure token-based authentication handling within the frontend application.
+### Frontend Development
 
 
 
-\### Security Implementation
+- Built a responsive user interface using React and Vite.
+
+- Developed authentication, messaging, inbox, and group chat pages.
+
+- Integrated frontend components with backend REST APIs.
+
+- Improved user experience through intuitive navigation and communication workflows.
+
+- Implemented secure token-based authentication handling within the frontend application.
 
 
 
-\- Implemented JWT (JSON Web Token) authentication and authorization.
-
-\- Secured passwords using BCrypt hashing, a password-hashing algorithm designed to protect credentials from brute-force attacks.
-
-\- Protected REST endpoints using Spring Security.
-
-\- Configured HTTPS (Hypertext Transfer Protocol Secure) for encrypted communication.
-
-\- Implemented secure backend validation and access-control mechanisms.
+### Security Implementation
 
 
 
-\### Cloud and DevOps
+- Implemented JWT (JSON Web Token) authentication and authorization.
+
+- Secured passwords using BCrypt hashing, a password-hashing algorithm designed to protect credentials from brute-force attacks.
+
+- Protected REST endpoints using Spring Security.
+
+- Configured HTTPS (Hypertext Transfer Protocol Secure) for encrypted communication.
+
+- Implemented secure backend validation and access-control mechanisms.
 
 
 
-\- Containerized the application using Docker.
-
-\- Managed multi-container deployments using Docker Compose.
-
-\- Deployed the platform to AWS EC2 (Amazon Web Services Elastic Compute Cloud).
-
-\- Configured Nginx reverse proxy services for traffic routing and application access.
-
-\- Implemented CI/CD (Continuous Integration and Continuous Deployment) automation using GitHub Actions.
-
-\- Managed production deployment, monitoring, logging, and troubleshooting workflows.
+### Cloud and DevOps
 
 
 
-\---
+- Containerized the application using Docker.
+
+- Managed multi-container deployments using Docker Compose.
+
+- Deployed the platform to AWS EC2 (Amazon Web Services Elastic Compute Cloud).
+
+- Configured Nginx reverse proxy services for traffic routing and application access.
+
+- Implemented CI/CD (Continuous Integration and Continuous Deployment) automation using GitHub Actions.
+
+- Managed production deployment, monitoring, logging, and troubleshooting workflows.
 
 
 
-\## Future Improvements
+---
+
+
+
+## Future Improvements
 
 
 
@@ -1326,65 +1326,65 @@ Several enhancements can be implemented to further improve the platform's functi
 
 
 
-\### Planned Features
+### Planned Features
 
 
 
-\- Real-time messaging using WebSockets, a communication protocol that enables persistent bidirectional communication between clients and servers.
+- Real-time messaging using WebSockets, a communication protocol that enables persistent bidirectional communication between clients and servers.
 
-\- Message delivery and read receipts.
+- Message delivery and read receipts.
 
-\- User profile management.
+- User profile management.
 
-\- File and image sharing.
+- File and image sharing.
 
-\- Push notification system.
+- Push notification system.
 
-\- Message search functionality.
+- Message search functionality.
 
-\- Group administration controls.
+- Group administration controls.
 
-\- Message editing and deletion.
-
-
-
-\### Scalability Improvements
+- Message editing and deletion.
 
 
 
-\- Redis (Remote Dictionary Server) caching integration to improve performance and reduce database load.
-
-\- Load balancing for multiple application instances.
-
-\- Kubernetes (K8s) container orchestration for automated deployment, scaling, and management of containerized applications.
-
-\- Cloud-native monitoring solutions.
-
-\- Migration toward a microservices architecture.
+### Scalability Improvements
 
 
 
-\### Security Enhancements
+- Redis (Remote Dictionary Server) caching integration to improve performance and reduce database load.
+
+- Load balancing for multiple application instances.
+
+- Kubernetes (K8s) container orchestration for automated deployment, scaling, and management of containerized applications.
+
+- Cloud-native monitoring solutions.
+
+- Migration toward a microservices architecture.
 
 
 
-\- Multi-Factor Authentication (MFA) for additional account protection.
-
-\- Refresh token support for improved session management.
-
-\- Role-Based Access Control (RBAC) for granular permission management.
-
-\- Advanced audit logging.
-
-\- Enhanced security monitoring and session management.
+### Security Enhancements
 
 
 
-\---
+- Multi-Factor Authentication (MFA) for additional account protection.
+
+- Refresh token support for improved session management.
+
+- Role-Based Access Control (RBAC) for granular permission management.
+
+- Advanced audit logging.
+
+- Enhanced security monitoring and session management.
 
 
 
-\## Learning Outcomes
+---
+
+
+
+## Learning Outcomes
 
 
 
@@ -1392,91 +1392,91 @@ This project provided valuable experience across multiple areas of software engi
 
 
 
-\### Software Engineering
+### Software Engineering
 
 
 
-\- Applied object-oriented design principles.
+- Applied object-oriented design principles.
 
-\- Developed scalable backend architectures.
+- Developed scalable backend architectures.
 
-\- Built modern frontend applications using React.
+- Built modern frontend applications using React.
 
-\- Implemented RESTful API (Representational State Transfer Application Programming Interface) design practices.
+- Implemented RESTful API (Representational State Transfer Application Programming Interface) design practices.
 
-\- Improved software maintainability through modular application design.
-
-
-
-\### Security
+- Improved software maintainability through modular application design.
 
 
 
-\- Learned JWT (JSON Web Token) authentication workflows.
-
-\- Implemented Spring Security authorization mechanisms.
-
-\- Applied secure password management using BCrypt hashing.
-
-\- Configured HTTPS (Hypertext Transfer Protocol Secure) deployments.
-
-\- Improved understanding of authentication and authorization best practices.
+### Security
 
 
 
-\### Cloud Computing and DevOps
+- Learned JWT (JSON Web Token) authentication workflows.
+
+- Implemented Spring Security authorization mechanisms.
+
+- Applied secure password management using BCrypt hashing.
+
+- Configured HTTPS (Hypertext Transfer Protocol Secure) deployments.
+
+- Improved understanding of authentication and authorization best practices.
 
 
 
-\- Gained hands-on experience with Docker containerization.
-
-\- Managed multi-container applications using Docker Compose.
-
-\- Deployed applications to AWS EC2 (Amazon Web Services Elastic Compute Cloud).
-
-\- Configured Nginx reverse proxy services.
-
-\- Built CI/CD (Continuous Integration and Continuous Deployment) pipelines using GitHub Actions.
-
-\- Troubleshot production deployment issues and cloud infrastructure configurations.
+### Cloud Computing and DevOps
 
 
 
-\### Database Management
+- Gained hands-on experience with Docker containerization.
+
+- Managed multi-container applications using Docker Compose.
+
+- Deployed applications to AWS EC2 (Amazon Web Services Elastic Compute Cloud).
+
+- Configured Nginx reverse proxy services.
+
+- Built CI/CD (Continuous Integration and Continuous Deployment) pipelines using GitHub Actions.
+
+- Troubleshot production deployment issues and cloud infrastructure configurations.
 
 
 
-\- Designed relational database structures.
-
-\- Implemented persistence using Hibernate and JPA (Java Persistence API).
-
-\- Applied ORM (Object-Relational Mapping) concepts to connect Java objects with relational database tables.
-
-\- Managed data retrieval, storage, and database interactions.
+### Database Management
 
 
 
-\### Full-Stack Development
+- Designed relational database structures.
+
+- Implemented persistence using Hibernate and JPA (Java Persistence API).
+
+- Applied ORM (Object-Relational Mapping) concepts to connect Java objects with relational database tables.
+
+- Managed data retrieval, storage, and database interactions.
 
 
 
-\- Integrated frontend and backend systems.
-
-\- Managed application deployment from development to production.
-
-\- Troubleshot deployment, networking, and infrastructure issues.
-
-\- Improved application maintainability, scalability, and security.
-
-\- Gained practical experience building and deploying a production-oriented full-stack application.
+### Full-Stack Development
 
 
 
-\---
+- Integrated frontend and backend systems.
+
+- Managed application deployment from development to production.
+
+- Troubleshot deployment, networking, and infrastructure issues.
+
+- Improved application maintainability, scalability, and security.
+
+- Gained practical experience building and deploying a production-oriented full-stack application.
 
 
 
-\## Final Conclusion
+---
+
+
+
+## Final Conclusion
 
 
 
@@ -1492,11 +1492,11 @@ This project represents an important milestone in my journey as a Software Engin
 
 
 
-\---
+---
 
 
 
-\## Author
+## Author
 
 
 
@@ -1508,9 +1508,10 @@ This project represents an important milestone in my journey as a Software Engin
 
 
 
-\- GitHub: https://github.com/ThereseK02
+- GitHub: https://github.com/ThereseK02
 
-\- LinkedIn: https://www.linkedin.com/in/therese-kabayanja-14a43739b
+- LinkedIn: https://www.linkedin.com/in/therese-kabayanja-14a43739b
+
 
 
 
