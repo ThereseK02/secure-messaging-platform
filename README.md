@@ -373,19 +373,21 @@ The authentication workflow controls how users register, log in, and access prot
 - Spring Security validates the token before allowing access to backend resources.
 
 
-
 ### Authentication Screenshots
 
+#### Register Page
 
+![Register Page](screenshots/authentication/01_register_page.png)
 
-- `screenshots/authentication/01_register_page.png`
+#### Login Page
 
-- `screenshots/authentication/02_login_page.png`
+![Login Page](screenshots/authentication/02_login_page.png)
 
-- `screenshots/authentication/03_dashboard_jwt_authenticated.png`
+#### JWT Authenticated Dashboard
+
+![JWT Dashboard](screenshots/authentication/03_dashboard_jwt_authenticated.png)
 
 ---
-
 
 
 ## Messaging Features
@@ -1485,24 +1487,14 @@ This project represents an important milestone in my journey as a Software Engin
 
 
 ---
-
-
-
 ## Author
 
+**Therese Kabayanja**
 
+*Software Engineer | Machine Learning Engineer | Data Scientist*
 
-\*\*Therese Kabayanja\*\*
-
-
-
-\*Software Engineer | Machine Learning Engineer | Data Science\*
-
-
-
-- GitHub: https://github.com/ThereseK02
-
-- LinkedIn: https://www.linkedin.com/in/therese-kabayanja-14a43739b
+- GitHub: [ThereseK02](https://github.com/ThereseK02)
+- LinkedIn: [Therese Kabayanja](https://www.linkedin.com/in/therese-kabayanja-14a43739b)
 
 
 
