@@ -450,17 +450,6 @@ The messaging interface was designed to provide a straightforward communication 
 
 
 
-### Messaging Screenshots
-
-
-
-- `screenshots/messaging/04_send_secure_message.png`
-
-- `screenshots/messaging/05_inbox_decrypted_messages.png`
-
-- `screenshots/messaging/06_message_exchange.png`
-
----
 
 
 
@@ -514,7 +503,21 @@ Group messages and membership information are stored using Hibernate/JPA and MyS
 
 ### Group Messaging Workflow
 
+### Messaging Screenshots
 
+#### Send Secure Message
+
+![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
+
+#### Decrypted Inbox Messages
+
+![Inbox Messages](screenshots/messaging/05_inbox_decrypted_messages.png)
+
+#### Message Exchange
+
+![Message Exchange](screenshots/messaging/06_message_exchange.png)
+
+---
 
 1\. Create a new group.
 
