@@ -862,11 +862,11 @@ Implementing CI/CD provides several advantages:
 
 ### CI/CD Pipeline Screenshot
 
+#### GitHub Actions CI/CD Pipeline
 
+![GitHub Actions CI/CD Pipeline](screenshots/deployment/20_github_actions_pipeline.png)
 
-- `screenshots/deployment/20_github_actions_pipeline.png`
-
-
+---
 
 The GitHub Actions workflow demonstrates the automated deployment pipeline used to build, validate, and deploy application updates, supporting a modern DevOps-oriented software development process.
 
