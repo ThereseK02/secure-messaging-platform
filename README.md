@@ -623,23 +623,36 @@ The platform supports HTTPS-secured communication, ensuring that data exchanged 
 
 ### Deployment Screenshots
 
+#### Docker Local Deployment
 
+![Docker Local Deployment](screenshots/deployment/10_docker_local_deployment.png)
 
-- `screenshots/deployment/10_docker_local_deployment.png`
+#### Render Cloud Deployment
 
-- `screenshots/deployment/11_render_cloud_deployment.png`
+![Render Cloud Deployment](screenshots/deployment/11_render_cloud_deployment.png)
 
-- `screenshots/deployment/12_server_status_response.png`
+#### Server Status Response
 
-- `screenshots/deployment/13_docker_hub_repository.png`
+![Server Status Response](screenshots/deployment/12_server_status_response.png)
 
-- `screenshots/deployment/17_docker_containers_running.png`
+#### Docker Hub Repository
 
-- `screenshots/deployment/18_production_https_domain.png`
+![Docker Hub Repository](screenshots/deployment/13_docker_hub_repository.png)
 
-- `screenshots/deployment/19_aws_ec2_deployment.png`
+#### Docker Containers Running
+
+![Docker Containers Running](screenshots/deployment/17_docker_containers_running.png)
+
+#### Production HTTPS Domain
+
+![Production HTTPS Domain](screenshots/deployment/18_production_https_domain.png)
+
+#### AWS EC2 Deployment
+
+![AWS EC2 Deployment](screenshots/deployment/19_aws_ec2_deployment.png)
 
 ---
+
 
 ## Monitoring and Logging
 
