@@ -54,8 +54,6 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 - [CI/CD Pipeline](#cicd-pipeline)
 
-- [Screenshots](#screenshots)
-
 - [Diagrams](#diagrams)
 
 - [Key Contributions](#key-contributions)
@@ -86,7 +84,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 - Group messaging functionality
 
-- MySQL database persistence
+- PostgreSQL database persistence
 
 - Spring Security integration
 
@@ -114,7 +112,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 
 
-The Secure Messaging Platform follows a modern three-tier architecture consisting of a React frontend, a Spring Boot backend, and a MySQL database.
+The Secure Messaging Platform follows a modern three-tier architecture consisting of a React frontend, a Spring Boot backend, and a PostgreSQL database.
 
 
 
@@ -126,11 +124,11 @@ The frontend provides the user interface for authentication, private messaging, 
 
 
 
-The Secure Messaging Platform is deployed on an AWS EC2 production server using Docker Compose. Incoming HTTPS requests are handled by Nginx, which serves the React frontend and routes API requests to the Spring Boot backend. The backend exposes REST APIs, enforces authentication and authorization through Spring Security and JWT tokens, and persists application data in a MySQL database.
+The Secure Messaging Platform is deployed on an AWS EC2 production server using Docker Compose. Incoming HTTPS requests are handled by Nginx, which serves the React frontend and routes API requests to the Spring Boot backend. The backend exposes REST APIs, enforces authentication and authorization through Spring Security and JWT tokens, and persists application data in a PostgreSQL database.
 
 
 
-This architecture provides a clear separation of concerns between the presentation layer (React), application layer (Spring Boot), and data layer (MySQL), resulting in a scalable, maintainable, and production-ready full-stack application.
+This architecture provides a clear separation of concerns between the presentation layer (React), application layer (Spring Boot), and data layer (PostgreSQL), resulting in a scalable, maintainable, and production-ready full-stack application.
 
 
 
@@ -184,7 +182,7 @@ This architecture provides a clear separation of concerns between the presentati
 
 
 
-- MySQL
+- PostgreSQL
 
 
 
@@ -344,7 +342,7 @@ The authentication workflow controls how users register, log in, and access prot
 
 - The password is hashed using BCrypt before being stored.
 
-- User information is persisted in the MySQL database.
+- User information is persisted in the PostgreSQL database.
 
 
 
@@ -426,7 +424,7 @@ The platform maintains message records within the database, enabling users to vi
 
 
 
-Messages are stored in MySQL using Hibernate/JPA, ensuring reliable data persistence and retrieval. This approach allows message history to remain available across application restarts and deployments.
+Messages are stored in PostgreSQL using Hibernate/JPA, ensuring reliable data persistence and retrieval. This approach allows message history to remain available across application restarts and deployments.
 
 
 
@@ -497,7 +495,7 @@ The platform maintains a complete history of group conversations. Messages are p
 
 
 
-Group messages and membership information are stored using Hibernate/JPA and MySQL. This ensures reliable persistence, efficient retrieval, and scalability for future enhancements.
+Group messages and membership information are stored using Hibernate/JPA and PostgreSQL. This ensures reliable persistence, efficient retrieval, and scalability for future enhancements.
 
 
 
@@ -747,15 +745,11 @@ The logging infrastructure provides several operational benefits:
 ### Monitoring and Logging Screenshot
 
 
+#### Backend Monitoring and Logs
 
-- `screenshots/deployment/21_backend_logs.png`
+![Backend Monitoring and Logs](screenshots/deployment/21_backend_logs.png)
 
-
-
-The screenshot demonstrates backend runtime monitoring through Hibernate SQL logs, showing successful database queries related to group messaging functionality and confirming communication between the Spring Boot application and the MySQL database.
-
----
-
+The screenshot demonstrates backend runtime monitoring through Hibernate SQL logs, showing successful database queries related to group messaging functionality and confirming communication between the Spring Boot application and the PostgreSQL database.
 
 
 ## CI/CD Pipeline
@@ -873,319 +867,6 @@ The GitHub Actions workflow demonstrates the automated deployment pipeline used 
 ---
 
 
-
-## Screenshots
-
-
-
-### Authentication
-
-
-
-#### User Registration
-
-
-
-![User Registration](screenshots/authentication/01_register_page.png)
-
-
-
-New users can create an account through the registration interface.
-
-
-
-#### User Login
-
-
-
-![User Login](screenshots/authentication/02_login_page.png)
-
-
-
-Users authenticate using their registered credentials and receive a JSON Web Token (JWT) for accessing protected resources.
-
-
-
-#### Authenticated Dashboard
-
-
-
-![Authenticated Dashboard](screenshots/authentication/03_dashboard_jwt_authenticated.png)
-
-
-
-Successful authentication grants access to protected application features and messaging services.
-
-
-
----
-
-
-
-### Private Messaging
-
-
-
-#### Send Secure Message
-
-
-
-![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
-
-
-
-Authenticated users can compose and send secure private messages.
-
-
-
-#### Inbox Management
-
-
-
-![Inbox Management](screenshots/messaging/05_inbox_decrypted_messages.png)
-
-
-
-The inbox provides centralized access to received messages and communication history.
-
-
-
-#### Message Exchange
-
-
-
-![Message Exchange](screenshots/messaging/06_message_exchange.png)
-
-
-
-Demonstrates secure communication between registered platform users.
-
-
-
----
-
-
-
-### Security Features
-
-
-
-#### Encrypted Message Processing
-
-
-
-![Encrypted Message Processing](screenshots/security/07_encrypted_send_message.png)
-
-
-
-Illustrates secure message handling and encryption-related functionality.
-
-
-
-#### Message Decryption
-
-
-
-![Message Decryption](screenshots/security/08_decrypt_inbox.png)
-
-
-
-Shows secure retrieval and processing of stored messages.
-
-
-
-#### Repository Storage Verification
-
-
-
-![Repository Storage Verification](screenshots/security/09_encrypted_repository_view.png)
-
-
-
-Demonstrates database-level message persistence and storage validation.
-
-
-
----
-
-
-
-### Deployment and Infrastructure
-
-
-
-#### Local Docker Deployment
-
-
-
-![Local Docker Deployment](screenshots/deployment/10_docker_local_deployment.png)
-
-
-
-Application deployment using Docker containers in a local environment.
-
-
-
-#### Cloud Deployment
-
-
-
-![Cloud Deployment](screenshots/deployment/11_render_cloud_deployment.png)
-
-
-
-Demonstrates deployment in a cloud-hosted environment.
-
-
-
-#### Server Status Verification
-
-
-
-![Server Status Verification](screenshots/deployment/12_server_status_response.png)
-
-
-
-Confirms application availability and backend responsiveness.
-
-
-
-#### Docker Hub Repository
-
-
-
-![Docker Hub Repository](screenshots/deployment/13_docker_hub_repository.png)
-
-
-
-Container image management and distribution through Docker Hub.
-
-
-
----
-
-
-
-### Platform Overview
-
-
-
-#### Dashboard Overview
-
-
-
-![Dashboard Overview](screenshots/legacy-development/14_dashboard_overview.png)
-
-
-
-Overview of the platform interface and navigation workflow.
-
-
-
----
-
-
-
-### Group Messaging
-
-
-
-#### Group Chat Overview
-
-
-
-![Group Chat Overview](screenshots/group-messaging/15_group_chat_overview.png)
-
-
-
-Introduction to collaborative communication through group messaging.
-
-
-
-#### Group Communication
-
-
-
-![Group Communication](screenshots/group-messaging/16_group_messages.png)
-
-
-
-Demonstrates message exchange among multiple participants within a group.
-
-
-
----
-
-
-
-### Production Deployment
-
-
-
-#### Running Containers
-
-
-
-![Running Containers](screenshots/deployment/17_docker_containers_running.png)
-
-
-
-Shows active Docker containers supporting the deployed application.
-
-
-
-#### HTTPS Production Deployment
-
-
-
-![HTTPS Production Deployment](screenshots/deployment/18_production_https_domain.png)
-
-
-
-Demonstrates secure HTTPS access to the deployed application.
-
-
-
-#### AWS EC2 Deployment
-
-
-
-![AWS EC2 Deployment](screenshots/deployment/19_aws_ec2_deployment.png)
-
-
-
-Shows the production environment hosted on Amazon Web Services Elastic Compute Cloud (AWS EC2).
-
-
-
-#### GitHub Actions CI/CD Pipeline
-
-
-
-![GitHub Actions Pipeline](screenshots/deployment/20_github_actions_pipeline.png)
-
-
-
-Demonstrates Continuous Integration and Continuous Deployment (CI/CD) automation using GitHub Actions.
-
-
-
-#### Backend Monitoring and Logs
-
-
-
-![Backend Monitoring and Logs](screenshots/deployment/21_backend_logs.png)
-
-
-
-Shows backend runtime monitoring through Hibernate SQL logs, validating successful communication between the Spring Boot application and the MySQL database.
-
-
-
----
-
-
-
 ## Diagrams
 
 
@@ -1202,7 +883,7 @@ Shows backend runtime monitoring through Hibernate SQL logs, validating successf
 
 
 
-Illustrates the interaction between the React frontend, Spring Boot backend, MySQL database, and supporting infrastructure services.
+Illustrates the interaction between the React frontend, Spring Boot backend, PostgreSQL database, and supporting infrastructure services.
 
 
 
@@ -1222,7 +903,7 @@ Illustrates the interaction between the React frontend, Spring Boot backend, MyS
 
 
 
-Demonstrates the production deployment environment hosted on AWS EC2 using Docker Compose, including Nginx, React Frontend, Spring Boot Backend, and MySQL Database services.
+Demonstrates the production deployment environment hosted on AWS EC2 using Docker Compose, including Nginx, React Frontend, Spring Boot Backend, and PostgreSQL Database services.
 
 
 
