@@ -533,11 +533,13 @@ Group messages and membership information are stored using Hibernate/JPA and MyS
 
 ### Group Messaging Screenshots
 
+#### Group Chat Overview
 
+![Group Chat Overview](screenshots/group-messaging/15_group_chat_overview.png)
 
-- `screenshots/group-messaging/15_group_chat_overview.png`
+#### Group Messages
 
-- `screenshots/group-messaging/16_group_messages.png`
+![Group Messages](screenshots/group-messaging/16_group_messages.png)
 
 ---
 
