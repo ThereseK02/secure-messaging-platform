@@ -114,27 +114,13 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 The Secure Messaging Platform follows a modern three-tier architecture consisting of a React frontend, a Spring Boot backend, and a PostgreSQL database.
 
-
-
 The frontend provides the user interface for authentication, private messaging, and group communication. Incoming user requests are routed through Nginx and forwarded to the appropriate application components. Spring Security and JWT authentication protect secured endpoints, while Hibernate/JPA manages database persistence and data access operations.
-
-
-
-![System Architecture](diagrams/system_architecture.png)
-
-
 
 The Secure Messaging Platform is deployed on an AWS EC2 production server using Docker Compose. Incoming HTTPS requests are handled by Nginx, which serves the React frontend and routes API requests to the Spring Boot backend. The backend exposes REST APIs, enforces authentication and authorization through Spring Security and JWT tokens, and persists application data in a PostgreSQL database.
 
-
-
 This architecture provides a clear separation of concerns between the presentation layer (React), application layer (Spring Boot), and data layer (PostgreSQL), resulting in a scalable, maintainable, and production-ready full-stack application.
 
-
-
 ---
-
-
 
 ## Technology Stack
 
@@ -167,7 +153,7 @@ This architecture provides a clear separation of concerns between the presentati
 - Vite
 
 - React Router
-
+  
 - Axios
 
 - JavaScript
@@ -228,13 +214,9 @@ secure-messaging-platform/
 
 ## Database Design
 
+### Database Design Diagram
 
-
-#### Database Diagram
-
-
-
-![Database Diagram](diagrams/database_diagram.png)
+![Database Design Diagram](diagrams/database_diagram.png)
 
 
 
@@ -428,7 +410,7 @@ Messages are stored in PostgreSQL using Hibernate/JPA, ensuring reliable data pe
 
 
 
-### User Experience
+### Private Messaging Workflow
 
 
 
@@ -446,9 +428,21 @@ The messaging interface was designed to provide a straightforward communication 
 
 5\. Review conversation history.
 
+### Private Messaging Screenshots
 
+#### Send Secure Message
 
+![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
 
+#### Decrypted Inbox Messages
+
+![Inbox Messages](screenshots/messaging/05_inbox_decrypted_messages.png)
+
+#### Message Exchange
+
+![Message Exchange](screenshots/messaging/06_message_exchange.png)
+
+---
 
 
 ## Group Messaging
@@ -493,29 +487,9 @@ The platform maintains a complete history of group conversations. Messages are p
 
 ### Database Management
 
-
-
 Group messages and membership information are stored using Hibernate/JPA and PostgreSQL. This ensures reliable persistence, efficient retrieval, and scalability for future enhancements.
 
-
-
 ### Group Messaging Workflow
-
-### Messaging Screenshots
-
-#### Send Secure Message
-
-![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
-
-#### Decrypted Inbox Messages
-
-![Inbox Messages](screenshots/messaging/05_inbox_decrypted_messages.png)
-
-#### Message Exchange
-
-![Message Exchange](screenshots/messaging/06_message_exchange.png)
-
----
 
 1\. Create a new group.
 
@@ -526,7 +500,6 @@ Group messages and membership information are stored using Hibernate/JPA and Pos
 4\. Send messages to the group.
 
 5\. View ongoing group conversations and message history.
-
 
 
 ### Group Messaging Screenshots
@@ -542,9 +515,7 @@ Group messages and membership information are stored using Hibernate/JPA and Pos
 ---
 
 
-
 ## Deployment Architecture
-
 
 
 The Secure Messaging Platform was designed using a containerized deployment architecture that supports local development, cloud hosting, automated deployments, and production scalability.
@@ -751,6 +722,7 @@ The logging infrastructure provides several operational benefits:
 
 The screenshot demonstrates backend runtime monitoring through Hibernate SQL logs, showing successful database queries related to group messaging functionality and confirming communication between the Spring Boot application and the PostgreSQL database.
 
+---
 
 ## CI/CD Pipeline
 
@@ -860,7 +832,6 @@ Implementing CI/CD provides several advantages:
 
 ![GitHub Actions CI/CD Pipeline](screenshots/deployment/20_github_actions_pipeline.png)
 
----
 
 The GitHub Actions workflow demonstrates the automated deployment pipeline used to build, validate, and deploy application updates, supporting a modern DevOps-oriented software development process.
 
@@ -882,13 +853,10 @@ The GitHub Actions workflow demonstrates the automated deployment pipeline used 
 ![System Architecture Diagram](diagrams/system_architecture.png)
 
 
-
 Illustrates the interaction between the React frontend, Spring Boot backend, PostgreSQL database, and supporting infrastructure services.
 
 
-
 ---
-
 
 
 ### Deployment Architecture
@@ -1071,7 +1039,7 @@ Several enhancements can be implemented to further improve the platform's functi
 
 - Enhanced security monitoring and session management.
 
-
+- Key rotation and forward secrecy implementation.
 
 ---
 
@@ -1139,18 +1107,15 @@ This project provided valuable experience across multiple areas of software engi
 
 
 
-- Designed relational database structures.
-
-- Implemented persistence using Hibernate and JPA (Java Persistence API).
+- After designing relational database structures, I implemented persistence using Hibernate and JPA (Java Persistence API).
 
 - Applied ORM (Object-Relational Mapping) concepts to connect Java objects with relational database tables.
 
-- Managed data retrieval, storage, and database interactions.
+- Gained more practical experience in managing data retrieval, storage, and database interactions.
 
 
 
 ### Full-Stack Development
-
 
 
 - Integrated frontend and backend systems.
@@ -1186,11 +1151,12 @@ This project represents an important milestone in my journey as a Software Engin
 
 
 ---
+
 ## Author
 
 **Therese Kabayanja**
 
-*Software Engineer | Machine Learning Engineer | Data Scientist*
+Software Engineer | Machine Learning Engineer | Data Scientist
 
 - GitHub: [ThereseK02](https://github.com/ThereseK02)
 - LinkedIn: [Therese Kabayanja](https://www.linkedin.com/in/therese-kabayanja-14a43739b)
