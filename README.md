@@ -42,6 +42,8 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 - [Security Features](#security-features)
 
+- [Encryption Features](#encryption-features)
+
 - [Authentication Workflow](#authentication-workflow)
 
 - [Messaging Features](#messaging-features)
@@ -235,7 +237,6 @@ Illustrates the relational database structure used by the platform, including us
 The Secure Messaging Platform implements multiple layers of security to protect user accounts, application resources, and communication workflows.
 
 
-
 ### JSON Web Token (JWT) Authentication
 
 
@@ -304,7 +305,47 @@ The Secure Messaging Platform implements multiple layers of security to protect 
 
 ---
 
+## Encryption Features
 
+The Secure Messaging Platform includes encryption-focused features that demonstrate secure communication workflows and protected message storage.
+
+### Encrypted Message Transmission
+
+Messages can be encrypted before being transmitted between users, helping protect message content during communication.
+
+### Encrypted Storage Concepts
+
+Encrypted message handling was explored during development to demonstrate how sensitive communication data can be protected within application workflows.
+
+### Encryption Workflow
+
+1. User composes a message.
+2. Message content is encrypted.
+3. Encrypted data is transmitted or stored.
+4. Authorized users retrieve the message.
+5. Message content is decrypted for viewing.
+
+### Encryption Screenshots
+
+#### Encrypted Send Message
+
+![Encrypted Send Message](screenshots/security/07_encrypted_send_message.png)
+
+Demonstrates message encryption before transmission, illustrating how message content can be protected prior to delivery.
+
+#### Decrypted Inbox View
+
+![Decrypted Inbox](screenshots/security/08_decrypt_inbox.png)
+
+Shows successful message decryption within the inbox interface, allowing authorized users to view protected message content.
+
+#### Encrypted Repository View
+
+![Encrypted Repository View](screenshots/security/09_encrypted_repository_view.png)
+
+Illustrates encrypted message persistence and storage concepts explored during development to support secure communication workflows.
+
+---
 
 ## Authentication Workflow
 
@@ -359,13 +400,25 @@ The authentication workflow controls how users register, log in, and access prot
 
 ![Register Page](screenshots/authentication/01_register_page.png)
 
+Displays the user registration interface used to create new platform accounts.
+
 #### Login Page
 
 ![Login Page](screenshots/authentication/02_login_page.png)
 
+Shows the secure login interface where users authenticate using their registered credentials.
+
 #### JWT Authenticated Dashboard
 
 ![JWT Dashboard](screenshots/authentication/03_dashboard_jwt_authenticated.png)
+
+Illustrates successful JWT-based authentication and access to protected application functionality.
+
+#### Dashboard Overview
+
+![Dashboard Overview](screenshots/legacy-development/14_dashboard_overview.png)
+
+Displays an earlier authenticated dashboard implementation used during development, highlighting navigation options and the evolution of the user interface prior to the final production design.
 
 ---
 
@@ -434,13 +487,19 @@ The messaging interface was designed to provide a straightforward communication 
 
 ![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
 
+Displays the interface used to compose and securely send messages to other authenticated users.
+
 #### Decrypted Inbox Messages
 
 ![Inbox Messages](screenshots/messaging/05_inbox_decrypted_messages.png)
 
+Shows received messages displayed within the inbox after successful retrieval and processing.
+
 #### Message Exchange
 
 ![Message Exchange](screenshots/messaging/06_message_exchange.png)
+
+Demonstrates communication between users through the secure messaging workflow.
 
 ---
 
@@ -508,9 +567,13 @@ Group messages and membership information are stored using Hibernate/JPA and Pos
 
 ![Group Chat Overview](screenshots/group-messaging/15_group_chat_overview.png)
 
+Displays the group chat interface where users can participate in collaborative conversations within a shared communication channel.
+
 #### Group Messages
 
 ![Group Messages](screenshots/group-messaging/16_group_messages.png)
+
+Demonstrates active group communication, showing how messages are shared and viewed by multiple participants within a group.
 
 ---
 
@@ -596,29 +659,43 @@ The platform supports HTTPS-secured communication, ensuring that data exchanged 
 
 ![Docker Local Deployment](screenshots/deployment/10_docker_local_deployment.png)
 
+Illustrates successful local execution of the application using Docker containers during development and testing.
+
 #### Render Cloud Deployment
 
 ![Render Cloud Deployment](screenshots/deployment/11_render_cloud_deployment.png)
+
+Shows an earlier cloud-hosted deployment stage used during platform development before migration to AWS EC2.
 
 #### Server Status Response
 
 ![Server Status Response](screenshots/deployment/12_server_status_response.png)
 
+Confirms successful backend operation through a health or status endpoint response.
+
 #### Docker Hub Repository
 
 ![Docker Hub Repository](screenshots/deployment/13_docker_hub_repository.png)
+
+Displays the Docker image repository used to store and manage application container images.
 
 #### Docker Containers Running
 
 ![Docker Containers Running](screenshots/deployment/17_docker_containers_running.png)
 
+Demonstrates successful execution of the platform services within running Docker containers.
+
 #### Production HTTPS Domain
 
 ![Production HTTPS Domain](screenshots/deployment/18_production_https_domain.png)
 
+Shows the production environment being served through HTTPS, demonstrating secure web communication.
+
 #### AWS EC2 Deployment
 
 ![AWS EC2 Deployment](screenshots/deployment/19_aws_ec2_deployment.png)
+
+Illustrates the application deployed and managed within the AWS EC2 cloud infrastructure.
 
 ---
 
