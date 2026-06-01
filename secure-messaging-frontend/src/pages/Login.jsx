@@ -145,7 +145,7 @@ export default function Login() {
                             fontWeight: "bold",
                             fontSize: "16px",
                             cursor: "pointer",
-                            marginBottom: "24px"
+                            marginBottom: "14px"
                         }}
                     >
                         Login
