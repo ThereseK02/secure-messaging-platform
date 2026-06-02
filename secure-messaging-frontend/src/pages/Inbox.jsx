@@ -4,7 +4,16 @@ import api from "../services/api";
 
 export default function Inbox() {
   const [messages, setMessages] = useState([]);
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
+
+  function showNotification(type, text) {
+    setNotification({ type, text });
+
+    setTimeout(() => {
+      setNotification(null);
+    }, 3500);
+  }
 
   async function loadInbox(showAlert = false) {
     try {
@@ -21,10 +30,12 @@ export default function Inbox() {
       );
 
       setMessages(sortedMessages);
-      if (showAlert) alert("Inbox refreshed");
+      if (showAlert) {
+        showNotification("success", "Inbox refreshed.");
+      }
     } catch (error) {
       console.error(error);
-      alert("Failed to load inbox");
+      showNotification("error", "Failed to load inbox.");
     }
   }
 
