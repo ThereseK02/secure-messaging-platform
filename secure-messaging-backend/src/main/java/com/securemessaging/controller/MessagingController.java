@@ -302,6 +302,26 @@ public ResponseEntity<?> joinGroup(@PathVariable("groupId") Long groupId) {
     );
 }
 
+@DeleteMapping("/groups/{groupId}/leave")
+public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
+    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+        return ResponseEntity.badRequest().body(
+                Map.of("error", "You are not a member of this group")
+        );
+    }
+
+    groupMemberRepository.deleteByGroupIdAndUsername(groupId, currentUsername);
+
+    return ResponseEntity.ok(
+            Map.of("status", "Left group successfully")
+    );
+}
+
 @PostMapping("/groups/{groupId}/send")
 public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                                           @RequestBody Map<String, String> request) {
