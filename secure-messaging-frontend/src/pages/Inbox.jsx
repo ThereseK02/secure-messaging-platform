@@ -90,6 +90,31 @@ export default function Inbox() {
       >
         Inbox
       </h1>
+{notification && (
+        <div
+          style={{
+            backgroundColor:
+              notification.type === "success"
+                ? "rgba(34, 197, 94, 0.12)"
+                : "rgba(239, 68, 68, 0.12)",
+            border:
+              notification.type === "success"
+                ? "1px solid #22c55e"
+                : "1px solid #ef4444",
+            color:
+              notification.type === "success"
+                ? "#bbf7d0"
+                : "#fecaca",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "20px",
+            maxWidth: "700px",
+            fontWeight: "bold"
+          }}
+        >
+          {notification.text}
+        </div>
+      )}
 
       <div
         style={{
@@ -98,6 +123,7 @@ export default function Inbox() {
           marginBottom: "30px",
           flexWrap: "wrap",
         }}
+
       >
         <button style={buttonStyle} onClick={() => navigate("/dashboard")}>
           Dashboard
