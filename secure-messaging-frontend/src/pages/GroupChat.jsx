@@ -18,7 +18,7 @@ function showNotification(type, text) {
 
   setTimeout(() => {
     setNotification(null);
-  }, 3500);
+  }, 5000);
 }
 
   async function loadGroups() {
@@ -85,6 +85,7 @@ async function refreshMessages() {
       await api.post(`/api/groups/${selectedGroupId}/send`, { message });
       setMessage("");
       await loadMessages(selectedGroupId);
+      showNotification("success", "Group message sent");
     } catch (error) {
       console.error(error);
 showNotification("error", "Failed to send group message");
