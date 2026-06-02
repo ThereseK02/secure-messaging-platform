@@ -37,11 +37,11 @@ export default function SendMessage() {
             );
 
             setMessage("");
-            showNotification("success", "Message sent successfully.");
+            showNotification("success", "Message sent successfully");
 
         } catch (error) {
             console.error(error);
-            showNotification("error", "Message sending failed.");
+            showNotification("error", "Message sending failed");
         }
     }
 

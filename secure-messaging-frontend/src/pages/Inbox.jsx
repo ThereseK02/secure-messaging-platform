@@ -31,11 +31,11 @@ export default function Inbox() {
 
       setMessages(sortedMessages);
       if (showAlert) {
-        showNotification("success", "Inbox refreshed.");
+        showNotification("success", "Inbox refreshed");
       }
     } catch (error) {
       console.error(error);
-      showNotification("error", "Failed to load inbox.");
+      showNotification("error", "Failed to load inbox");
     }
   }
 
