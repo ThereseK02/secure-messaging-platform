@@ -9,8 +9,17 @@ export default function GroupChat() {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [joinGroupId, setJoinGroupId] = useState("");
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
+const [message, setMessage] = useState("");
+const [messages, setMessages] = useState([]);
+const [notification, setNotification] = useState(null);
+
+function showNotification(type, text) {
+  setNotification({ type, text });
+
+  setTimeout(() => {
+    setNotification(null);
+  }, 3500);
+}
 
   async function loadGroups() {
     try {
@@ -18,7 +27,7 @@ export default function GroupChat() {
       setGroups(response.data);
     } catch (error) {
       console.error(error);
-      alert("Failed to load groups");
+showNotification("error", "Failed to load groups");
     }
   }
 
@@ -27,10 +36,11 @@ export default function GroupChat() {
       await api.post("/api/groups/create", { groupName });
       setGroupName("");
       await loadGroups();
-      alert("Group created");
+showNotification("success", "Group created");
+
     } catch (error) {
       console.error(error);
-      alert("Failed to create group");
+showNotification("error", "Failed to create group");
     }
   }
 
@@ -39,10 +49,10 @@ export default function GroupChat() {
       await api.post(`/api/groups/${joinGroupId}/join`);
       setJoinGroupId("");
       await loadGroups();
-      alert("Joined group");
+showNotification("success", "Joined group");
     } catch (error) {
       console.error(error);
-      alert("Failed to join group");
+showNotification("error", "Failed to join group");
     }
   }
 
@@ -54,7 +64,7 @@ export default function GroupChat() {
       setMessages(response.data);
     } catch (error) {
       console.error(error);
-      alert("Failed to load group messages");
+showNotification("error", "Failed to load group messages");
     }
   }
 
@@ -67,7 +77,7 @@ export default function GroupChat() {
       await loadMessages(selectedGroupId);
     } catch (error) {
       console.error(error);
-      alert("Failed to send group message");
+showNotification("error", "Failed to send group message");
     }
   }
 
@@ -78,6 +88,31 @@ export default function GroupChat() {
   return (
     <div style={styles.page}>
       <h1 style={styles.title}>Group Chat</h1>
+{notification && (
+        <div
+          style={{
+            backgroundColor:
+              notification.type === "success"
+                ? "rgba(34, 197, 94, 0.12)"
+                : "rgba(239, 68, 68, 0.12)",
+            border:
+              notification.type === "success"
+                ? "1px solid #22c55e"
+                : "1px solid #ef4444",
+            color:
+              notification.type === "success"
+                ? "#bbf7d0"
+                : "#fecaca",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "20px",
+            maxWidth: "850px",
+            fontWeight: "bold"
+          }}
+        >
+          {notification.text}
+        </div>
+      )}
 
       <div style={styles.buttonRow}>
         <button style={styles.navButton} onClick={() => navigate("/dashboard")}>
