@@ -10,6 +10,7 @@ export default function GroupChat() {
   const [groupName, setGroupName] = useState("");
   const [joinGroupId, setJoinGroupId] = useState("");
 const [message, setMessage] = useState("");
+const [members, setMembers] = useState([]);
 const [messages, setMessages] = useState([]);
 const [notification, setNotification] = useState(null);
 
@@ -77,6 +78,17 @@ showNotification("error", "Failed to load group messages");
     }
   }
 
+async function loadMembers(groupId = selectedGroupId) {
+  if (!groupId) return;
+
+  try {
+    const response = await api.get(`/api/groups/${groupId}/members`);
+    setMembers(response.data);
+  } catch (error) {
+    console.error(error);
+    showNotification("error", "Failed to load group members");
+  }
+}
 
 async function refreshMessages() {
   if (!selectedGroupId) {
@@ -188,8 +200,11 @@ showNotification("error", "Failed to send group message");
                       : "1px solid #1e293b",
                 }}
                 onClick={() => {
-                  setSelectedGroupId(group.id);
-                  loadMessages(group.id);
+
+setSelectedGroupId(group.id);
+loadMessages(group.id);
+loadMembers(group.id);
+
                 }}
               >
                 {group.groupName} #{group.id}
@@ -201,6 +216,10 @@ showNotification("error", "Failed to send group message");
 
       <div style={styles.section}>
         <h2 style={styles.sectionTitle}>Messages</h2>
+{members.length > 0 && (
+  <p style={styles.muted}>
+    Members: {members.join(", ")}
+  </p>
 
         <div style={styles.messagesBox}>
           {messages.length === 0 ? (
