@@ -45,14 +45,23 @@ showNotification("error", "Failed to create group");
   }
 
   async function joinGroup() {
+    if (!joinGroupId.trim()) {
+      showNotification("error", "Please enter a group ID");
+      return;
+    }
+
     try {
-      await api.post(`/api/groups/${joinGroupId}/join`);
+      const response = await api.post(`/api/groups/${joinGroupId}/join`);
       setJoinGroupId("");
       await loadGroups();
-showNotification("success", "Joined group");
+
+      showNotification(
+        "success",
+        response.data?.status || "Joined group successfully"
+      );
     } catch (error) {
       console.error(error);
-showNotification("error", "Failed to join group");
+      showNotification("error", "Failed to join group");
     }
   }
 
