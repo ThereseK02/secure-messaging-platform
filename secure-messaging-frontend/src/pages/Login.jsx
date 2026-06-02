@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logo from "../assets/branding/secure-messaging-logo.png";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
@@ -8,13 +8,23 @@ export default function Login() {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (localStorage.getItem("sessionExpired") === "true") {
+            setErrorMessage("Session expired. Please log in again.");
+            localStorage.removeItem("sessionExpired");
+        }
+    }, []);
 
     async function handleLogin(e) {
 
         e.preventDefault();
 
         try {
+
+            setErrorMessage("");
 
             const response = await api.post("/users/login", {
                 username,
@@ -28,7 +38,7 @@ export default function Login() {
         } catch (error) {
 
             console.error(error);
-            alert("Login failed");
+            setErrorMessage("Login failed. Please check your username and password.");
         }
     }
 
@@ -92,6 +102,22 @@ export default function Login() {
                 >
                     Think secure. Stay ahead.
                 </p>
+
+                {errorMessage && (
+                    <div
+                        style={{
+                            backgroundColor: "rgba(239, 68, 68, 0.12)",
+                            border: "1px solid #ef4444",
+                            color: "#fecaca",
+                            padding: "12px",
+                            borderRadius: "10px",
+                            marginBottom: "18px",
+                            fontSize: "14px"
+                        }}
+                    >
+                        {errorMessage}
+                    </div>
+                )}
 
                 <form onSubmit={handleLogin}>
 
