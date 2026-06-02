@@ -2,18 +2,29 @@ import { useState } from "react";
 import api from "../services/api";
 
 export default function SendMessage() {
-
     const [recipient, setRecipient] = useState("");
     const [message, setMessage] = useState("");
+    const [notification, setNotification] = useState(null);
+
+    function showNotification(type, text) {
+        setNotification({ type, text });
+
+        setTimeout(() => {
+            setNotification(null);
+        }, 3500);
+    }
 
     async function handleSend() {
-
         try {
+            if (!recipient.trim() || !message.trim()) {
+                showNotification("error", "Please enter a recipient and a message.");
+                return;
+            }
 
             const token = localStorage.getItem("token");
 
             await api.post(
-                  "/api/messages/send",
+                "/api/messages/send",
                 {
                     receiver: recipient,
                     message: message
@@ -25,17 +36,16 @@ export default function SendMessage() {
                 }
             );
 
-            alert("Message sent successfully");
+            setMessage("");
+            showNotification("success", "Message sent successfully.");
 
         } catch (error) {
-
             console.error(error);
-            alert("Message sending failed");
+            showNotification("error", "Message sending failed.");
         }
     }
 
     return (
-
         <div
             style={{
                 minHeight: "100vh",
@@ -47,7 +57,6 @@ export default function SendMessage() {
                 fontFamily: "Arial, sans-serif"
             }}
         >
-
             <div
                 style={{
                     backgroundColor: "#0f172a",
@@ -56,7 +65,6 @@ export default function SendMessage() {
                     width: "520px"
                 }}
             >
-
                 <h1
                     style={{
                         color: "#38bdf8",
@@ -70,6 +78,33 @@ export default function SendMessage() {
                     Send Secure Message
                 </h1>
 
+                {notification && (
+                    <div
+                        style={{
+                            backgroundColor:
+                                notification.type === "success"
+                                    ? "rgba(34, 197, 94, 0.12)"
+                                    : "rgba(239, 68, 68, 0.12)",
+                            border:
+                                notification.type === "success"
+                                    ? "1px solid #22c55e"
+                                    : "1px solid #ef4444",
+                            color:
+                                notification.type === "success"
+                                    ? "#bbf7d0"
+                                    : "#fecaca",
+                            padding: "12px",
+                            borderRadius: "10px",
+                            marginBottom: "18px",
+                            fontSize: "14px",
+                            textAlign: "center",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        {notification.text}
+                    </div>
+                )}
+
                 <input
                     type="text"
                     placeholder="Recipient username"
@@ -77,6 +112,7 @@ export default function SendMessage() {
                     onChange={(e) => setRecipient(e.target.value)}
                     style={{
                         width: "100%",
+                        boxSizing: "border-box",
                         padding: "14px",
                         marginBottom: "20px",
                         borderRadius: "8px",
@@ -92,6 +128,7 @@ export default function SendMessage() {
                     onChange={(e) => setMessage(e.target.value)}
                     style={{
                         width: "100%",
+                        boxSizing: "border-box",
                         height: "160px",
                         padding: "14px",
                         borderRadius: "8px",
@@ -117,9 +154,7 @@ export default function SendMessage() {
                 >
                     Send Message
                 </button>
-
             </div>
-
         </div>
     );
 }
