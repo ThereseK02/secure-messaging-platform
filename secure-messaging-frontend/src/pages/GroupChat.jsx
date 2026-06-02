@@ -210,7 +210,7 @@ showNotification("error", "Failed to send group message");
               <div key={msg.id} style={styles.messageCard}>
                 <p style={styles.sender}>{msg.sender}</p>
                 <p style={styles.messageText}>{msg.message}</p>
-                <p style={styles.timestamp}>{new Date(msg.timestamp).toLocaleString()}</p>
+                <p style={styles.timestamp}>{new Date(msg.timestamp + "Z").toLocaleString("en-US", { timeZone: "America/Chicago" })}</p>
               </div>
             ))
           )}
