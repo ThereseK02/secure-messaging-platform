@@ -4,8 +4,17 @@ import logo from "../assets/branding/secure-messaging-logo.png";
 
 export default function Register() {
 
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+const [username, setUsername] = useState("");
+const [password, setPassword] = useState("");
+const [notification, setNotification] = useState(null);
+
+function showNotification(type, text) {
+    setNotification({ type, text });
+
+    setTimeout(() => {
+        setNotification(null);
+    }, 3500);
+}
 
     async function handleRegister(e) {
 
@@ -18,12 +27,12 @@ export default function Register() {
                 password
             });
 
-            alert("Registration successful");
+showNotification("success", "Registration successful");
 
         } catch (error) {
 
             console.error(error);
-            alert("Registration failed");
+showNotification("error", "Registration failed");
         }
     }
 
@@ -85,6 +94,32 @@ export default function Register() {
                 >
                     Create your secure account
                 </p>
+
+{notification && (
+    <div
+        style={{
+            backgroundColor:
+                notification.type === "success"
+                    ? "rgba(34, 197, 94, 0.12)"
+                    : "rgba(239, 68, 68, 0.12)",
+            border:
+                notification.type === "success"
+                    ? "1px solid #22c55e"
+                    : "1px solid #ef4444",
+            color:
+                notification.type === "success"
+                    ? "#bbf7d0"
+                    : "#fecaca",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "20px",
+            textAlign: "center",
+            fontWeight: "bold"
+        }}
+    >
+        {notification.text}
+    </div>
+)}
 
                 <form onSubmit={handleRegister}>
 
