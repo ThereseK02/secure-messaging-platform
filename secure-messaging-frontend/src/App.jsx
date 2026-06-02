@@ -1,4 +1,3 @@
-
 import GroupChat from "./pages/GroupChat";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -7,28 +6,52 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import SendMessage from "./pages/SendMessage";
 import Inbox from "./pages/Inbox";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
-
     return (
         <BrowserRouter>
-
             <Routes>
-
                 <Route path="/" element={<Login />} />
 
                 <Route path="/register" element={<Register />} />
 
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
 
-                <Route path="/send" element={<SendMessage />} />
+                <Route
+                    path="/send"
+                    element={
+                        <ProtectedRoute>
+                            <SendMessage />
+                        </ProtectedRoute>
+                    }
+                />
 
-                <Route path="/inbox" element={<Inbox />} />
+                <Route
+                    path="/inbox"
+                    element={
+                        <ProtectedRoute>
+                            <Inbox />
+                        </ProtectedRoute>
+                    }
+                />
 
-		<Route path="/groups" element={<GroupChat />} />
-
+                <Route
+                    path="/groups"
+                    element={
+                        <ProtectedRoute>
+                            <GroupChat />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
-
         </BrowserRouter>
     );
 }
