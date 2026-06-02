@@ -183,7 +183,7 @@ export default function Inbox() {
                 color: "#94a3b8",
               }}
             >
-              {message.timestamp}
+{new Date(message.timestamp).toLocaleString()}
             </p>
           </div>
         ))}
