@@ -68,6 +68,16 @@ showNotification("error", "Failed to load group messages");
     }
   }
 
+
+async function refreshMessages() {
+  if (!selectedGroupId) {
+    showNotification("error", "Please select a group first");
+    return;
+  }
+
+  await loadMessages(selectedGroupId);
+  showNotification("success", "Group messages refreshed");
+}
   async function sendMessage() {
     if (!selectedGroupId || !message.trim()) return;
 
@@ -209,7 +219,7 @@ showNotification("error", "Failed to send group message");
 
         <button
           style={styles.refreshButton}
-          onClick={() => loadMessages(selectedGroupId)}
+onClick={refreshMessages}
         >
           Refresh Messages
         </button>
