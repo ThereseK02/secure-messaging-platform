@@ -215,13 +215,17 @@ loadMembers(group.id);
       </div>
 
       <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>Messages</h2>
+
+<h2 style={styles.sectionTitle}>Messages</h2>
+
 {members.length > 0 && (
   <p style={styles.muted}>
-    Members: {members.join(", ")}
+    Members ({members.length}): {members.join(", ")}
   </p>
+)}
 
-        <div style={styles.messagesBox}>
+<div style={styles.messagesBox}>
+
           {messages.length === 0 ? (
             <p style={styles.muted}>Select a group to view messages.</p>
           ) : (
