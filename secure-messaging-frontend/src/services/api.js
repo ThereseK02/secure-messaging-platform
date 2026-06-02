@@ -18,4 +18,17 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.setItem("sessionExpired", "true");
+            window.location.href = "/";
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export default api;
