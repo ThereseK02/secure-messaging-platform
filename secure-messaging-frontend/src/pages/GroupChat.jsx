@@ -112,6 +112,28 @@ async function refreshMessages() {
 showNotification("error", "Failed to send group message");
     }
   }
+async function leaveGroup() {
+  if (!selectedGroupId) {
+    showNotification("error", "Please select a group first");
+    return;
+  }
+
+  try {
+    await api.delete(`/api/groups/${selectedGroupId}/leave`);
+
+    showNotification("success", "You left the group successfully");
+    setSelectedGroupId("");
+    setMessages([]);
+    setMembers([]);
+    await loadGroups();
+  } catch (error) {
+    console.error(error);
+    showNotification(
+      "error",
+      error.response?.data?.error || "Failed to leave group"
+    );
+  }
+}
 
   useEffect(() => {
     loadGroups();
@@ -250,6 +272,10 @@ loadMembers(group.id);
           Send Group Message
         </button>
 
+<button style={styles.leaveButton} onClick={leaveGroup}>
+  Leave Group
+</button>
+
         <button
           style={styles.refreshButton}
 onClick={refreshMessages}
@@ -384,6 +410,18 @@ const styles = {
     cursor: "pointer",
     marginRight: "12px",
   },
+
+leaveButton: {
+  backgroundColor: "#dc2626",
+  color: "#ffffff",
+  border: "none",
+  padding: "12px 18px",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  marginTop: "10px",
+},
+
   refreshButton: {
     backgroundColor: "#1e3a8a",
     color: "#ffffff",
