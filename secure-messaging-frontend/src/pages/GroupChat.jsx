@@ -168,15 +168,15 @@ async function leaveGroup() {
         </div>
       )}
 
-      <div style={styles.buttonRow}>
-        <button style={styles.navButton} onClick={() => navigate("/dashboard")}>
-          Dashboard
-        </button>
+<div style={styles.navButtonRow}>
+  <button style={styles.navButton} onClick={() => navigate("/dashboard")}>
+    Dashboard
+  </button>
 
-        <button style={styles.navButton} onClick={() => navigate("/inbox")}>
-          Inbox
-        </button>
-      </div>
+  <button style={styles.navButton} onClick={() => navigate("/inbox")}>
+    Inbox
+  </button>
+</div>
 
       <div style={styles.section}>
         <h2 style={styles.sectionTitle}>Create Group</h2>
@@ -268,20 +268,23 @@ loadMembers(group.id);
           onChange={(e) => setMessage(e.target.value)}
         />
 
-        <button style={styles.sendButton} onClick={sendMessage}>
-          Send Group Message
-        </button>
+<div style={styles.buttonRow}>
+  <button style={styles.sendButton} onClick={sendMessage}>
+    Send Group Message
+  </button>
 
-<button style={styles.leaveButton} onClick={leaveGroup}>
-  Leave Group
-</button>
+  <button style={styles.leaveButton} onClick={leaveGroup}>
+    Leave Group
+  </button>
 
-        <button
-          style={styles.refreshButton}
-onClick={refreshMessages}
-        >
-          Refresh Messages
-        </button>
+  <button
+    style={styles.refreshButton}
+    onClick={refreshMessages}
+  >
+    Refresh Messages
+  </button>
+</div>
+
       </div>
     </div>
   );
@@ -300,12 +303,24 @@ const styles = {
     fontSize: "56px",
     marginBottom: "20px",
   },
-  buttonRow: {
-    display: "flex",
-    gap: "16px",
-    marginBottom: "30px",
-    flexWrap: "wrap",
-  },
+
+navButtonRow: {
+  display: "flex",
+  gap: "16px",
+  marginBottom: "30px",
+  marginLeft: "26px",
+  flexWrap: "wrap",
+},
+
+  
+buttonRow: {
+  display: "flex",
+  justifyContent: "center",
+  gap: "12px",
+  marginBottom: "30px",
+  flexWrap: "wrap",
+},
+
   navButton: {
     backgroundColor: "#1e3a8a",
     color: "#ffffff",
@@ -406,20 +421,22 @@ const styles = {
     border: "none",
     borderRadius: "14px",
     padding: "14px 22px",
+    minWidth: "170px",
+    height: "48px",
     fontWeight: "700",
     cursor: "pointer",
-    marginRight: "12px",
   },
 
 leaveButton: {
   backgroundColor: "#dc2626",
   color: "#ffffff",
   border: "none",
-  padding: "12px 18px",
   borderRadius: "10px",
+  padding: "12px 24px",
+  minWidth: "170px",
+  height: "48px",
+  fontWeight: "700",
   cursor: "pointer",
-  fontWeight: "bold",
-  marginTop: "10px",
 },
 
   refreshButton: {
@@ -428,6 +445,8 @@ leaveButton: {
     border: "2px solid #38bdf8",
     borderRadius: "14px",
     padding: "14px 22px",
+    minWidth: "170px",
+    height: "48px", 
     fontWeight: "700",
     cursor: "pointer",
   },
