@@ -13,6 +13,7 @@ const [message, setMessage] = useState("");
 const [members, setMembers] = useState([]);
 const [messages, setMessages] = useState([]);
 const [notification, setNotification] = useState(null);
+const currentUsername = localStorage.getItem("username");
 
 function showNotification(type, text) {
   setNotification({ type, text });
@@ -261,15 +262,30 @@ loadMembers(group.id);
 
           {messages.length === 0 ? (
             <p style={styles.muted}>Select a group to view messages.</p>
-          ) : (
-            messages.map((msg) => (
-              <div key={msg.id} style={styles.messageCard}>
-                <p style={styles.sender}>{msg.sender}</p>
-                <p style={styles.messageText}>{msg.message}</p>
-                <p style={styles.timestamp}>{new Date(msg.timestamp + "Z").toLocaleString()}</p>
-              </div>
-            ))
-          )}
+          ) : (messages.map((msg) => {
+  const isMine = msg.sender === currentUsername;
+
+  return (
+    <div
+      key={msg.id}
+      style={{
+        ...styles.messageRow,
+        justifyContent: isMine ? "flex-end" : "flex-start",
+      }}
+    >
+      <div style={isMine ? styles.myMessageBubble : styles.otherMessageBubble}>
+        <p style={styles.sender}>
+          {isMine ? "You" : msg.sender}
+        </p>
+        <p style={styles.messageText}>{msg.message}</p>
+        <p style={styles.timestamp}>
+          {new Date(msg.timestamp + "Z").toLocaleString()}
+        </p>
+      </div>
+    </div>
+  );
+})}
+
         </div>
 
         <textarea
@@ -404,7 +420,37 @@ groupButton: {
     minHeight: "160px",
     marginBottom: "16px",
   },
-  messageCard: {
+  
+
+
+messageRow: {
+  display: "flex",
+  width: "100%",
+  marginBottom: "12px",
+},
+
+myMessageBubble: {
+  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+  color: "#ffffff",
+  borderRadius: "18px 18px 4px 18px",
+  padding: "12px 16px",
+  maxWidth: "70%",
+  minWidth: "180px",
+  boxShadow: "0 4px 10px rgba(236, 72, 153, 0.18)",
+},
+
+otherMessageBubble: {
+  backgroundColor: "#020617",
+  color: "#ffffff",
+  border: "1px solid #38bdf8",
+  borderRadius: "18px 18px 18px 4px",
+  padding: "12px 16px",
+  maxWidth: "70%",
+  minWidth: "180px",
+  boxShadow: "0 4px 10px rgba(56, 189, 248, 0.12)",
+},
+
+messageCard: {
     backgroundColor: "#020617",
     border: "1px solid #1e293b",
     borderRadius: "14px",

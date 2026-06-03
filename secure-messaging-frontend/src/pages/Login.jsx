@@ -33,6 +33,8 @@ export default function Login() {
 
             localStorage.setItem("token", response.data.token);
 
+localStorage.setItem("username", username);
+
             navigate("/dashboard");
 
         } catch (error) {
