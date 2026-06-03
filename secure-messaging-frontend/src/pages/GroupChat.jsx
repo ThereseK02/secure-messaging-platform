@@ -229,7 +229,18 @@ loadMembers(group.id);
 
                 }}
               >
-                {group.groupName} #{group.id}
+
+<div>
+  <div>
+    {group.groupName} #{group.id}
+  </div>
+
+  {group.createdBy && (
+    <div style={styles.adminBadge}>
+      Admin: {group.createdBy}
+    </div>
+  )}
+</div>
               </button>
             ))}
           </div>
@@ -372,7 +383,17 @@ buttonRow: {
     gap: "12px",
     flexWrap: "wrap",
   },
-  groupButton: {
+  
+
+adminBadge: {
+  marginTop: "6px",
+  color: "#facc15",
+  fontSize: "12px",
+  fontWeight: "700",
+},
+
+
+groupButton: {
     backgroundColor: "#020617",
     color: "#ffffff",
     borderRadius: "14px",
