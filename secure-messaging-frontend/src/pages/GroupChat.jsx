@@ -387,7 +387,7 @@ buttonRow: {
 
 adminBadge: {
   marginTop: "6px",
-  color: "#facc15",
+  color: "#d6c6a5",
   fontSize: "12px",
   fontWeight: "700",
 },
@@ -449,11 +449,11 @@ groupButton: {
   },
 
 leaveButton: {
-  backgroundColor: "#dc2626",
+  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
   color: "#ffffff",
   border: "none",
-  borderRadius: "10px",
-  padding: "12px 24px",
+  borderRadius: "14px",
+  padding: "14px 22px",
   minWidth: "170px",
   height: "48px",
   fontWeight: "700",
