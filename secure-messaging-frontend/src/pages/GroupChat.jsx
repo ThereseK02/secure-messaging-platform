@@ -449,7 +449,7 @@ groupButton: {
   },
 
 leaveButton: {
-  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+  background: "linear-gradient(135deg, #8b5cf6, #6366f1)",
   color: "#ffffff",
   border: "none",
   borderRadius: "14px",
