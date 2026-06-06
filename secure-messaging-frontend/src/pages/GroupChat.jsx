@@ -262,7 +262,8 @@ loadMembers(group.id);
 
           {messages.length === 0 ? (
             <p style={styles.muted}>Select a group to view messages.</p>
-          ) : (messages.map((msg) => {
+) : (
+  messages.map((msg) => {
   const isMine = msg.sender === currentUsername;
 
   return (
@@ -284,8 +285,8 @@ loadMembers(group.id);
       </div>
     </div>
   );
-})}
-
+})
+)}
         </div>
 
         <textarea
@@ -521,3 +522,4 @@ leaveButton: {
     color: "#94a3b8",
   },
 };
+
