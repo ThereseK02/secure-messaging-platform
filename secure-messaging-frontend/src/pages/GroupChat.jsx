@@ -141,12 +141,27 @@ export default function GroupChat() {
   }
 
   useEffect(() => {
-    loadGroups();
-  }, []);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
-  }, [messages]);
+  
+}, [messages]);
+
+
+useEffect(() => {
+    loadGroups();
+}, []);
+
+useEffect(() => {
+    if (!selectedGroupId || !showConversation) return;
+
+    loadMessages(selectedGroupId);
+
+    const intervalId = setInterval(() => {
+        loadMessages(selectedGroupId);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+}, [selectedGroupId, showConversation]);
+
 
   return (
       <div style={styles.page}>
