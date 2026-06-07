@@ -103,19 +103,31 @@ export default function GroupChat() {
     showNotification("success", "Group messages refreshed");
   }
 
-  async function sendMessage() {
-    if (!selectedGroupId || !message.trim()) return;
 
-    try {
-      await api.post(`/api/groups/${selectedGroupId}/send`, {message});
-      setMessage("");
-      await loadMessages(selectedGroupId);
-      showNotification("success", "Group message sent");
-    } catch (error) {
-      console.error(error);
-      showNotification("error", "Failed to send group message");
-    }
+async function sendMessage() {
+  if (!selectedGroupId) {
+    showNotification("error", "Please select a group first");
+    return;
   }
+
+  if (!message.trim()) {
+    showNotification("error", "Please write a message first");
+    return;
+  }
+
+  try {
+    await api.post(`/api/groups/${selectedGroupId}/send`, { message });
+    setMessage("");
+    await loadMessages(selectedGroupId);
+    showNotification("success", "Group message sent");
+  } catch (error) {
+    console.error(error);
+    showNotification(
+      "error",
+      error.response?.data?.error || "Failed to send group message"
+    );
+  }
+}
 
   async function leaveGroup() {
     if (!selectedGroupId) {
@@ -140,10 +152,6 @@ export default function GroupChat() {
     }
   }
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
-  
-}, [messages]);
 
 
 useEffect(() => {
@@ -165,7 +173,21 @@ useEffect(() => {
 
   return (
       <div style={styles.page}>
-        <h1 style={styles.title}>Group Chat</h1>
+      
+<style>
+  {`
+    .messagesBox::-webkit-scrollbar {
+      display: none;
+    }
+
+    .messagesBox {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+  `}
+</style>
+
+  <h1 style={styles.title}>Group Chat</h1>
 
         {notification && (
             <div
@@ -294,13 +316,13 @@ useEffect(() => {
 		  {groups.find(g => String(g.id) === String(selectedGroupId))?.groupName}
 		</h2>
 
-                <h2 style={styles.sectionTitle}>Group Membership</h2>
 
                 {members.length > 0 && (
                     <div style={styles.memberBox}>
-                      <p style={styles.membersLabel}>
-                        Group Members ({members.length})
-                      </p>
+
+			<p style={styles.membersLabel}>
+ 			 Members ({members.length})
+			</p>
 
                       <div style={styles.memberPills}>
                         {members.slice(0, 5).map((member) => (
@@ -336,7 +358,7 @@ useEffect(() => {
   			🟢 Live Refresh: ON
 		</p>
 
-                <div style={styles.messagesBox}>
+		<div className="messagesBox" style={styles.messagesBox}>
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
                   ) : (
@@ -378,28 +400,34 @@ useEffect(() => {
                   <div ref={messagesEndRef}/>
                 </div>
 
-                <textarea
-                    style={styles.textarea}
-                    placeholder="Write a group message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                />
+<div style={styles.messageInputRow}>
+  <textarea
+    style={styles.textarea}
+    placeholder="Write a group message"
+    value={message}
+    onChange={(e) => setMessage(e.target.value)}
+  />
 
-                <div style={styles.buttonRow}>
-                  <button style={styles.sendButton} onClick={sendMessage}>
-                    Send Group Message
-                  </button>
+  <div style={styles.messageButtonColumn}>
+    <button style={styles.sendButton} onClick={sendMessage}>
+      Send Group Message
+    </button>
 
-                  <button style={styles.refreshButton} onClick={refreshMessages}>
-                    Refresh Messages
-                  </button>
-                </div>
+    <button style={styles.refreshButton} onClick={refreshMessages}>
+      Refresh Messages
+    </button>
+
+</div>
+</div>
+
               </div>
             </>
         )}
       </div>
   );
 }
+
+
 const styles = {
   page: {
     minHeight: "100vh",
@@ -430,8 +458,14 @@ navButtonRow: {
   flexWrap: "wrap",
 },
 
-  
-buttonRow: {
+messageInputRow: {
+  display: "flex",
+  alignItems: "stretch",
+  gap: "14px",
+  marginTop: "14px",
+},
+
+  buttonRow: {
   display: "flex",
   justifyContent: "center",
   gap: "12px",
@@ -456,15 +490,17 @@ buttonRow: {
     width: "180px",
     height: "54px",
   },
-  section: {
-    backgroundColor: "#0f172a",
-    border: "1px solid #1e293b",
-    borderRadius: "16px",
-    padding: "24px",
-    marginBottom: "24px",
-    maxWidth: "850px",
-    boxShadow: "0 0 12px rgba(56,189,248,0.08)",
-  },
+
+section: {
+  backgroundColor: "#0f172a",
+  border: "1px solid #1e293b",
+  borderRadius: "16px",
+  padding: "18px 24px",
+  marginBottom: "18px",
+  maxWidth: "850px",
+  boxShadow: "0 0 12px rgba(56,189,248,0.08)",
+},
+
   sectionTitle: {
     color: "#38bdf8",
     marginBottom: "16px",
@@ -512,19 +548,20 @@ groupButton: {
     padding: "14px 18px",
     cursor: "pointer",
   },
-  messagesBox: {
-    minHeight: "360px",
-    maxHeight: "520px",
-    overflowY: "auto",
-    scrollbarWidth: "none",
-    msOverflowStyle: "none",
-    padding: "16px",
-    marginBottom: "16px",
-  },
-  memberBox: {
-    marginBottom: "14px",
-    textAlign: "center",
-  },
+
+messagesBox: {
+  height: "260px",
+  maxHeight: "260px",
+  overflowY: "auto",
+  overflowX: "hidden",
+  padding: "16px",
+  marginBottom: "20px",
+},
+
+memberBox: {
+  marginBottom: "10px",
+  textAlign: "center",
+},
 
   membersLabel: {
     color: "#bfdbfe",
@@ -599,30 +636,38 @@ messageCard: {
     color: "#94a3b8",
     fontSize: "12px",
   },
-  textarea: {
-    display: "block",
-    width: "100%",
-    maxWidth: "700px",
-    minHeight: "90px",
-    padding: "14px",
-    borderRadius: "10px",
-    border: "1px solid #38bdf8",
-    backgroundColor: "#020617",
-    color: "#ffffff",
-    fontSize: "16px",
-    marginBottom: "14px",
-  },
-  sendButton: {
-    background: "linear-gradient(135deg, #d946ef, #8b5cf6)",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "14px",
-    padding: "14px 22px",
-    minWidth: "170px",
-    height: "48px",
-    fontWeight: "700",
-    cursor: "pointer",
-  },
+
+
+textarea: {
+  flex: 1,
+  minHeight: "95px",
+  padding: "14px",
+  borderRadius: "10px",
+  border: "1px solid #38bdf8",
+  backgroundColor: "#020617",
+  color: "#ffffff",
+  fontSize: "15px",
+  resize: "none",
+},
+
+messageButtonColumn: {
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+  justifyContent: "center",
+},
+
+sendButton: {
+  width: "170px",
+  height: "46px",
+  borderRadius: "12px",
+  border: "none",
+  background: "linear-gradient(135deg, #d946ef, #8b5cf6)",
+  color: "#ffffff",
+  fontWeight: "700",
+  cursor: "pointer",
+},
+
 
             backButton: {
             backgroundColor: "#020617",
@@ -639,25 +684,25 @@ leaveButton: {
   background: "linear-gradient(135deg, #8b5cf6, #6366f1)",
   color: "#ffffff",
   border: "none",
-  borderRadius: "14px",
-  padding: "14px 22px",
-  minWidth: "170px",
-  height: "48px",
+  borderRadius: "12px",
+  padding: "10px 18px",
+  minWidth: "150px",
+  height: "42px",
   fontWeight: "700",
   cursor: "pointer",
 },
 
-  refreshButton: {
-    backgroundColor: "#1e3a8a",
-    color: "#ffffff",
-    border: "2px solid #38bdf8",
-    borderRadius: "14px",
-    padding: "14px 22px",
-    minWidth: "170px",
-    height: "48px", 
-    fontWeight: "700",
-    cursor: "pointer",
-  },
+refreshButton: {
+  width: "170px",
+  height: "46px",
+  borderRadius: "12px",
+  border: "1px solid #38bdf8",
+  backgroundColor: "#1e3a8a",
+  color: "#ffffff",
+  fontWeight: "700",
+  cursor: "pointer",
+},
+
   muted: {
     color: "#94a3b8",
   },
