@@ -1,9 +1,12 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import logo from "../assets/branding/secure-messaging-logo.png";
 
 export default function Register() {
 
+const navigate = useNavigate();
 const [username, setUsername] = useState("");
 const [password, setPassword] = useState("");
 const [notification, setNotification] = useState(null);
@@ -27,7 +30,11 @@ function showNotification(type, text) {
                 password
             });
 
-showNotification("success", "Registration successful");
+showNotification("success", "Registration successful. Redirecting to login...");
+
+setTimeout(() => {
+    navigate("/login");
+}, 1500);
 
         } catch (error) {
 
