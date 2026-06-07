@@ -290,6 +290,10 @@ useEffect(() => {
                   Back to Groups
                 </button>
 
+		<h2 style={styles.groupTitle}>
+		  {groups.find(g => String(g.id) === String(selectedGroupId))?.groupName}
+		</h2>
+
                 <h2 style={styles.sectionTitle}>Group Membership</h2>
 
                 {members.length > 0 && (
@@ -324,6 +328,14 @@ useEffect(() => {
               <div style={styles.section}>
                 <h2 style={styles.sectionTitle}>Messages</h2>
 
+		<p style={styles.messageCount}>
+		  {messages.length} messages
+		</p>
+
+		<p style={styles.liveIndicator}>
+  			🟢 Live Refresh: ON
+		</p>
+
                 <div style={styles.messagesBox}>
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
@@ -346,15 +358,17 @@ useEffect(() => {
                                         : styles.otherMessageBubble
                                   }
                               >
-                                <p style={styles.sender}>
-                                  {isMine ? "You" : msg.sender}
-                                </p>
 
-                                <p style={styles.messageText}>{msg.message}</p>
+				<p style={styles.sender}>
+				  {isMine ? "You" : msg.sender} •{" "}
+				  {new Date(msg.timestamp + "Z").toLocaleTimeString([], {
+    					hour: "numeric",
+    					minute: "2-digit",
+  				})}
+				</p>
 
-                                <p style={styles.timestamp}>
-                                  {new Date(msg.timestamp + "Z").toLocaleString()}
-                                </p>
+<p style={styles.messageText}>{msg.message}</p>
+
                               </div>
                             </div>
                         );
@@ -399,6 +413,14 @@ const styles = {
     fontSize: "56px",
     marginBottom: "20px",
   },
+
+liveIndicator: {
+  color: "#22c55e",
+  fontSize: "13px",
+  fontWeight: "600",
+  marginTop: "-10px",
+  marginBottom: "15px",
+},
 
 navButtonRow: {
   display: "flex",
