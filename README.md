@@ -44,6 +44,8 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 - [Encryption Features](#encryption-features)
 
+- [Welcome Page](#welcome-page)
+
 - [Authentication Workflow](#authentication-workflow)
 
 - [Messaging Features](#messaging-features)
@@ -346,6 +348,18 @@ Shows successful message decryption within the inbox interface, allowing authori
 Illustrates encrypted message persistence and storage concepts explored during development to support secure communication workflows.
 
 ---
+## Welcome Page
+
+The Secure Messaging Platform begins with a dedicated Welcome Page that serves as the public entry point to the application. The landing experience introduces the platform, highlights key features, and provides convenient access to registration and login workflows.
+
+### Welcome Screen
+
+![Welcome Page](screenshots/authentication/04_welcome_page.png)
+
+The Welcome Page presents the Secure Messaging Platform branding, project overview, feature highlights, and navigation options that guide users into the secure messaging environment. This enhancement improves usability, strengthens application branding, and creates a more professional user experience before authentication.
+
+---
+
 
 ## Authentication Workflow
 
@@ -574,6 +588,12 @@ Displays the group chat interface where users can participate in collaborative c
 ![Group Messages](screenshots/group-messaging/16_group_messages.png)
 
 Demonstrates active group communication, showing how messages are shared and viewed by multiple participants within a group.
+
+#### Group Administration and Membership Management
+
+![Group Administration](screenshots/group-messaging/17_group_chat_admin_badge_beige.png)
+
+Shows the finalized group chat interface featuring administrator identification, group membership management, and refined user interface improvements. Group creators are clearly distinguished through an administrator badge, while users can manage participation through the integrated Leave Group functionality.
 
 ---
 
