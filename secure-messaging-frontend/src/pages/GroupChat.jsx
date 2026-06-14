@@ -171,6 +171,22 @@ useEffect(() => {
 }, [selectedGroupId, showConversation]);
 
 
+  useEffect(() => {
+    loadGroups();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedGroupId || !showConversation) return;
+
+    loadMessages(selectedGroupId);
+
+    const intervalId = setInterval(() => {
+      loadMessages(selectedGroupId);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [selectedGroupId, showConversation]);
+
   return (
       <div style={styles.page}>
       
@@ -548,21 +564,36 @@ groupButton: {
     padding: "14px 18px",
     cursor: "pointer",
   },
-
-messagesBox: {
-  height: "260px",
-  maxHeight: "260px",
-  overflowY: "auto",
-  overflowX: "hidden",
-  padding: "16px",
-  marginBottom: "20px",
-},
-
+  messagesBox: {
+    height: "260px",
+    overflowY: "auto",
+    scrollbarWidth: "none",
+    msOverflowStyle: "none",
+    padding: "10px",
+    marginBottom: "10px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
 memberBox: {
   marginBottom: "10px",
   textAlign: "center",
 },
-
+    messagesBox: {
+  height: "260px",
+      overflowY: "auto",
+      scrollbarWidth: "none",
+      msOverflowStyle: "none",
+      padding: "10px",
+      marginBottom: "10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+},
+  memberBox: {
+    marginBottom: "14px",
+    textAlign: "center",
+  },
   membersLabel: {
     color: "#bfdbfe",
     fontSize: "15px",
