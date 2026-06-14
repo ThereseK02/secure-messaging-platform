@@ -17,6 +17,7 @@ export default function GroupChat() {
   const messagesEndRef = useRef(null);
   const messagesBoxRef = useRef(null);
   const [showConversation, setShowConversation] = useState(false);
+  const [selectedGroupName, setSelectedGroupName] = useState("");
 
   function showNotification(type, text) {
     setNotification({type, text});
@@ -297,6 +298,7 @@ useEffect(() => {
                               }}
                               onClick={() => {
                                 setSelectedGroupId(group.id);
+                                setSelectedGroupName(group.groupName);
                                 setShowConversation(true);
                                 loadMessages(group.id);
                                 loadMembers(group.id);
@@ -371,6 +373,9 @@ useEffect(() => {
               </div>
 
               <div style={styles.section}>
+                <p style={styles.groupContext}>
+                  Group: {selectedGroupName} (#{selectedGroupId})
+                </p>
                 <h2 style={styles.sectionTitle}>Messages</h2>
 
 		<p style={styles.messageCount}>
@@ -574,6 +579,13 @@ groupButton: {
     borderRadius: "14px",
     padding: "14px 18px",
     cursor: "pointer",
+  },
+  groupContext: {
+    color: "#bfdbfe",
+    fontSize: "16px",
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: "8px",
   },
   messagesBox: {
     height: "260px",
