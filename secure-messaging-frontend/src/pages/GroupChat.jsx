@@ -15,6 +15,7 @@ export default function GroupChat() {
   const [notification, setNotification] = useState(null);
   const currentUsername = localStorage.getItem("username");
   const messagesEndRef = useRef(null);
+  const messagesBoxRef = useRef(null);
   const [showConversation, setShowConversation] = useState(false);
 
   function showNotification(type, text) {
@@ -187,6 +188,12 @@ useEffect(() => {
     return () => clearInterval(intervalId);
   }, [selectedGroupId, showConversation]);
 
+  useEffect(() => {
+    if (messagesBoxRef.current) {
+      messagesBoxRef.current.scrollTop =
+          messagesBoxRef.current.scrollHeight;
+    }
+  }, [messages]);
   return (
       <div style={styles.page}>
       
@@ -374,7 +381,11 @@ useEffect(() => {
   			🟢 Live Refresh: ON
 		</p>
 
-		<div className="messagesBox" style={styles.messagesBox}>
+                <div
+                    ref={messagesBoxRef}
+                    className="messagesBox"
+                    style={styles.messagesBox}
+                >
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
                   ) : (
