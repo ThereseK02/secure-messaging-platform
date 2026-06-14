@@ -458,15 +458,17 @@ useEffect(() => {
 const styles = {
   page: {
     minHeight: "100vh",
+    width: "100%",
+    boxSizing: "border-box",
     backgroundColor: "#020617",
     color: "#ffffff",
-    padding: "40px",
+    padding: "clamp(12px, 3vw, 40px)",
     fontFamily: "Arial, sans-serif",
   },
   title: {
     color: "#38bdf8",
-    fontSize: "44px",
-    marginBottom: "12px",
+    fontSize: "clamp(34px, 5vw, 56px)",
+    marginBottom: "clamp(8px, 2vh, 20px)",
   },
 
 liveIndicator: {
@@ -518,15 +520,17 @@ messageInputRow: {
     height: "54px",
   },
 
-section: {
-  backgroundColor: "#0f172a",
-  border: "1px solid #1e293b",
-  borderRadius: "16px",
-  padding: "18px 24px",
-  marginBottom: "18px",
-  maxWidth: "850px",
-  boxShadow: "0 0 12px rgba(56,189,248,0.08)",
-},
+  section: {
+    backgroundColor: "#0f172a",
+    border: "1px solid #1e293b",
+    borderRadius: "16px",
+    padding: "clamp(12px, 2vw, 24px)",
+    marginBottom: "clamp(12px, 2vh, 24px)",
+    width: "100%",
+    maxWidth: "850px",
+    boxSizing: "border-box",
+    boxShadow: "0 0 12px rgba(56,189,248,0.08)",
+  },
 
   sectionTitle: {
     color: "#38bdf8",
@@ -548,9 +552,11 @@ section: {
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
-    padding: "10px",
-    marginBottom: "12px",
+    padding: "clamp(8px, 1.5vw, 16px)",
+    marginBottom: "clamp(10px, 2vh, 18px)",
+    width: "100%",
     maxWidth: "850px",
+    boxSizing: "border-box",
     boxShadow: "0 0 12px rgba(56,189,248,0.08)",
   },
   primaryButton: {
@@ -592,16 +598,15 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    flex: 1,
-    height: "190px",
+    height: "clamp(160px, 28vh, 240px)",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
-    padding: "8px",
-    marginBottom: "8px",
+    padding: "clamp(8px, 1vw, 12px)",
+    marginBottom: "clamp(8px, 1vh, 12px)",
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "clamp(8px, 1vh, 12px)",
   },
 memberBox: {
   marginBottom: "10px",
@@ -685,10 +690,11 @@ messageCard: {
     fontSize: "12px",
   },
 
-
   textarea: {
     width: "100%",
-    height: "70px",
+    height: "clamp(60px, 10vh, 90px)",
+    minHeight: "60px",
+    maxHeight: "90px",
     padding: "14px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
@@ -696,8 +702,8 @@ messageCard: {
     color: "#ffffff",
     fontSize: "15px",
     resize: "none",
+    boxSizing: "border-box",
   },
-
 messageButtonColumn: {
   display: "flex",
   flexDirection: "column",
