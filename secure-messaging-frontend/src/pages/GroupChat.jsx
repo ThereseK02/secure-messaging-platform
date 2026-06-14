@@ -588,7 +588,7 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "260px",
+    height: "220px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
@@ -602,18 +602,7 @@ memberBox: {
   marginBottom: "10px",
   textAlign: "center",
 },
-    messagesBox: {
-  height: "260px",
-      overflowY: "auto",
-      scrollbarWidth: "none",
-      msOverflowStyle: "none",
-      padding: "10px",
-      marginBottom: "10px",
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-},
-  memberBox: {
+    memberBox: {
     marginBottom: "14px",
     textAlign: "center",
   },
