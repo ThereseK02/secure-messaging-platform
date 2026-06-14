@@ -337,11 +337,6 @@ useEffect(() => {
                   Back to Groups
                 </button>
 
-		<h2 style={styles.groupTitle}>
-		  {groups.find(g => String(g.id) === String(selectedGroupId))?.groupName}
-		</h2>
-
-
                 {members.length > 0 && (
                     <div style={styles.memberBox}>
 
@@ -470,8 +465,8 @@ const styles = {
   },
   title: {
     color: "#38bdf8",
-    fontSize: "56px",
-    marginBottom: "20px",
+    fontSize: "44px",
+    marginBottom: "12px",
   },
 
 liveIndicator: {
@@ -553,10 +548,9 @@ section: {
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
-    padding: "14px",
-    marginBottom: "16px",
+    padding: "10px",
+    marginBottom: "12px",
     maxWidth: "850px",
-    minHeight: "150px",
     boxShadow: "0 0 12px rgba(56,189,248,0.08)",
   },
   primaryButton: {
@@ -598,15 +592,16 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "220px",
+    flex: 1,
+    height: "190px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
-    padding: "10px",
-    marginBottom: "10px",
+    padding: "8px",
+    marginBottom: "8px",
     display: "flex",
     flexDirection: "column",
-    gap: "10px",
+    gap: "8px",
   },
 memberBox: {
   marginBottom: "10px",
@@ -691,17 +686,17 @@ messageCard: {
   },
 
 
-textarea: {
-  flex: 1,
-  minHeight: "95px",
-  padding: "14px",
-  borderRadius: "10px",
-  border: "1px solid #38bdf8",
-  backgroundColor: "#020617",
-  color: "#ffffff",
-  fontSize: "15px",
-  resize: "none",
-},
+  textarea: {
+    width: "100%",
+    height: "70px",
+    padding: "14px",
+    borderRadius: "10px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#020617",
+    color: "#ffffff",
+    fontSize: "15px",
+    resize: "none",
+  },
 
 messageButtonColumn: {
   display: "flex",
