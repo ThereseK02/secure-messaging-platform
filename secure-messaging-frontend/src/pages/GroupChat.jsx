@@ -325,7 +325,7 @@ useEffect(() => {
 
         {showConversation && (
             <>
-              <div style={styles.section}>
+              <div style={styles.conversationHeaderCard}>
                 <button
                     style={styles.backButton}
                     onClick={() => {
@@ -548,6 +548,16 @@ section: {
     backgroundColor: "#020617",
     color: "#ffffff",
     fontSize: "16px",
+  },
+  conversationHeaderCard: {
+    backgroundColor: "#0f172a",
+    border: "1px solid #1e293b",
+    borderRadius: "16px",
+    padding: "14px",
+    marginBottom: "16px",
+    maxWidth: "850px",
+    minHeight: "150px",
+    boxShadow: "0 0 12px rgba(56,189,248,0.08)",
   },
   primaryButton: {
     background: "linear-gradient(135deg, #4f46e5, #2563eb)",
