@@ -52,7 +52,7 @@ const styles = {
 	minHeight: "auto",
         background: "rgba(15, 42, 74, 0.96)",
         borderRadius: "22px",
-        padding:  "clamp(24px, 4vw, 55px)",
+        padding:  "clamp(18px, 3vw, 45px)",
         textAlign: "center",
         boxShadow: "0 20px 45px rgba(0, 0, 0, 0.35)",
         border: "1px solid rgba(255, 255, 255, 0.12)",
@@ -60,7 +60,7 @@ const styles = {
     
 logo: {
     width: "165px",
-    height: "clamp(110px, 18vw, 165px)",
+    height: "clamp(90px, 14vw, 135px)",
     objectFit: "cover",
     objectPosition: "center",
     borderRadius: "50%",
@@ -69,39 +69,36 @@ logo: {
     backgroundColor: "#020617",
     padding: "6px"
 },
-
-welcome: {
-    color: "#cbd5e1",
-    fontSize: "28px",
-    marginBottom: "24px",
-    fontWeight: "600",
-},
-
-title: {
-    fontSize: "52px",
-    fontWeight: "800",
-    lineHeight: "1.25",
-    marginTop: "0",
-    marginBottom: "24px",
-    color: "#f5efe6",
-},
+    welcome: {
+        color: "#cbd5e1",
+        fontSize: "clamp(20px, 3vw, 28px)",
+        marginBottom: "18px",
+        fontWeight: "600",
+    },
+    title: {
+        fontSize: "clamp(36px, 6vw, 52px)",
+        fontWeight: "800",
+        lineHeight: "1.15",
+        marginTop: "0",
+        marginBottom: "18px",
+        color: "#f5efe6",
+    },
 
     tagline: {
         color: "#e0f2fe",
-        fontSize: "24px",
+        fontSize: "clamp(18px, 3vw, 24px)",
         fontWeight: "700",
-        marginTop: "14px",
-        marginBottom: "40px",
+        marginTop: "10px",
+        marginBottom: "18px",
     },
 
-description: {
-    color: "#e8dfd1",
-    fontSize: "18px",
-    lineHeight: "2",
-    maxWidth: "500px",
-    margin: "0 auto 50px auto",
-},
-
+    description: {
+        color: "#e8dfd1",
+        fontSize: "clamp(15px, 2vw, 18px)",
+        lineHeight: "1.7",
+        maxWidth: "500px",
+        margin: "0 auto 24px auto",
+    },
 buttons: {
     display: "flex",
     justifyContent: "center",
