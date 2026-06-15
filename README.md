@@ -517,63 +517,44 @@ Demonstrates communication between users through the secure messaging workflow.
 
 ---
 
-
 ## Group Messaging
 
+The Secure Messaging Platform includes a production-ready group messaging workflow that allows authenticated users to create groups, join existing groups, view members, and participate in shared conversations through a chat-style interface.
 
+### Group Creation and Joining
 
-The Secure Messaging Platform extends traditional one-to-one communication by providing group messaging functionality. This feature enables multiple users to participate in shared conversations within dedicated discussion groups.
+Authenticated users can create new groups by entering a group name. Each group receives a unique identifier that other users can use to join the conversation.
 
+Users can also join existing groups by entering a group ID. Once joined, the group appears under the user's **My Groups** section.
 
+### Group Membership Display
 
-### Group Creation
+The group chat interface displays current group members using compact member badges. Group creators are identified with an administrator badge, making ownership and membership easier to understand.
 
+### Group Conversation Experience
 
+The group conversation page uses a two-page workflow:
 
-Authenticated users can create new groups and establish collaborative communication channels for multiple participants. Each group is assigned a unique identifier and is managed through the backend services.
+1. Page 1 displays Create Group, Join Group, and My Groups.
+2. Page 2 displays the selected group conversation.
+3. Users can return to Page 1 with the Back to Groups button.
+4. Users can leave a group from the conversation view.
 
+Messages are shown in a chat-style layout with sender labels and timestamps. The current user's messages are labeled as **You**, while messages from other participants show the sender's username.
 
+### Live Refresh
 
-### Group Membership
+Group messages refresh automatically every three seconds using polling. This allows participants to see new messages without manually refreshing the page.
 
+The current implementation uses polling for reliable real-time-style behavior. A future version may migrate this feature to WebSockets for true real-time messaging.
 
+### Responsive Layout
 
-Users can join existing groups and become active participants in group discussions. Group membership information is stored and managed within the database to ensure accurate access control and message delivery.
-
-
-
-### Group Communication
-
-
-
-Group members can send messages that are visible to all participants within the group. This functionality enables real-time collaboration and shared communication among multiple users.
-
-
-
-### Message History
-
-
-
-The platform maintains a complete history of group conversations. Messages are persisted in the database and can be retrieved whenever users access a group, allowing participants to review previous discussions.
-
-
+The Group Chat interface was refined for laptop and monitor screens. The layout keeps the message input and action buttons visible, uses internal scrolling for the message area, and maintains a compact header and member display.
 
 ### Database Management
 
-Group messages and membership information are stored using Hibernate/JPA and PostgreSQL. This ensures reliable persistence, efficient retrieval, and scalability for future enhancements.
-
-### Group Messaging Workflow
-
-1\. Create a new group.
-
-2\. Add or join group members.
-
-3\. Open the group chat interface.
-
-4\. Send messages to the group.
-
-5\. View ongoing group conversations and message history.
-
+Group records, group memberships, and group messages are stored using Hibernate/JPA and PostgreSQL. This supports persistent conversations, reliable member tracking, and future scalability.
 
 ### Group Messaging Screenshots
 
@@ -581,19 +562,19 @@ Group messages and membership information are stored using Hibernate/JPA and Pos
 
 ![Group Chat Overview](screenshots/group-messaging/15_group_chat_overview.png)
 
-Displays the group chat interface where users can participate in collaborative conversations within a shared communication channel.
+Displays the group management page where users can create groups, join groups, and open existing group conversations.
 
-#### Group Messages
+#### Group Conversation
 
 ![Group Messages](screenshots/group-messaging/16_group_messages.png)
 
-Demonstrates active group communication, showing how messages are shared and viewed by multiple participants within a group.
+Shows the group conversation interface with sender labels, timestamps, message history, live refresh, and visible message controls.
 
 #### Group Administration and Membership Management
 
 ![Group Administration](screenshots/group-messaging/17_group_chat_admin_badge_beige.png)
 
-Shows the finalized group chat interface featuring administrator identification, group membership management, and refined user interface improvements. Group creators are clearly distinguished through an administrator badge, while users can manage participation through the integrated Leave Group functionality.
+Shows the finalized group chat interface with administrator identification, member display, and refined group participation controls.
 
 ---
 
