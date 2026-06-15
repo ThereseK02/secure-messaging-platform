@@ -324,8 +324,10 @@ useEffect(() => {
         )}
 
         {showConversation && (
-            <>
-              <div style={styles.conversationHeaderCard}>
+            <div style={styles.chatLayout}>
+
+              <div style={styles.chatSidebar}>
+
                 <button
                     style={styles.backButton}
                     onClick={() => {
@@ -337,37 +339,38 @@ useEffect(() => {
                   Back to Groups
                 </button>
 
-                {members.length > 0 && (
-                    <div style={styles.memberBox}>
+                <div style={styles.memberBox}>
+                  <p style={styles.membersLabel}>
+                    Members ({members.length})
+                  </p>
 
-			<p style={styles.membersLabel}>
- 			 Members ({members.length})
-			</p>
+                  <div style={styles.memberPills}>
+                    {members.slice(0, 5).map((member) => (
+                        <span key={member} style={styles.memberPill}>
+              {member}
+            </span>
+                    ))}
 
-                      <div style={styles.memberPills}>
-                        {members.slice(0, 5).map((member) => (
-                            <span key={member} style={styles.memberPill}>
-                    {member}
-                  </span>
-                        ))}
-
-                        {members.length > 5 && (
-                            <span style={styles.memberPill}>
-                    +{members.length - 5} more
-                  </span>
-                        )}
-                      </div>
-                    </div>
-                )}
+                    {members.length > 5 && (
+                        <span style={styles.memberPill}>
+              +{members.length - 5} more
+            </span>
+                    )}
+                  </div>
+                </div>
 
                 {selectedGroupId && (
-                    <button style={styles.leaveButton} onClick={leaveGroup}>
+                    <button
+                        style={styles.leaveButton}
+                        onClick={leaveGroup}
+                    >
                       Leave Group
                     </button>
                 )}
+
               </div>
 
-              <div style={styles.section}>
+              <div style={styles.chatMain}>
                 <p style={styles.groupContext}>
                   Group: {selectedGroupName} (#{selectedGroupId})
                 </p>
@@ -448,12 +451,12 @@ useEffect(() => {
 </div>
 
               </div>
-            </>
+
+            </div>
         )}
       </div>
   );
 }
-
 
 const styles = {
   page: {
@@ -471,7 +474,7 @@ const styles = {
     marginBottom: "clamp(8px, 2vh, 20px)",
   },
 
-liveIndicator: {
+  liveIndicator: {
   color: "#22c55e",
   fontSize: "13px",
   fontWeight: "600",
@@ -527,7 +530,7 @@ messageInputRow: {
     padding: "clamp(12px, 2vw, 24px)",
     marginBottom: "clamp(12px, 2vh, 24px)",
     width: "100%",
-    maxWidth: "850px",
+    maxWidth: "100%",
     boxSizing: "border-box",
     boxShadow: "0 0 12px rgba(56,189,248,0.08)",
   },
@@ -598,7 +601,7 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "clamp(160px, 28vh, 240px)",
+    height: "50vh",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
@@ -669,7 +672,34 @@ otherMessageBubble: {
   minWidth: "180px",
   boxShadow: "0 4px 10px rgba(96, 165, 250, 0.22)",
 },
-
+  chatLayout: {
+    display: "flex",
+    gap: "20px",
+    width: "100%",
+    maxWidth: "1200px",
+    alignItems: "stretch",
+  },
+  chatSidebar: {
+    width: "260px",
+    minWidth: "260px",
+    backgroundColor: "#0f172a",
+    border: "1px solid #1e293b",
+    borderRadius: "16px",
+    padding: "20px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+    boxSizing: "border-box",
+  },
+  chatMain: {
+    flex: 1,
+    backgroundColor: "#0f172a",
+    border: "1px solid #1e293b",
+    borderRadius: "16px",
+    padding: "clamp(12px, 2vw, 24px)",
+    boxSizing: "border-box",
+    boxShadow: "0 0 12px rgba(56,189,248,0.08)",
+  },
 messageCard: {
     backgroundColor: "#020617",
     border: "1px solid #1e293b",
