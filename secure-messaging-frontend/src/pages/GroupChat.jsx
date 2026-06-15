@@ -553,8 +553,8 @@ const styles = {
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
-    padding: "clamp(12px, 2vw, 24px)",
-    marginBottom: "clamp(12px, 2vh, 24px)",
+    padding: "12px 24px",
+    marginBottom: "10px",
     width: "100%",
     maxWidth: "100%",
     boxSizing: "border-box",
@@ -563,14 +563,15 @@ const styles = {
 
   sectionTitle: {
     color: "#38bdf8",
-    marginBottom: "16px",
+    marginBottom: "8px",
   },
+
   input: {
     display: "block",
     width: "100%",
     maxWidth: "420px",
-    padding: "14px",
-    marginBottom: "14px",
+    padding: "10px 14px",
+    marginBottom: "8px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
     backgroundColor: "#020617",
@@ -593,7 +594,7 @@ const styles = {
     color: "#ffffff",
     border: "none",
     borderRadius: "14px",
-    padding: "14px 22px",
+    padding: "10px 20px",
     fontWeight: "700",
     cursor: "pointer",
   },
