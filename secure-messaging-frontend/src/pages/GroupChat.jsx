@@ -470,8 +470,8 @@ const styles = {
   },
   title: {
     color: "#38bdf8",
-    fontSize: "clamp(34px, 5vw, 56px)",
-    marginBottom: "clamp(8px, 2vh, 20px)",
+    fontSize: "clamp(34px, 4vw, 48px)",
+    marginBottom: "10px",
   },
 
   liveIndicator: {
@@ -482,13 +482,13 @@ const styles = {
   marginBottom: "15px",
 },
 
-navButtonRow: {
-  display: "flex",
-  gap: "16px",
-  marginBottom: "30px",
-  marginLeft: "26px",
-  flexWrap: "wrap",
-},
+  navButtonRow: {
+    display: "flex",
+    gap: "16px",
+    marginBottom: "18px",
+    marginLeft: "26px",
+    flexWrap: "wrap",
+  },
 
 messageInputRow: {
   display: "flex",
@@ -680,7 +680,7 @@ otherMessageBubble: {
     width: "100%",
     maxWidth: "1200px",
     alignItems: "stretch",
-    minHeight: "70vh",
+    minHeight: "65vh",
   },
   chatSidebar: {
     width: "260px",
