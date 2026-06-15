@@ -49,10 +49,10 @@ const styles = {
     card: {
         width: "100%",
         maxWidth: "620px",
-	minHeight: "760px",
+	minHeight: "auto",
         background: "rgba(15, 42, 74, 0.96)",
         borderRadius: "22px",
-        padding: "70px 55px",
+        padding:  "clamp(24px, 4vw, 55px)",
         textAlign: "center",
         boxShadow: "0 20px 45px rgba(0, 0, 0, 0.35)",
         border: "1px solid rgba(255, 255, 255, 0.12)",
@@ -60,7 +60,7 @@ const styles = {
     
 logo: {
     width: "165px",
-    height: "165px",
+    height: "clamp(110px, 18vw, 165px)",
     objectFit: "cover",
     objectPosition: "center",
     borderRadius: "50%",
