@@ -601,8 +601,9 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    flex: 1,
+    height: "48vh",
     minHeight: "300px",
+    maxHeight: "520px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
