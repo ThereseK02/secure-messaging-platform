@@ -601,7 +601,8 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "50vh",
+    flex: 1,
+    minHeight: "300px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
@@ -678,10 +679,13 @@ otherMessageBubble: {
     width: "100%",
     maxWidth: "1200px",
     alignItems: "stretch",
+    minHeight: "70vh",
   },
   chatSidebar: {
     width: "260px",
     minWidth: "260px",
+    height: "100%",
+    justifyContent: "flex-start",
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
@@ -693,6 +697,9 @@ otherMessageBubble: {
   },
   chatMain: {
     flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
