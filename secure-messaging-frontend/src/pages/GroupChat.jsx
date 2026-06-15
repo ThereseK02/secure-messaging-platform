@@ -18,6 +18,7 @@ export default function GroupChat() {
   const messagesBoxRef = useRef(null);
   const [showConversation, setShowConversation] = useState(false);
   const [selectedGroupName, setSelectedGroupName] = useState("");
+  const [showGroups, setShowGroups] = useState(false);
 
   function showNotification(type, text) {
     setNotification({type, text});
@@ -280,44 +281,53 @@ useEffect(() => {
               </div>
 
               <div style={styles.section}>
-                <h2 style={styles.sectionTitle}>My Groups</h2>
+                <button
+                    style={styles.sectionTitleButton}
+                    onClick={() => setShowGroups(!showGroups)}
+                >
+                  My Groups {showGroups ? "▲" : "▼"}
+                </button>
 
-                {groups.length === 0 ? (
-                    <p style={styles.muted}>No groups yet.</p>
-                ) : (
-                    <div style={styles.groupList}>
-                      {groups.map((group) => (
-                          <button
-                              key={group.id}
-                              style={{
-                                ...styles.groupButton,
-                                border:
-                                    String(selectedGroupId) === String(group.id)
-                                        ? "2px solid #38bdf8"
-                                        : "1px solid #1e293b",
-                              }}
-                              onClick={() => {
-                                setSelectedGroupId(group.id);
-                                setSelectedGroupName(group.groupName);
-                                setShowConversation(true);
-                                loadMessages(group.id);
-                                loadMembers(group.id);
-                              }}
-                          >
-                            <div>
-                              <div>
-                                {group.groupName} #{group.id}
-                              </div>
+                {showGroups && (
+                    <>
+                      {groups.length === 0 ? (
+                          <p style={styles.muted}>No groups yet.</p>
+                      ) : (
+                          <div style={styles.groupList}>
+                            {groups.map((group) => (
+                                <button
+                                    key={group.id}
+                                    style={{
+                                      ...styles.groupButton,
+                                      border:
+                                          String(selectedGroupId) === String(group.id)
+                                              ? "2px solid #38bdf8"
+                                              : "1px solid #1e293b",
+                                    }}
+                                    onClick={() => {
+                                      setSelectedGroupId(group.id);
+                                      setSelectedGroupName(group.groupName);
+                                      setShowConversation(true);
+                                      loadMessages(group.id);
+                                      loadMembers(group.id);
+                                    }}
+                                >
+                                  <div>
+                                    <div>
+                                      {group.groupName} #{group.id}
+                                    </div>
 
-                              {group.createdBy && (
-                                  <div style={styles.adminBadge}>
-                                    Admin: {group.createdBy}
+                                    {group.createdBy && (
+                                        <div style={styles.adminBadge}>
+                                          Admin: {group.createdBy}
+                                        </div>
+                                    )}
                                   </div>
-                              )}
-                            </div>
-                          </button>
-                      ))}
-                    </div>
+                                </button>
+                            ))}
+                          </div>
+                      )}
+                    </>
                 )}
               </div>
             </>
@@ -472,6 +482,16 @@ const styles = {
     color: "#38bdf8",
     fontSize: "clamp(34px, 4vw, 48px)",
     marginBottom: "10px",
+  },
+
+  sectionTitleButton: {
+    background: "transparent",
+    border: "none",
+    color: "#38bdf8",
+    fontSize: "22px",
+    fontWeight: "600",
+    cursor: "pointer",
+    marginBottom: "16px",
   },
 
   liveIndicator: {
