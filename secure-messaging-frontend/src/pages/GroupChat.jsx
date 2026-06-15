@@ -504,7 +504,7 @@ const styles = {
   color: "#22c55e",
   fontSize: "13px",
   fontWeight: "600",
-  marginTop: "-10px",
+  marginTop: "4x",
   marginBottom: "15px",
 },
 
