@@ -53,20 +53,20 @@ showNotification("error", "Registration failed");
                 justifyContent: "center",
                 alignItems: "center",
                 fontFamily: "Arial, sans-serif",
-                padding: "20px"
+                padding: "clamp(12px, 3vw, 20px)",
+                width: "100%"
             }}
         >
 
             <div
                 style={{
                     backgroundColor: "#052659",
-                    padding: "40px",
+                    padding: "4px 36px",
                     borderRadius: "20px",
-                    width: "360px",
-                    minHeight: "760px",
+                    width: "100%",
+                    maxWidth: "462px",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
                     boxShadow: "0 0 25px rgba(0,0,0,0.4)"
                 }}
             >
@@ -75,9 +75,14 @@ showNotification("error", "Registration failed");
                     src={logo}
                     alt="Secure Messaging"
                     style={{
-                        width: "140px",
+                        width: "165px",
+                        height: "165px",
+                        objectFit: "cover",
+                        objectPosition: "center",
+                        borderRadius: "50%",
                         display: "block",
-                        margin: "0 auto 20px auto"
+                        margin: "0 auto 18px auto",
+                        boxShadow: "0 0 22px rgba(56, 189, 248, 0.35)"
                     }}
                 />
 
@@ -187,7 +192,7 @@ showNotification("error", "Registration failed");
 
                     <div
                         style={{
-                            marginTop: "80px",
+                            marginTop: "24px",
                             textAlign: "center",
                             color: "#64748b"
                         }}

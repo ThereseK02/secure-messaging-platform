@@ -54,16 +54,18 @@ localStorage.setItem("username", username);
                 justifyContent: "center",
                 alignItems: "center",
                 fontFamily: "Arial, sans-serif",
-                padding: "20px"
+                padding: "clamp(12px, 3vw, 20px)",
+                width: "100%"
             }}
         >
 
             <div
                 style={{
                     backgroundColor: "rgba(15,23,42,0.88)",
-                    padding: "36px",
+                    padding: "4px 36px",
                     borderRadius: "18px",
-                    width: "390px",
+                    width: "100%",
+                    maxWidth: "462px",
                     border: "1px solid #1e3a8a",
                     boxShadow: "0 0 35px rgba(59,130,246,0.18)",
                     textAlign: "center"
@@ -87,7 +89,7 @@ localStorage.setItem("username", username);
                 <h1
                     style={{
                         color: "#ffffff",
-                        fontSize: "36px",
+                        fontSize: "clamp(28px, 4vw, 36px)",
                         marginBottom: "8px",
                         fontWeight: "bold"
                     }}
