@@ -57,18 +57,18 @@ const styles = {
         boxShadow: "0 20px 45px rgba(0, 0, 0, 0.35)",
         border: "1px solid rgba(255, 255, 255, 0.12)",
     },
-    
-logo: {
-    width: "165px",
-    height: "clamp(90px, 14vw, 135px)",
-    objectFit: "cover",
-    objectPosition: "center",
-    borderRadius: "50%",
-    marginBottom: "22px",
-    boxShadow: "0 0 22px rgba(56, 189, 248, 0.35)",
-    backgroundColor: "#020617",
-    padding: "6px"
-},
+
+    logo: {
+        width: "165px",
+        height: "165px",
+        objectFit: "cover",
+        objectPosition: "center",
+        borderRadius: "50%",
+        marginBottom: "22px",
+        boxShadow: "0 0 22px rgba(56, 189, 248, 0.35)",
+        backgroundColor: "#020617",
+        padding: "6px"
+    },
     welcome: {
         color: "#cbd5e1",
         fontSize: "clamp(20px, 3vw, 28px)",
