@@ -481,6 +481,7 @@ const styles = {
   title: {
     color: "#38bdf8",
     fontSize: "clamp(34px, 4vw, 48px)",
+    marginTop: "20px",
     marginBottom: "10px",
   },
 
