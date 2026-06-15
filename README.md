@@ -568,13 +568,8 @@ Displays the group management page where users can create groups, join groups, a
 
 ![Group Messages](screenshots/group-messaging/16_group_messages.png)
 
-Shows the group conversation interface with sender labels, timestamps, message history, live refresh, and visible message controls.
+Shows the group conversation interface with sender labels, timestamps, message history, live refresh, member display, and visible message controls.
 
-#### Group Administration and Membership Management
-
-![Group Administration](screenshots/group-messaging/17_group_chat_admin_badge_beige.png)
-
-Shows the finalized group chat interface with administrator identification, member display, and refined group participation controls.
 
 ---
 
