@@ -308,6 +308,7 @@ useEffect(() => {
                                       setSelectedGroupId(group.id);
                                       setSelectedGroupName(group.groupName);
                                       setShowConversation(true);
+                                      window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
                                       loadMembers(group.id);
                                     }}
