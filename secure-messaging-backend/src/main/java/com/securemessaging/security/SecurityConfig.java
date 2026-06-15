@@ -1,4 +1,5 @@
 package com.securemessaging.security;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -54,33 +55,26 @@ public class SecurityConfig {
             return config;
         }))
 
-.authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/",
-                        "/api/health",
-                        "/api/auth/**",
-                        "/auth/**",
-                        "/users/**",
-                        "/api/users/**",
-                        "/messages/**",
-                        "/api/messages/**",
-                        "/send/**",
-                        "/api/send/**",
-                        "/chat/**",
-                        "/api/chat/**",
-                        "/api/groups/**",
-                        "/groups/**",
-                        "/ws/**",
-                        "/error"
-                ).permitAll()
-                .anyRequest().authenticated()
-        )
-        .addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
+         .authorizeHttpRequests(auth -> auth
+                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                 .requestMatchers(
+                         "/",
+                         "/health",
+                         "/api/health",
+                         "/users/login",
+                         "/users/register",
+                         "/api/users/login",
+                         "/api/users/register",
+                         "/error"
+                 ).permitAll()
+                 .anyRequest().authenticated()
+         )
+         .addFilterBefore(
+                 jwtAuthenticationFilter,
+                 UsernamePasswordAuthenticationFilter.class
+         );
 
-    return http.build();
+        return http.build();
 }
 
     @Bean
