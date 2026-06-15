@@ -490,12 +490,12 @@ const styles = {
     flexWrap: "wrap",
   },
 
-messageInputRow: {
-  display: "flex",
-  alignItems: "stretch",
-  gap: "14px",
-  marginTop: "14px",
-},
+  messageInputRow: {
+    display: "flex",
+    gap: "14px",
+    alignItems: "stretch",
+    marginTop: "0",
+  },
 
   buttonRow: {
   display: "flex",
@@ -601,9 +601,9 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "40vh",
-    minHeight: "240px",
-    maxHeight: "420px",
+    height: "34vh",
+    minHeight: "220px",
+    maxHeight: "360px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
@@ -730,9 +730,9 @@ messageCard: {
 
   textarea: {
     width: "100%",
-    height: "60px",
-    minHeight: "60px",
-    maxHeight: "60px",
+    height: "52px",
+    minHeight: "52px",
+    maxHeight: "52px",
     padding: "12px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
