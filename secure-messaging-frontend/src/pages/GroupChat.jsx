@@ -475,13 +475,12 @@ const styles = {
     boxSizing: "border-box",
     backgroundColor: "#020617",
     color: "#ffffff",
-    padding: "clamp(12px, 3vw, 40px)",
+    padding: "40px clamp(12px, 3vw, 40px) clamp(12px, 3vw, 40px)",
     fontFamily: "Arial, sans-serif",
   },
   title: {
     color: "#38bdf8",
     fontSize: "clamp(34px, 4vw, 48px)",
-    marginTop: "5px",
     marginBottom: "10px",
   },
 
