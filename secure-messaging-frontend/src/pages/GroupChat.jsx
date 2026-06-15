@@ -475,7 +475,7 @@ const styles = {
     boxSizing: "border-box",
     backgroundColor: "#020617",
     color: "#ffffff",
-    padding: "40px clamp(12px, 3vw, 40px) clamp(12px, 3vw, 40px)",
+    padding: "40px clamp(12px, 3vw, 40px) 60px",
     fontFamily: "Arial, sans-serif",
   },
   title: {
