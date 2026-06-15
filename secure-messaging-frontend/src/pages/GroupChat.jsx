@@ -196,6 +196,11 @@ useEffect(() => {
           messagesBoxRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [showConversation]);
+
   return (
       <div style={styles.page}>
       
