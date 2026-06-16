@@ -796,18 +796,18 @@ messageCard: {
   },
 
   textarea: {
-    width: "100%",
-    height: "52px",
-    minHeight: "52px",
-    maxHeight: "52px",
+    flex: 1,
+    height: "96px",
+    minHeight: "96px",
+    maxHeight: "96px",
     padding: "12px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
     backgroundColor: "#020617",
-    color: "#ffffff",
+    color: "white",
     fontSize: "15px",
     resize: "none",
-    boxSizing: "border-box",
+    boxSizing: "border-box"
   },
 messageButtonColumn: {
   display: "flex",
