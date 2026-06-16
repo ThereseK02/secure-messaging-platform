@@ -457,13 +457,12 @@ useEffect(() => {
                 </div>
 
 <div style={styles.messageInputRow}>
-  <textarea
-    style={styles.textarea}
-    placeholder="Write a group message"
-    value={message}
-    onChange={(e) => setMessage(e.target.value)}
-  />
-
+ <textarea
+     placeholder="Write a group message"
+     value={message}
+     onChange={(e) => setMessage(e.target.value)}
+     style={styles.messageInput}
+ />
   <div
       style={{
         display: "flex",
@@ -557,6 +556,9 @@ const styles = {
   messageInputRow: {
     display: "flex",
     gap: "14px",
+    height: "96px",
+    minHeight: "96px",
+    resize: "none",
     alignItems: "stretch",
     marginTop: "0",
   },
