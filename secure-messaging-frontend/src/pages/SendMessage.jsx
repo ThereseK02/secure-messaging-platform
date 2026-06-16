@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function SendMessage() {
+    const navigate = useNavigate();
     const [recipient, setRecipient] = useState("");
     const [message, setMessage] = useState("");
     const [notification, setNotification] = useState(null);
@@ -65,6 +67,48 @@ export default function SendMessage() {
                     width: "520px"
                 }}
             >
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "14px",
+                        marginBottom: "24px"
+                    }}
+                >
+                    <button
+                        type="button"
+                        onClick={() => navigate("/dashboard")}
+                        style={{
+                            flex: 1,
+                            padding: "12px",
+                            borderRadius: "10px",
+                            border: "1px solid #38bdf8",
+                            backgroundColor: "#1e3a8a",
+                            color: "white",
+                            fontWeight: "bold",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Dashboard
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => navigate("/inbox")}
+                        style={{
+                            flex: 1,
+                            padding: "12px",
+                            borderRadius: "10px",
+                            border: "1px solid #38bdf8",
+                            backgroundColor: "#1e3a8a",
+                            color: "white",
+                            fontWeight: "bold",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Inbox
+                    </button>
+                </div>
+
                 <h1
                     style={{
                         color: "#38bdf8",
