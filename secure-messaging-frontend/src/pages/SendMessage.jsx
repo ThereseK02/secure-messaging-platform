@@ -73,9 +73,11 @@ export default function SendMessage() {
             <div
                 style={{
                     backgroundColor: "#0f172a",
-                    padding: "40px",
+                    padding: "28px",
                     borderRadius: "14px",
-                    width: "520px"
+                    width: "520px",
+                    maxHeight: "92vh",
+                    overflowY: "auto"
                 }}
             >
                 <div
@@ -123,9 +125,9 @@ export default function SendMessage() {
                 <h1
                     style={{
                         color: "#38bdf8",
-                        fontSize: "48px",
-                        lineHeight: "1.15",
-                        marginBottom: "32px",
+                        fontSize: "42px",
+                        lineHeight: "1.1",
+                        marginBottom: "24px",
                         textAlign: "center",
                         fontWeight: "bold"
                     }}
@@ -184,7 +186,7 @@ export default function SendMessage() {
                     style={{
                         width: "100%",
                         boxSizing: "border-box",
-                        height: "160px",
+                        height: "190px",
                         padding: "14px",
                         borderRadius: "8px",
                         border: "none",
@@ -207,13 +209,13 @@ export default function SendMessage() {
                             type="button"
                             onClick={() => addEmoji(emoji)}
                             style={{
-                                width: "38px",
-                                height: "38px",
+                                width: "34px",
+                                height: "34px",
                                 borderRadius: "8px",
                                 border: "1px solid #38bdf8",
                                 backgroundColor: "#1e293b",
                                 cursor: "pointer",
-                                fontSize: "18px"
+                                fontSize: "16px"
                             }}
                         >
                             {emoji}
