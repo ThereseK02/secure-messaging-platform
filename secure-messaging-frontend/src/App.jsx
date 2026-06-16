@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import SendMessage from "./pages/SendMessage";
 import Inbox from "./pages/Inbox";
 import GroupChat from "./pages/GroupChat";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
     return (
@@ -16,10 +17,38 @@ function App() {
                 <Route path="/" element={<Welcome />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/send" element={<SendMessage />} />
-                <Route path="/inbox" element={<Inbox />} />
-                <Route path="/groups" element={<GroupChat />} />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/send"
+                    element={
+                        <ProtectedRoute>
+                            <SendMessage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/inbox"
+                    element={
+                        <ProtectedRoute>
+                            <Inbox />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/groups"
+                    element={
+                        <ProtectedRoute>
+                            <GroupChat />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );
