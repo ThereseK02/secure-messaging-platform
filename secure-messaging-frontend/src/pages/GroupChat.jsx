@@ -19,6 +19,7 @@ export default function GroupChat() {
   const [showConversation, setShowConversation] = useState(false);
   const [selectedGroupName, setSelectedGroupName] = useState("");
   const [showGroups, setShowGroups] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiOptions = [
     "😀", "😂", "😊", "😍", "🥰", "😎", "🤔", "😭",
     "👍", "👏", "🙏", "💪", "❤️", "💙", "✨", "🔥",
@@ -463,34 +464,31 @@ useEffect(() => {
      onChange={(e) => setMessage(e.target.value)}
      style={styles.messageInput}
  />
-  <div
-      style={{
-        display: "flex",
-        gap: "8px",
-        marginTop: "10px",
-        flexWrap: "wrap"
-      }}
-  >
-    {emojiOptions.map((emoji) => (
-        <button
-            key={emoji}
-            type="button"
-            onClick={() => addEmoji(emoji)}
-            style={{
-              width: "34px",
-              height: "34px",
-              borderRadius: "8px",
-              border: "1px solid #38bdf8",
-              backgroundColor: "#1e293b",
-              cursor: "pointer",
-              fontSize: "17px"
-            }}
-        >
-          {emoji}
-        </button>
-    ))}
-  </div>
 
+  <div style={styles.emojiPickerWrapper}>
+    <button
+        type="button"
+        onClick={() => setShowEmojiPicker((current) => !current)}
+        style={styles.emojiToggleButton}
+    >
+      😊
+    </button>
+
+    {showEmojiPicker && (
+        <div style={styles.emojiPicker}>
+          {emojiOptions.map((emoji) => (
+              <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => addEmoji(emoji)}
+                  style={styles.emojiButton}
+              >
+                {emoji}
+              </button>
+          ))}
+        </div>
+    )}
+  </div>
     <div style={styles.messageButtonColumn}>
     <button style={styles.sendButton} onClick={sendMessage}>
       Send Group Message
@@ -796,9 +794,9 @@ messageCard: {
   },
   textarea: {
     flex: 1,
-    height: "82px",
-    minHeight: "82px",
-    maxHeight: "82px",
+    height: "86px",
+    minHeight: "86px",
+    maxHeight: "86px",
     padding: "12px 14px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
@@ -861,8 +859,47 @@ refreshButton: {
   fontWeight: "700",
   cursor: "pointer",
 },
+  emojiPickerWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "flex-start"
+  },
 
-  muted: {
+  emojiToggleButton: {
+    width: "42px",
+    height: "42px",
+    borderRadius: "10px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#1e293b",
+    cursor: "pointer",
+    fontSize: "20px"
+  },
+
+  emojiPicker: {
+    position: "absolute",
+    bottom: "52px",
+    left: "0",
+    display: "grid",
+    gridTemplateColumns: "repeat(8, 30px)",
+    gap: "6px",
+    padding: "10px",
+    borderRadius: "12px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#0f172a",
+    zIndex: 10
+  },
+
+  emojiButton: {
+    width: "30px",
+    height: "30px",
+    borderRadius: "8px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#1e293b",
+    cursor: "pointer",
+    fontSize: "15px",
+    padding: 0
+  },
+    muted: {
     color: "#94a3b8",
   },
 };
