@@ -19,6 +19,16 @@ export default function GroupChat() {
   const [showConversation, setShowConversation] = useState(false);
   const [selectedGroupName, setSelectedGroupName] = useState("");
   const [showGroups, setShowGroups] = useState(false);
+  const emojiOptions = [
+    "😀", "😂", "😊", "😍", "🥰", "😎", "🤔", "😭",
+    "👍", "👏", "🙏", "💪", "❤️", "💙", "✨", "🔥",
+    "🎉", "🥳", "🎁", "🎀", "💝", "💐", "🧸", "🍫",
+    "💌", "💎", "🌟", "✅", "🔒", "🔐", "🛡️", "💬"
+  ];
+
+  function addEmoji(emoji) {
+    setMessage((currentMessage) => `${currentMessage}${emoji}`);
+  }
 
   function showNotification(type, text) {
     setNotification({type, text});
@@ -454,7 +464,35 @@ useEffect(() => {
     onChange={(e) => setMessage(e.target.value)}
   />
 
-  <div style={styles.messageButtonColumn}>
+  <div
+      style={{
+        display: "flex",
+        gap: "8px",
+        marginTop: "10px",
+        flexWrap: "wrap"
+      }}
+  >
+    {emojiOptions.map((emoji) => (
+        <button
+            key={emoji}
+            type="button"
+            onClick={() => addEmoji(emoji)}
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "8px",
+              border: "1px solid #38bdf8",
+              backgroundColor: "#1e293b",
+              cursor: "pointer",
+              fontSize: "17px"
+            }}
+        >
+          {emoji}
+        </button>
+    ))}
+  </div>
+
+    <div style={styles.messageButtonColumn}>
     <button style={styles.sendButton} onClick={sendMessage}>
       Send Group Message
     </button>

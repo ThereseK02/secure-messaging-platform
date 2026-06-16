@@ -8,6 +8,17 @@ export default function SendMessage() {
     const [message, setMessage] = useState("");
     const [notification, setNotification] = useState(null);
 
+
+    const emojiOptions = [
+        "😀", "😂", "😊", "😍", "🥰", "😎", "🤔", "😭",
+        "👍", "👏", "🙏", "💪", "❤️", "💙", "✨", "🔥",
+        "🎉", "🥳", "🎁", "🎀", "💝", "💐", "🧸", "🍫",
+        "💌", "💎", "🌟", "✅", "🔒", "🔐", "🛡️", "💬"
+    ];
+
+    function addEmoji(emoji) {
+        setMessage((currentMessage) => `${currentMessage}${emoji}`);
+    }
     function showNotification(type, text) {
         setNotification({ type, text });
 
@@ -182,7 +193,33 @@ export default function SendMessage() {
                         resize: "none"
                     }}
                 />
-
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "8px",
+                        marginTop: "14px",
+                        flexWrap: "wrap"
+                    }}
+                >
+                    {emojiOptions.map((emoji) => (
+                        <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => addEmoji(emoji)}
+                            style={{
+                                width: "38px",
+                                height: "38px",
+                                borderRadius: "8px",
+                                border: "1px solid #38bdf8",
+                                backgroundColor: "#1e293b",
+                                cursor: "pointer",
+                                fontSize: "18px"
+                            }}
+                        >
+                            {emoji}
+                        </button>
+                    ))}
+                </div>
                 <button
                     onClick={handleSend}
                     style={{
