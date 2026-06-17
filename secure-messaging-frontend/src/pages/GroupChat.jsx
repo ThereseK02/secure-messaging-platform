@@ -718,26 +718,25 @@ memberBox: {
     marginBottom: "12px",
   },
 
-myMessageBubble: {
-  background: "linear-gradient(135deg, #60a5fa, #2563eb)",
-  color: "#ffffff",
-  borderRadius: "18px 18px 4px 18px",
-  padding: "12px 16px",
-  maxWidth: "70%",
-  minWidth: "180px",
-  boxShadow: "0 4px 10px rgba(236, 72, 153, 0.18)",
-},
+  myMessageBubble: {
+    background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+    color: "#f8fafc",
+    border: "1px solid #38bdf8",
+    borderRadius: "16px 16px 4px 16px",
+    padding: "12px 16px",
+    maxWidth: "55%",
+    boxShadow: "0 8px 20px rgba(56, 189, 248, 0.18)"
+  },
 
-otherMessageBubble: {
-  backgroundColor: "#020617",
-  color: "#ffffff",
-  border: "1px solid #38bdf8",
-  borderRadius: "18px 18px 18px 4px",
-  padding: "12px 16px",
-  maxWidth: "70%",
-  minWidth: "180px",
-  boxShadow: "0 4px 10px rgba(96, 165, 250, 0.22)",
-},
+  otherMessageBubble: {
+    backgroundColor: "#020617",
+    color: "#f8fafc",
+    border: "1px solid #38bdf8",
+    borderRadius: "16px 16px 16px 4px",
+    padding: "12px 16px",
+    maxWidth: "55%",
+    boxShadow: "0 8px 20px rgba(56, 189, 248, 0.14)"
+  },
   chatLayout: {
     display: "flex",
     gap: "20px",
@@ -780,12 +779,16 @@ messageCard: {
     marginBottom: "12px",
   },
   sender: {
-    color: "#38bdf8",
-    fontWeight: "700",
+    color: "#bae6fd",
+    fontSize: "13px",
+    fontWeight: "800",
+    margin: "0 0 4px 0"
   },
   messageText: {
     color: "#f8fafc",
-    fontSize: "16px",
+    fontSize: "15px",
+    margin: 0,
+    lineHeight: "1.35"
   },
   timestamp: {
     color: "#94a3b8",
