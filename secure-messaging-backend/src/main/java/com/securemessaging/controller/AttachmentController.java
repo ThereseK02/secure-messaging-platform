@@ -59,20 +59,23 @@ public class AttachmentController {
 
         List<Map<String, Object>> attachments = attachmentService.findInbox(receiver)
                 .stream()
-                .map(attachment -> Map.<String, Object>of(
-                        "id", attachment.getId(),
-                        "sender", attachment.getSender(),
-                        "receiver", attachment.getReceiver(),
-                        "filename", attachment.getOriginalFilename(),
-                        "contentType", attachment.getContentType(),
-                        "fileSize", attachment.getFileSize(),
-                        "timestamp", attachment.getTimestamp()
-                ))
+                .map(attachment -> {
+                    Map<String, Object> item = new java.util.LinkedHashMap<>();
+                    item.put("id", attachment.getId());
+                    item.put("sender", attachment.getSender());
+                    item.put("receiver", attachment.getReceiver());
+                    item.put("filename", attachment.getOriginalFilename());
+                    item.put("contentType", attachment.getContentType() != null
+                            ? attachment.getContentType()
+                            : "application/octet-stream");
+                    item.put("fileSize", attachment.getFileSize());
+                    item.put("timestamp", attachment.getTimestamp());
+                    return item;
+                })
                 .toList();
 
         return ResponseEntity.ok(attachments);
     }
-
     @GetMapping("/{attachmentId}/download")
     public ResponseEntity<byte[]> downloadAttachment(@PathVariable Long attachmentId) throws Exception {
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder
