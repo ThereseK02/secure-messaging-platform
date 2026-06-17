@@ -77,7 +77,7 @@ public class AttachmentController {
         return ResponseEntity.ok(attachments);
     }
     @GetMapping("/{attachmentId}/download")
-    public ResponseEntity<byte[]> downloadAttachment(@PathVariable Long attachmentId) throws Exception {
+    public ResponseEntity<byte[]> downloadAttachment(@PathVariable("attachmentId") Long attachmentId) throws Exception {
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
