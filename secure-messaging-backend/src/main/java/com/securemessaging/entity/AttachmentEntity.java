@@ -18,8 +18,7 @@ public class AttachmentEntity {
     private String contentType;
     private Long fileSize;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "BYTEA")
     private byte[] encryptedFileBytes;
 
     @Column(nullable = false, columnDefinition = "TEXT")
