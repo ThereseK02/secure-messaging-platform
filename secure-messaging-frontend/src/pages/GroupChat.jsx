@@ -29,8 +29,8 @@ export default function GroupChat() {
 
   function addEmoji(emoji) {
     setMessage((currentMessage) => `${currentMessage}${emoji}`);
+    setShowEmojiPicker(false);
   }
-
   function showNotification(type, text) {
     setNotification({type, text});
 
@@ -462,8 +462,8 @@ useEffect(() => {
      placeholder="Write a group message"
      value={message}
      onChange={(e) => setMessage(e.target.value)}
-     style={styles.messageInput}
- />
+     style={styles.textarea}
+      />
 
   <div style={styles.emojiPickerWrapper}>
     <button
@@ -552,13 +552,12 @@ const styles = {
   },
 
   messageInputRow: {
-    display: "flex",
-    gap: "14px",
-    height: "96px",
-    minHeight: "96px",
-    resize: "none",
-    alignItems: "stretch",
-    marginTop: "0",
+    display: "grid",
+    gridTemplateColumns: "minmax(360px, 1fr) 48px 220px",
+    gap: "16px",
+    alignItems: "end",
+    width: "100%",
+    marginTop: "18px"
   },
 
   buttonRow: {
@@ -793,7 +792,7 @@ messageCard: {
     fontSize: "12px",
   },
   textarea: {
-    flex: 1,
+    width: "100%",
     height: "86px",
     minHeight: "86px",
     maxHeight: "86px",
@@ -886,7 +885,8 @@ refreshButton: {
     borderRadius: "12px",
     border: "1px solid #38bdf8",
     backgroundColor: "#0f172a",
-    zIndex: 10
+    zIndex: 20,
+    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.45)"
   },
 
   emojiButton: {
