@@ -84,6 +84,12 @@ public class AttachmentController {
                 .getName();
 
         AttachmentEntity attachment = attachmentService.findById(attachmentId);
+
+        if (!currentUsername.equals(attachment.getSender())
+                && !currentUsername.equals(attachment.getReceiver())) {
+            return ResponseEntity.status(403).build();
+        }
+
         byte[] decryptedBytes =
                 attachmentService.decryptAttachmentForUser(attachmentId, currentUsername);
 
