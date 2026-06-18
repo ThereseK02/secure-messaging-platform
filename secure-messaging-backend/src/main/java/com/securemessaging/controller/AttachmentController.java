@@ -90,8 +90,13 @@ public class AttachmentController {
             return ResponseEntity.status(403).build();
         }
 
-        byte[] decryptedBytes =
-                attachmentService.decryptAttachmentForUser(attachmentId, currentUsername);
+        byte[] decryptedBytes;
+
+        try {
+            decryptedBytes = attachmentService.decryptAttachmentForUser(attachmentId, currentUsername);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        }
 
         return ResponseEntity.ok()
                 .header(
