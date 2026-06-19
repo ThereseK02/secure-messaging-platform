@@ -6,6 +6,8 @@ export default function SendMessage() {
     const navigate = useNavigate();
     const [recipient, setRecipient] = useState("");
     const [message, setMessage] = useState("");
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
     const [notification, setNotification] = useState(null);
 
 
@@ -195,6 +197,72 @@ export default function SendMessage() {
                         resize: "none"
                     }}
                 />
+
+                <div
+                    style={{
+                        width: "100%",
+                        marginBottom: "18px",
+                        padding: "14px",
+                        borderRadius: "12px",
+                        backgroundColor: "#0f172a",
+                        border: "1px solid #334155",
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <label
+                        style={{
+                            display: "block",
+                            color: "#dbeafe",
+                            fontWeight: "bold",
+                            marginBottom: "10px"
+                        }}
+                    >
+                        Secure Attachment
+                    </label>
+
+                    <input
+                        type="file"
+                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                        style={{
+                            width: "100%",
+                            color: "#e5e7eb",
+                            marginBottom: "10px"
+                        }}
+                    />
+
+                    {selectedFile && (
+                        <div
+                            style={{
+                                color: "#93c5fd",
+                                fontSize: "14px",
+                                marginBottom: "10px"
+                            }}
+                        >
+                            Selected file: {selectedFile.name}
+                        </div>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={handleAttachmentUpload}
+                        disabled={isUploadingAttachment}
+                        style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "10px",
+                            border: "none",
+                            background: isUploadingAttachment
+                                ? "#64748b"
+                                : "linear-gradient(135deg, #0ea5e9, #2563eb)",
+                            color: "white",
+                            fontSize: "15px",
+                            fontWeight: "bold",
+                            cursor: isUploadingAttachment ? "not-allowed" : "pointer"
+                        }}
+                    >
+                        {isUploadingAttachment ? "Uploading..." : "Upload Attachment"}
+                    </button>
+                </div>
                 <div
                     style={{
                         display: "flex",
@@ -240,4 +308,34 @@ export default function SendMessage() {
             </div>
         </div>
     );
+}
+async function handleAttachmentUpload() {
+    try {
+        if (!recipient.trim()) {
+            showNotification("error", "Please enter a recipient before uploading an attachment.");
+            return;
+        }
+
+        if (!selectedFile) {
+            showNotification("error", "Please choose a file to upload.");
+            return;
+        }
+
+        setIsUploadingAttachment(true);
+
+        const formData = new FormData();
+        formData.append("receiver", recipient);
+        formData.append("file", selectedFile);
+
+        await api.post("/api/attachments/upload", formData);
+
+        setSelectedFile(null);
+        showNotification("success", "Attachment uploaded securely");
+
+    } catch (error) {
+        console.error(error);
+        showNotification("error", "Attachment upload failed");
+    } finally {
+        setIsUploadingAttachment(false);
+    }
 }
