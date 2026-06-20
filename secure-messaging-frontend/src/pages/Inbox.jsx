@@ -203,14 +203,14 @@ export default function Inbox() {
       </div>
 
 
-         <h2
+      <h2
           style={{
             color: "#38bdf8",
             fontSize: "30px",
             marginBottom: "18px",
           }}
       >
-        Messages
+        Messages {messages.length > 0 && `(${messages.length})`}
       </h2>
 
       <div style={{ marginTop: "30px" }}>
