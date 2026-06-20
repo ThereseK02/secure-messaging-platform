@@ -214,11 +214,14 @@ export default function SendMessage() {
                         color: "white"
                     }}
                 />
-
                 <textarea
                     placeholder="Type your encrypted message..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
+                    spellCheck={false}
+                    data-gramm="false"
+                    data-gramm_editor="false"
+                    data-enable-grammarly="false"
                     style={{
                         width: "100%",
                         boxSizing: "border-box",
