@@ -192,83 +192,8 @@ export default function Inbox() {
         </button>
       </div>
 
-      <div style={{ marginTop: "30px", marginBottom: "30px" }}>
-        <h2
-            style={{
-              color: "#38bdf8",
-              fontSize: "30px",
-              marginBottom: "18px",
-            }}
-        >
-          Attachments
-        </h2>
 
-        {attachments.length === 0 ? (
-            <p style={{ color: "#94a3b8" }}>No attachments received yet.</p>
-        ) : (
-            attachments.map((attachment) => (
-                <div
-                    key={attachment.id}
-                    style={{
-                      backgroundColor: "#0f172a",
-                      padding: "22px",
-                      borderRadius: "14px",
-                      marginBottom: "18px",
-                      border: "1px solid #334155",
-                      boxShadow: "0 0 12px rgba(56,189,248,0.08)",
-                      textAlign: "left",
-                      maxWidth: "700px",
-                    }}
-                >
-                  <p
-                      style={{
-                        color: "#93c5fd",
-                        fontWeight: "bold",
-                        fontSize: "18px",
-                        marginBottom: "8px",
-                      }}
-                  >
-                    {attachment.filename}
-                  </p>
-
-                  <p style={{ color: "#e5e7eb", marginBottom: "6px" }}>
-                    From: {attachment.sender}
-                  </p>
-
-                  <p style={{ color: "#cbd5e1", marginBottom: "6px" }}>
-                    Type: {attachment.contentType || "Unknown"}
-                  </p>
-
-                  <p style={{ color: "#cbd5e1", marginBottom: "6px" }}>
-                    Size: {formatFileSize(attachment.fileSize)}
-                  </p>
-
-                  <p style={{ color: "#94a3b8", fontSize: "12px" }}>
-                    {new Date(attachment.timestamp).toLocaleString()}
-                  </p>
-
-                  <button
-                      type="button"
-                      onClick={() => handleDownloadAttachment(attachment)}
-                      style={{
-                        marginTop: "12px",
-                        padding: "12px 18px",
-                        borderRadius: "10px",
-                        border: "none",
-                        background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
-                        color: "white",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                      }}
-                  >
-                    Download Attachment
-                  </button>
-                </div>
-            ))
-        )}
-      </div>
-
-      <h2
+         <h2
           style={{
             color: "#38bdf8",
             fontSize: "30px",
@@ -279,50 +204,124 @@ export default function Inbox() {
       </h2>
 
       <div style={{ marginTop: "30px" }}>
-        {messages.map((message, index) => (
-          <div
-            key={message.id || index}
-            style={{
-              backgroundColor: "#0f172a",
-              padding: "24px",
-              borderRadius: "14px",
-              marginBottom: "24px",
-              border: "1px solid #1e293b",
-              boxShadow: "0 0 12px rgba(56,189,248,0.08)",
-              textAlign: "left",
-              maxWidth: "700px",
-            }}
-          >
-            <p
-              style={{
-                color: "#38bdf8",
-                fontWeight: "bold",
-                fontSize: "20px",
-              }}
-            >
-              {message.sender}
-            </p>
+        {messages.length === 0 ? (
+            <p style={{ color: "#94a3b8" }}>No messages received yet.</p>
+        ) : (
+            messages.map((message, index) => {
+              const messageAttachments = attachments.filter(
+                  (attachment) =>
+                      attachment.messageId &&
+                      message.id &&
+                      String(attachment.messageId) === String(message.id)
+              );
 
-            <p
-              style={{
-                fontSize: "18px",
-                lineHeight: "1.5",
-                color: "#f8fafc",
-              }}
-            >
-              {message.message}
-            </p>
+              return (
+                  <div
+                      key={message.id || index}
+                      style={{
+                        backgroundColor: "#0f172a",
+                        padding: "24px",
+                        borderRadius: "14px",
+                        marginBottom: "24px",
+                        border: "1px solid #1e293b",
+                        boxShadow: "0 0 12px rgba(56,189,248,0.08)",
+                        textAlign: "left",
+                        maxWidth: "700px",
+                      }}
+                  >
+                    <p
+                        style={{
+                          color: "#38bdf8",
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                        }}
+                    >
+                      {message.sender}
+                    </p>
 
-            <p
-              style={{
-                fontSize: "12px",
-                color: "#94a3b8",
-              }}
-            >
-{new Date(message.timestamp).toLocaleString()}
-            </p>
-          </div>
-        ))}
+                    <p
+                        style={{
+                          fontSize: "18px",
+                          lineHeight: "1.5",
+                          color: "#f8fafc",
+                        }}
+                    >
+                      {message.message}
+                    </p>
+
+                    {messageAttachments.length > 0 && (
+                        <div
+                            style={{
+                              marginTop: "18px",
+                              padding: "16px",
+                              borderRadius: "12px",
+                              backgroundColor: "#020617",
+                              border: "1px solid #334155",
+                            }}
+                        >
+                          <p
+                              style={{
+                                color: "#93c5fd",
+                                fontWeight: "bold",
+                                marginBottom: "10px",
+                              }}
+                          >
+                            Attachment
+                          </p>
+
+                          {messageAttachments.map((attachment) => (
+                              <div key={attachment.id} style={{ marginBottom: "12px" }}>
+                                <p
+                                    style={{
+                                      color: "#f8fafc",
+                                      fontSize: "16px",
+                                      marginBottom: "6px",
+                                    }}
+                                >
+                                  {attachment.filename}
+                                </p>
+
+                                <p style={{ color: "#cbd5e1", marginBottom: "6px" }}>
+                                  Type: {attachment.contentType || "Unknown"}
+                                </p>
+
+                                <p style={{ color: "#cbd5e1", marginBottom: "10px" }}>
+                                  Size: {formatFileSize(attachment.fileSize)}
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleDownloadAttachment(attachment)}
+                                    style={{
+                                      padding: "10px 16px",
+                                      borderRadius: "10px",
+                                      border: "none",
+                                      background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
+                                      color: "white",
+                                      fontWeight: "bold",
+                                      cursor: "pointer",
+                                    }}
+                                >
+                                  Download Attachment
+                                </button>
+                              </div>
+                          ))}
+                        </div>
+                    )}
+
+                    <p
+                        style={{
+                          marginTop: "14px",
+                          fontSize: "12px",
+                          color: "#94a3b8",
+                        }}
+                    >
+                      {new Date(message.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+              );
+            })
+        )}
       </div>
     </div>
   );

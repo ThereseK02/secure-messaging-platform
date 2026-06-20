@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "attachments")
+
 public class AttachmentEntity {
 
     @Id
@@ -13,6 +14,8 @@ public class AttachmentEntity {
 
     private String sender;
     private String receiver;
+    @Column(name = "message_id")
+    private Long messageId;
 
     private String originalFilename;
     private String contentType;
@@ -68,4 +71,11 @@ public class AttachmentEntity {
     public String getEncryptedKeyForReceiverBase64() { return encryptedKeyForReceiverBase64; }
     public String getEncryptedKeyForSenderBase64() { return encryptedKeyForSenderBase64; }
     public LocalDateTime getTimestamp() { return timestamp; }
+    public Long getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
+    }
 }

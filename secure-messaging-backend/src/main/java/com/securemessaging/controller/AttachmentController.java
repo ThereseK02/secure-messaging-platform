@@ -24,7 +24,8 @@ public class AttachmentController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadAttachment(@RequestParam("receiver") String receiver,
-                                              @RequestParam("file") MultipartFile file) throws Exception {
+                                              @RequestParam("file") MultipartFile file,
+                                              @RequestParam(value = "messageId", required = false) Long messageId) throws Exception {
         String sender = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -37,7 +38,7 @@ public class AttachmentController {
         }
 
         AttachmentEntity savedAttachment =
-                attachmentService.saveEncryptedAttachment(sender, receiver, file);
+                attachmentService.saveEncryptedAttachment(sender, receiver, file, messageId);
 
         return ResponseEntity.ok(
                 Map.of(
@@ -45,7 +46,8 @@ public class AttachmentController {
                         "attachmentId", savedAttachment.getId(),
                         "filename", savedAttachment.getOriginalFilename(),
                         "sender", savedAttachment.getSender(),
-                        "receiver", savedAttachment.getReceiver()
+                        "receiver", savedAttachment.getReceiver(),
+                        "messageId", savedAttachment.getMessageId()
                 )
         );
     }
@@ -64,6 +66,7 @@ public class AttachmentController {
                     item.put("id", attachment.getId());
                     item.put("sender", attachment.getSender());
                     item.put("receiver", attachment.getReceiver());
+                    item.put("messageId", attachment.getMessageId());
                     item.put("filename", attachment.getOriginalFilename());
                     item.put("contentType", attachment.getContentType() != null
                             ? attachment.getContentType()

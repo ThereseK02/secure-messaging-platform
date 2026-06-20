@@ -32,7 +32,8 @@ public class AttachmentService {
 
     public AttachmentEntity saveEncryptedAttachment(String senderUsername,
                                                     String receiverUsername,
-                                                    MultipartFile file) throws Exception {
+                                                    MultipartFile file,
+                                                    Long messageId) throws Exception {
         SecureMessagingSystem.User sender =
                 databaseUserService.findDomainUser(senderUsername);
 
@@ -49,7 +50,6 @@ public class AttachmentService {
 
         String encryptedKeyForSenderBase64 =
                 encryptAesKeyForUser(aesKey, sender);
-
         AttachmentEntity attachment = new AttachmentEntity(
                 senderUsername,
                 receiverUsername,
@@ -62,6 +62,8 @@ public class AttachmentService {
                 encryptedKeyForSenderBase64,
                 LocalDateTime.now()
         );
+
+        attachment.setMessageId(messageId);
 
         return attachmentRepository.save(attachment);
     }

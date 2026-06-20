@@ -130,11 +130,13 @@ public MessagingController(DatabaseMessagingService databaseMessagingService,
         SecureMessagingSystem.EncryptedMessage encryptedMessage =
                 encryptionService.encrypt(messageText, sender, receiver);
 
-        databaseMessagingService.saveEncryptedMessage(encryptedMessage);
+        EncryptedMessageEntity savedMessage =
+                databaseMessagingService.saveEncryptedMessage(encryptedMessage);
 
         return ResponseEntity.ok(
                 Map.of(
                         "status", "Encrypted message saved successfully",
+                        "messageId", savedMessage.getId(),
                         "sender", senderUsername,
                         "receiver", receiverUsername
                 )
@@ -194,6 +196,7 @@ public MessagingController(DatabaseMessagingService databaseMessagingService,
 
             decryptedMessages.add(
                     new DecryptedMessageView(
+                            entity.getId(),
                             encryptedMessage.getSender(),
                             encryptedMessage.getReceiver(),
                             decryptedText,

@@ -15,12 +15,12 @@ public class DatabaseMessagingService {
         this.repository = repository;
     }
 
-    public void saveEncryptedMessage(EncryptedMessage message) {
+    public EncryptedMessageEntity saveEncryptedMessage(EncryptedMessage message) {
 
         EncryptedMessageEntity entity =
                 EncryptedMessageMapper.toEntity(message);
 
-        repository.save(entity);
+        return repository.save(entity);
     }
     public List<EncryptedMessageEntity> findInbox(String receiver) {
         return repository.findByReceiver(receiver);

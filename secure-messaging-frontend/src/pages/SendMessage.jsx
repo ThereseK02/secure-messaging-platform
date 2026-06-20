@@ -41,7 +41,7 @@ export default function SendMessage() {
 
             const token = localStorage.getItem("token");
 
-            await api.post(
+            const messageResponse = await api.post(
                 "/api/messages/send",
                 {
                     receiver: recipient,
@@ -54,49 +54,46 @@ export default function SendMessage() {
                 }
             );
 
+            const messageId = messageResponse.data.messageId;
+
+            if (selectedFile) {
+                setIsUploadingAttachment(true);
+
+                const formData = new FormData();
+                formData.append("receiver", recipient);
+                formData.append("file", selectedFile);
+                formData.append("messageId", messageId);
+
+                await api.post("/api/attachments/upload", formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                setSelectedFile(null);
+
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                }
+            }
+
             setMessage("");
-            showNotification("success", "Message sent successfully");
+
+            showNotification(
+                "success",
+                selectedFile
+                    ? "Message and attachment sent successfully"
+                    : "Message sent successfully"
+            );
 
         } catch (error) {
             console.error(error);
             showNotification("error", "Message sending failed");
-        }
-    }
-    async function handleAttachmentUpload() {
-        try {
-            if (!recipient.trim()) {
-                showNotification("error", "Please enter a recipient before uploading an attachment.");
-                return;
-            }
-
-            if (!selectedFile) {
-                showNotification("error", "Please choose a file to upload.");
-                return;
-            }
-
-            setIsUploadingAttachment(true);
-
-            const formData = new FormData();
-            formData.append("receiver", recipient);
-            formData.append("file", selectedFile);
-
-            await api.post("/api/attachments/upload", formData);
-
-            setSelectedFile(null);
-
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
-
-            showNotification("success", "Attachment uploaded securely");
-
-        } catch (error) {
-            console.error(error);
-            showNotification("error", "Attachment upload failed");
         } finally {
             setIsUploadingAttachment(false);
         }
     }
+
     return (
         <div
             style={{
@@ -280,27 +277,7 @@ export default function SendMessage() {
                         </div>
                     )}
 
-                    <button
-                        type="button"
-                        onClick={handleAttachmentUpload}
-                        disabled={isUploadingAttachment}
-                        style={{
-                            width: "100%",
-                            padding: "12px",
-                            borderRadius: "10px",
-                            border: "none",
-                            background: isUploadingAttachment
-                                ? "#64748b"
-                                : "linear-gradient(135deg, #0ea5e9, #2563eb)",
-                            color: "white",
-                            fontSize: "15px",
-                            fontWeight: "bold",
-                            cursor: isUploadingAttachment ? "not-allowed" : "pointer"
-                        }}
-                    >
-                        {isUploadingAttachment ? "Uploading..." : "Upload Attachment"}
-                    </button>
-                </div>
+                       </div>
 
                 <div style={{ marginTop: "14px" }}>
                     <button
@@ -357,6 +334,7 @@ export default function SendMessage() {
                 </div>
                 <button
                     onClick={handleSend}
+                    disabled={isUploadingAttachment}
                     style={{
                         width: "100%",
                         marginTop: "24px",
@@ -368,7 +346,7 @@ export default function SendMessage() {
                         cursor: "pointer"
                     }}
                 >
-                    Send Message
+                    {isUploadingAttachment ? "Sending..." : "Send Message"}
                 </button>
             </div>
         </div>

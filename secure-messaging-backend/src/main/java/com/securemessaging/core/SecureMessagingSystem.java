@@ -420,6 +420,7 @@ public class SecureMessagingSystem {
                 String decrypted = encryptionService.decrypt(msg, receiver, sender);
 
                 result.add(new DecryptedMessageView(
+                        null,
                         msg.getSender(),
                         msg.getReceiver(),
                         decrypted,
@@ -432,10 +433,12 @@ public class SecureMessagingSystem {
     }
 
     public record DecryptedMessageView(
+            Long id,
             String sender,
             String receiver,
             String message,
             LocalDateTime timestamp
     ) {
+
     }
 }
