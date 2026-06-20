@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
@@ -8,7 +8,10 @@ export default function SendMessage() {
     const [message, setMessage] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
+    const [showEmojiPanel, setShowEmojiPanel] = useState(false);
     const [notification, setNotification] = useState(null);
+    const fileInputRef = useRef(null);
+
     const emojiOptions = [
         "😀", "😂", "😊", "😍", "🥰", "😎", "🤔", "😭",
         "👍", "👏", "🙏", "💪", "❤️", "💙", "✨", "🔥",
@@ -17,7 +20,9 @@ export default function SendMessage() {
     ];
 
     function addEmoji(emoji) {
-        setMessage((currentMessage) => `${currentMessage}${emoji}`);
+        setMessage((currentMessage) =>
+            `${currentMessage}${emoji}`);
+        setShowEmojiPanel(false);
     }
     function showNotification(type, text) {
         setNotification({ type, text });
@@ -78,6 +83,11 @@ export default function SendMessage() {
             await api.post("/api/attachments/upload", formData);
 
             setSelectedFile(null);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+
             showNotification("success", "Attachment uploaded securely");
 
         } catch (error) {
@@ -248,6 +258,7 @@ export default function SendMessage() {
                     </label>
 
                     <input
+                        ref={fileInputRef}
                         type="file"
                         onChange={(e) => setSelectedFile(e.target.files[0])}
                         style={{
@@ -290,32 +301,59 @@ export default function SendMessage() {
                         {isUploadingAttachment ? "Uploading..." : "Upload Attachment"}
                     </button>
                 </div>
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "8px",
-                        marginTop: "14px",
-                        flexWrap: "wrap"
-                    }}
-                >
-                    {emojiOptions.map((emoji) => (
-                        <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => addEmoji(emoji)}
+
+                <div style={{ marginTop: "14px" }}>
+                    <button
+                        type="button"
+                        onClick={() => setShowEmojiPanel(!showEmojiPanel)}
+                        style={{
+                            padding: "10px 14px",
+                            borderRadius: "10px",
+                            border: "1px solid #38bdf8",
+                            backgroundColor: "#1e293b",
+                            color: "#ffffff",
+                            cursor: "pointer",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        😊 Emojis
+                    </button>
+
+                    {showEmojiPanel && (
+                        <div
                             style={{
-                                width: "34px",
-                                height: "34px",
-                                borderRadius: "8px",
-                                border: "1px solid #38bdf8",
-                                backgroundColor: "#1e293b",
-                                cursor: "pointer",
-                                fontSize: "16px"
+                                display: "flex",
+                                gap: "8px",
+                                marginTop: "12px",
+                                flexWrap: "wrap",
+                                maxHeight: "120px",
+                                overflowY: "auto",
+                                padding: "10px",
+                                borderRadius: "10px",
+                                border: "1px solid #334155",
+                                backgroundColor: "#0f172a"
                             }}
                         >
-                            {emoji}
-                        </button>
-                    ))}
+                            {emojiOptions.map((emoji) => (
+                                <button
+                                    key={emoji}
+                                    type="button"
+                                    onClick={() => addEmoji(emoji)}
+                                    style={{
+                                        width: "34px",
+                                        height: "34px",
+                                        borderRadius: "8px",
+                                        border: "1px solid #38bdf8",
+                                        backgroundColor: "#1e293b",
+                                        cursor: "pointer",
+                                        fontSize: "16px"
+                                    }}
+                                >
+                                    {emoji}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 <button
                     onClick={handleSend}
