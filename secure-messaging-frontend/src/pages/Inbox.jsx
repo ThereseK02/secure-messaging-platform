@@ -50,6 +50,16 @@ export default function Inbox() {
       showNotification("error", "Failed to load inbox");
     }
   }
+  useEffect(() => {
+    loadInbox(false);
+
+    const interval = setInterval(() => {
+      loadInbox(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   function handleLogout() {
     localStorage.removeItem("token");
     navigate("/");
