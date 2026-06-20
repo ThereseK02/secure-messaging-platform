@@ -281,14 +281,6 @@ export default function Inbox() {
                                   {attachment.filename}
                                 </p>
 
-                                <p style={{ color: "#cbd5e1", marginBottom: "6px" }}>
-                                  Type: {attachment.contentType || "Unknown"}
-                                </p>
-
-                                <p style={{ color: "#cbd5e1", marginBottom: "10px" }}>
-                                  Size: {formatFileSize(attachment.fileSize)}
-                                </p>
-
                                 <button
                                     type="button"
                                     onClick={() => handleDownloadAttachment(attachment)}
@@ -302,7 +294,7 @@ export default function Inbox() {
                                       cursor: "pointer",
                                     }}
                                 >
-                                  Download Attachment
+                                  Download
                                 </button>
                               </div>
                           ))}
