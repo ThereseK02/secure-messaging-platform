@@ -9,8 +9,6 @@ export default function SendMessage() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
     const [notification, setNotification] = useState(null);
-
-
     const emojiOptions = [
         "😀", "😂", "😊", "😍", "🥰", "😎", "🤔", "😭",
         "👍", "👏", "🙏", "💪", "❤️", "💙", "✨", "🔥",
@@ -59,7 +57,36 @@ export default function SendMessage() {
             showNotification("error", "Message sending failed");
         }
     }
+    async function handleAttachmentUpload() {
+        try {
+            if (!recipient.trim()) {
+                showNotification("error", "Please enter a recipient before uploading an attachment.");
+                return;
+            }
 
+            if (!selectedFile) {
+                showNotification("error", "Please choose a file to upload.");
+                return;
+            }
+
+            setIsUploadingAttachment(true);
+
+            const formData = new FormData();
+            formData.append("receiver", recipient);
+            formData.append("file", selectedFile);
+
+            await api.post("/api/attachments/upload", formData);
+
+            setSelectedFile(null);
+            showNotification("success", "Attachment uploaded securely");
+
+        } catch (error) {
+            console.error(error);
+            showNotification("error", "Attachment upload failed");
+        } finally {
+            setIsUploadingAttachment(false);
+        }
+    }
     return (
         <div
             style={{
@@ -308,34 +335,4 @@ export default function SendMessage() {
             </div>
         </div>
     );
-}
-async function handleAttachmentUpload() {
-    try {
-        if (!recipient.trim()) {
-            showNotification("error", "Please enter a recipient before uploading an attachment.");
-            return;
-        }
-
-        if (!selectedFile) {
-            showNotification("error", "Please choose a file to upload.");
-            return;
-        }
-
-        setIsUploadingAttachment(true);
-
-        const formData = new FormData();
-        formData.append("receiver", recipient);
-        formData.append("file", selectedFile);
-
-        await api.post("/api/attachments/upload", formData);
-
-        setSelectedFile(null);
-        showNotification("success", "Attachment uploaded securely");
-
-    } catch (error) {
-        console.error(error);
-        showNotification("error", "Attachment upload failed");
-    } finally {
-        setIsUploadingAttachment(false);
-    }
 }
