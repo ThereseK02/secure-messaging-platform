@@ -203,15 +203,13 @@ useEffect(() => {
 
   useEffect(() => {
     if (messagesBoxRef.current) {
-      messagesBoxRef.current.scrollTop =
-          messagesBoxRef.current.scrollHeight;
+      messagesBoxRef.current.scrollTop = messagesBoxRef.current.scrollHeight;
     }
   }, [messages]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [showConversation]);
-
   return (
       <div style={styles.page}>
       
@@ -671,16 +669,15 @@ groupButton: {
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
-    padding: "clamp(8px, 1vw, 12px)",
+    padding: "18px 12px 22px",
     marginBottom: "8px",
     display: "flex",
     flexDirection: "column",
-    gap: "clamp(8px, 1vh, 12px)",
+    gap: "14px",
+    scrollPaddingTop: "18px",
+    scrollPaddingBottom: "22px",
+    scrollBehavior: "smooth",
   },
-memberBox: {
-  marginBottom: "10px",
-  textAlign: "center",
-},
     memberBox: {
     marginBottom: "14px",
     textAlign: "center",
@@ -709,15 +706,14 @@ memberBox: {
     fontSize: "14px",
     fontWeight: "700",
   },
-
   messageRow: {
     display: "flex",
     width: "78%",
     marginLeft: "auto",
     marginRight: "auto",
-    marginBottom: "12px",
+    flexShrink: 0,
+    scrollSnapAlign: "start",
   },
-
   myMessageBubble: {
     background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
     color: "#f8fafc",
@@ -725,7 +721,8 @@ memberBox: {
     borderRadius: "16px 16px 4px 16px",
     padding: "12px 16px",
     maxWidth: "55%",
-    boxShadow: "0 8px 20px rgba(56, 189, 248, 0.18)"
+    overflowWrap: "break-word",
+    boxShadow: "0 8px 20px rgba(56, 189, 248, 0.18)",
   },
 
   otherMessageBubble: {
@@ -735,7 +732,8 @@ memberBox: {
     borderRadius: "16px 16px 16px 4px",
     padding: "12px 16px",
     maxWidth: "55%",
-    boxShadow: "0 8px 20px rgba(56, 189, 248, 0.14)"
+    overflowWrap: "break-word",
+    boxShadow: "0 8px 20px rgba(56, 189, 248, 0.14)",
   },
   chatLayout: {
     display: "flex",
