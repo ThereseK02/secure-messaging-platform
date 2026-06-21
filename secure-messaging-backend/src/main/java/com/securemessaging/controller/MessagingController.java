@@ -168,8 +168,7 @@ public MessagingController(DatabaseMessagingService databaseMessagingService,
 
         List<EncryptedMessageEntity> encryptedEntities =
                 databaseMessagingService.findInbox(receiverUsername);
-
-        List<DecryptedMessageView> decryptedMessages =
+        List<Map<String, Object>> decryptedMessages =
                 new ArrayList<>();
 
         SecureMessagingSystem.HybridEncryptionService encryptionService =
@@ -195,22 +194,56 @@ public MessagingController(DatabaseMessagingService databaseMessagingService,
                     );
 
             decryptedMessages.add(
-                    new DecryptedMessageView(
-                            entity.getId(),
-                            encryptedMessage.getSender(),
-                            encryptedMessage.getReceiver(),
-                            decryptedText,
-                            entity.getTimestamp()
+                    Map.of(
+                            "id", entity.getId(),
+                            "sender", encryptedMessage.getSender(),
+                            "receiver", encryptedMessage.getReceiver(),
+                            "message", decryptedText,
+                            "timestamp", entity.getTimestamp(),
+                            "readByReceiver", entity.isReadByReceiver()
                     )
             );
         }
 
         decryptedMessages.sort(
-                (a, b) -> b.timestamp().compareTo(a.timestamp())
+                (a, b) -> ((LocalDateTime) b.get("timestamp"))
+                        .compareTo((LocalDateTime) a.get("timestamp"))
         );
 
         return ResponseEntity.ok(decryptedMessages);
     }
+
+    @PutMapping("/messages/{messageId}/read")
+    public ResponseEntity<?> markMessageAsRead(@PathVariable("messageId") Long messageId) {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return databaseMessagingService.findById(messageId)
+                .map(message -> {
+                    if (!currentUsername.equals(message.getReceiver())) {
+                        return ResponseEntity.status(403).body(
+                                Map.of("error", "You can only mark your own received messages as read")
+                        );
+                    }
+
+                    message.setReadByReceiver(true);
+                    databaseMessagingService.save(message);
+
+                    return ResponseEntity.ok(
+                            Map.of(
+                                    "status", "Message marked as read",
+                                    "messageId", message.getId(),
+                                    "readByReceiver", message.isReadByReceiver()
+                            )
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.status(404).body(
+                        Map.of("error", "Message not found")
+                ));
+    }
+
 @PostMapping("/groups/create")
 public ResponseEntity<?> createGroup(@RequestBody Map<String, String> request) {
     String currentUsername = org.springframework.security.core.context.SecurityContextHolder

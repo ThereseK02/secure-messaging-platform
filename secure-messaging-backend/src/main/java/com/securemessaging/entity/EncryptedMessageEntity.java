@@ -27,6 +27,7 @@ public class EncryptedMessageEntity {
     private String digitalSignatureBase64;
 
     private LocalDateTime timestamp;
+    private boolean readByReceiver = false;
 
     public EncryptedMessageEntity() {
     }
@@ -51,4 +52,10 @@ public class EncryptedMessageEntity {
     public String getIvBase64() { return ivBase64; }
     public String getDigitalSignatureBase64() { return digitalSignatureBase64; }
     public LocalDateTime getTimestamp() { return timestamp; }
+    public boolean isReadByReceiver() {
+        return readByReceiver;
+    }
+    public void setReadByReceiver(boolean readByReceiver) {
+        this.readByReceiver = readByReceiver;
+    }
 }

@@ -110,6 +110,27 @@ export default function Inbox() {
     }
   }
 
+  const unreadCount = messages.filter(
+      (message) => !message.readByReceiver
+  ).length;
+
+  async function markMessageAsRead(messageId) {
+    try {
+      await api.put(`/api/messages/${messageId}/read`);
+
+      setMessages((currentMessages) =>
+          currentMessages.map((message) =>
+              String(message.id) === String(messageId)
+                  ? { ...message, readByReceiver: true }
+                  : message
+          )
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification("error", "Failed to update message status");
+    }
+  }
+
   const buttonStyle = {
     backgroundColor: "#1e3a8a",
     color: "#ffffff",
@@ -198,16 +219,28 @@ export default function Inbox() {
         </button>
       </div>
 
+      <div style={{ marginBottom: "18px" }}>
+        <h2
+            style={{
+              color: "#38bdf8",
+              fontSize: "30px",
+              marginBottom: "6px",
+            }}
+        >
+          Messages
+        </h2>
 
-      <h2
-          style={{
-            color: "#38bdf8",
-            fontSize: "30px",
-            marginBottom: "18px",
-          }}
-      >
-        Messages {messages.length > 0 && `(${messages.length})`}
-      </h2>
+        <p
+            style={{
+              color: "#94a3b8",
+              fontSize: "15px",
+              margin: 0,
+              fontWeight: "600",
+            }}
+        >
+          Unread: {unreadCount} · Needs attention: 0
+        </p>
+      </div>
 
       <div style={{ marginTop: "30px" }}>
         {messages.length === 0 ? (
@@ -224,27 +257,67 @@ export default function Inbox() {
               return (
                   <div
                       key={message.id || index}
+                      onClick={() => {
+                        if (!message.readByReceiver) {
+                          markMessageAsRead(message.id);
+                        }
+                      }}
+                      title={
+                        message.readByReceiver
+                            ? "Message already read"
+                            : "Click to mark as read"
+                      }
                       style={{
-                        backgroundColor: "#0f172a",
+                        backgroundColor: message.readByReceiver ? "#0f172a" : "#111827",
                         padding: "24px",
                         borderRadius: "14px",
                         marginBottom: "24px",
-                        border: "1px solid #1e293b",
-                        boxShadow: "0 0 12px rgba(56,189,248,0.08)",
+                        border: message.readByReceiver
+                            ? "1px solid #1e293b"
+                            : "2px solid #38bdf8",
+                        boxShadow: message.readByReceiver
+                            ? "0 0 12px rgba(56,189,248,0.08)"
+                            : "0 0 18px rgba(56,189,248,0.22)",
                         textAlign: "left",
                         maxWidth: "700px",
+                        cursor: message.readByReceiver ? "default" : "pointer",
                       }}
                   >
-                    <p
+
+                    <div
                         style={{
-                          color: "#38bdf8",
-                          fontWeight: "bold",
-                          fontSize: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          marginBottom: "10px",
                         }}
                     >
-                      {message.sender}
-                    </p>
+                      <p
+                          style={{
+                            color: "#38bdf8",
+                            fontWeight: "bold",
+                            fontSize: "20px",
+                            margin: 0,
+                          }}
+                      >
+                        {message.sender}
+                      </p>
 
+                      {!message.readByReceiver && (
+                          <span
+                              style={{
+                                backgroundColor: "#38bdf8",
+                                color: "#020617",
+                                padding: "4px 10px",
+                                borderRadius: "999px",
+                                fontSize: "12px",
+                                fontWeight: "800",
+                              }}
+                          >
+                            UNREAD
+                          </span>
+                      )}
+                    </div>
                     <p
                         style={{
                           fontSize: "18px",
@@ -289,7 +362,10 @@ export default function Inbox() {
 
                                 <button
                                     type="button"
-                                    onClick={() => handleDownloadAttachment(attachment)}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleDownloadAttachment(attachment);
+                                    }}
                                     style={{
                                       padding: "10px 16px",
                                       borderRadius: "10px",

@@ -1,5 +1,8 @@
 package com.securemessaging.service;
+
 import java.util.List;
+import java.util.Optional;
+
 import com.securemessaging.core.SecureMessagingSystem.EncryptedMessage;
 import com.securemessaging.entity.EncryptedMessageEntity;
 import com.securemessaging.mapper.EncryptedMessageMapper;
@@ -22,7 +25,16 @@ public class DatabaseMessagingService {
 
         return repository.save(entity);
     }
+
     public List<EncryptedMessageEntity> findInbox(String receiver) {
         return repository.findByReceiver(receiver);
+    }
+
+    public Optional<EncryptedMessageEntity> findById(Long messageId) {
+        return repository.findById(messageId);
+    }
+
+    public EncryptedMessageEntity save(EncryptedMessageEntity message) {
+        return repository.save(message);
     }
 }
