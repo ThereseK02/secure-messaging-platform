@@ -193,10 +193,6 @@ export default function Inbox() {
           Send Message
         </button>
 
-        <button style={buttonStyle} onClick={() => loadInbox(true)}>
-          Refresh Messages
-        </button>
-
         <button style={logoutStyle} onClick={handleLogout}>
           Logout
         </button>
