@@ -460,8 +460,12 @@ useEffect(() => {
      placeholder="Write a group message"
      value={message}
      onChange={(e) => setMessage(e.target.value)}
+     spellCheck={false}
+     data-gramm="false"
+     data-gramm_editor="false"
+     data-enable-grammarly="false"
      style={styles.textarea}
-      />
+ />
 
   <div style={styles.emojiPickerWrapper}>
     <button
