@@ -77,16 +77,21 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 ## Key Features
 
 
-
 - User registration and login
 
 - JSON Web Token (JWT)-based authentication and authorization
 
 - Secure password storage with BCrypt
 
-- Private messaging between users
+- Private messaging between registered users
 
-- Group messaging functionality
+- Direct message attachment upload and download
+
+- Inbox unread message tracking
+
+- Group creation, joining, membership display, and group chat
+
+- Group chat live refresh with two-user conversation testing
 
 - PostgreSQL database persistence
 
@@ -96,7 +101,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 - Docker containerization
 
-- AWS EC2 deployment
+- AWS EC2 production deployment
 
 - Nginx reverse proxy configuration
 
@@ -105,8 +110,6 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 - GitHub Actions CI/CD automation
 
 - Monitoring and backend logging
-
-
 
 ---
 
@@ -439,81 +442,38 @@ Displays an earlier authenticated dashboard implementation used during developme
 
 ## Messaging Features
 
-
-
-The Secure Messaging Platform enables authenticated users to exchange private messages through a secure and user-friendly interface.
-
-
+The Secure Messaging Platform enables authenticated users to exchange private messages through a secure and user-friendly interface. Private messaging is protected by JWT-authenticated API requests and integrated with the backend message persistence layer.
 
 ### Secure Message Delivery
 
-
-
 Users can compose and send private messages to other registered users through the messaging interface. Messages are transmitted through protected REST API endpoints secured with JWT authentication.
 
+### Attachment Upload and Download
 
+The platform supports direct message attachments. Users can send a message with an attached file, and the receiver can view the attachment metadata from the inbox and download the file from the frontend interface.
 
 ### Inbox Management
 
+Incoming messages are displayed in the user's inbox, allowing users to review received communications in a centralized location. The inbox displays sender information, message content, timestamps, unread status, and attachment download controls when a file is included.
 
+### Unread Message Tracking
 
-Incoming messages are displayed in the user's inbox, allowing users to review received communications in a centralized location. The inbox provides a simple and organized view of message history.
+The inbox includes unread message tracking to help users identify new messages that require attention. Message cards display unread indicators, and the inbox summary shows unread and attention counts.
 
+### Messaging Screenshots
 
+#### Send Message with Attachment
 
-### Conversation Tracking
+![Send Message with Attachment](screenshots/messaging/07_send_message_with_attachment_success.png)
 
+Shows a secure direct message being sent with an attachment and a success confirmation.
 
+#### Inbox Attachment Download
 
-The platform maintains message records within the database, enabling users to view ongoing conversations and communication history between participants.
+![Inbox Attachment Download](screenshots/messaging/08_inbox_attachment_download_success.png)
 
+Shows a received direct message with attachment metadata, unread status, and a successful attachment download confirmation.
 
-
-### Database Persistence
-
-
-
-Messages are stored in PostgreSQL using Hibernate/JPA, ensuring reliable data persistence and retrieval. This approach allows message history to remain available across application restarts and deployments.
-
-
-
-### Private Messaging Workflow
-
-
-
-The messaging interface was designed to provide a straightforward communication workflow:
-
-
-
-1\. Select a recipient.
-
-2\. Compose a message.
-
-3\. Send the message.
-
-4\. View received messages in the inbox.
-
-5\. Review conversation history.
-
-### Private Messaging Screenshots
-
-#### Send Secure Message
-
-![Send Secure Message](screenshots/messaging/04_send_secure_message.png)
-
-Displays the interface used to compose and securely send messages to other authenticated users.
-
-#### Decrypted Inbox Messages
-
-![Inbox Messages](screenshots/messaging/05_inbox_decrypted_messages.png)
-
-Shows received messages displayed within the inbox after successful retrieval and processing.
-
-#### Message Exchange
-
-![Message Exchange](screenshots/messaging/06_message_exchange.png)
-
-Demonstrates communication between users through the secure messaging workflow.
 
 ---
 
@@ -558,18 +518,23 @@ Group records, group memberships, and group messages are stored using Hibernate/
 
 ### Group Messaging Screenshots
 
-#### Group Chat Overview
+#### Group Management Page
 
-![Group Chat Overview](screenshots/group-messaging/15_group_chat_overview.png)
+![Group Management Page](screenshots/group-messaging/18_group_management_page.png)
 
-Displays the group management page where users can create groups, join groups, and open existing group conversations.
+Displays the group management workflow where users can create groups, join existing groups, view available groups, and access group conversations.
 
-#### Group Conversation
+#### Active Group Conversation
 
-![Group Messages](screenshots/group-messaging/16_group_messages.png)
+![Active Group Conversation](screenshots/group-messaging/19_active_group_conversation.png)
 
-Shows the group conversation interface with sender labels, timestamps, message history, live refresh, member display, and visible message controls.
+Shows the active group conversation interface with group context, member display, message count, live refresh status, chat history, and visible message controls.
 
+#### Two-User Group Chat and Live Refresh Test
+
+![Two-User Group Chat and Live Refresh Test](screenshots/group-messaging/20_group_chat_two_user_autoscroll_test.png)
+
+Demonstrates a two-user group conversation between different authenticated users, confirming that live refresh updates the conversation while keeping the message input and controls visible.
 
 ---
 
@@ -1047,9 +1012,7 @@ Throughout this project, I was responsible for the complete software development
 - Managed production deployment, monitoring, logging, and troubleshooting workflows.
 
 
-
 ---
-
 
 
 ## Future Improvements
@@ -1070,7 +1033,7 @@ Several enhancements can be implemented to further improve the platform's functi
 
 - User profile management.
 
-- File and image sharing.
+- Expanded file and image sharing support, including richer previews, file type validation, and larger attachment workflows.
 
 - Push notification system.
 
