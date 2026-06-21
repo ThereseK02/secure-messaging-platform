@@ -216,7 +216,7 @@ localStorage.setItem("username", username);
                         marginBottom: "18px"
                     }}
                 >
-                    Protected by JWT Authentication
+                    Secure session active
                 </p>
 
                 <div

@@ -76,7 +76,7 @@ export default function Dashboard() {
                         marginBottom: "30px"
                     }}
                 >
-                    Your JWT session is active.
+                    Your secure session is active.
                 </p>
 
                 <div
