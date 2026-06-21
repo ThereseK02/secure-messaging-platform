@@ -425,11 +425,11 @@ Displays the user registration interface used to create new platform accounts.
 
 Shows the secure login interface where users authenticate using their registered credentials.
 
-#### JWT Authenticated Dashboard
+#### Authenticated Dashboard
 
-![JWT Dashboard](screenshots/authentication/03_dashboard_jwt_authenticated.png)
+![Authenticated Dashboard](screenshots/authentication/03_dashboard_jwt_authenticated.png)
 
-Illustrates successful JWT-based authentication and access to protected application functionality.
+Illustrates successful authentication, confirming that the user's secure session is active and protected application features are accessible.
 
 #### Dashboard Overview
 
