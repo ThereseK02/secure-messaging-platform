@@ -91,7 +91,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 - Group creation, joining, membership display, and group chat
 
-- Group chat live refresh with two-user conversation testing
+- Real-time group chat with WebSocket/STOMP support and REST polling fallback
 
 - PostgreSQL database persistence
 
@@ -504,9 +504,11 @@ Messages are shown in a chat-style layout with sender labels and timestamps. The
 
 ### Live Refresh
 
-Group messages refresh automatically every three seconds using polling. This allows participants to see new messages without manually refreshing the page.
+Group messages now support real-time updates using Spring WebSocket/STOMP on the backend and a SockJS/STOMP client in React. When a group member sends a message, the backend saves the message through the existing authenticated REST endpoint and then broadcasts a WebSocket notification to the active group topic.
 
-The current implementation uses polling for reliable real-time-style behavior. A future version may migrate this feature to WebSockets for true real-time messaging.
+The frontend listens for the group WebSocket notification and immediately reloads the latest group messages. This allows connected participants to see new messages without manually refreshing the page.
+
+The existing REST polling behavior remains available as a fallback. If the WebSocket connection is unavailable, the interface continues to refresh group messages automatically so the conversation remains functional.
 
 ### Responsive Layout
 
@@ -535,6 +537,13 @@ Shows the active group conversation interface with group context, member display
 ![Two-User Group Chat and Live Refresh Test](screenshots/group-messaging/20_group_chat_two_user_autoscroll_test.png)
 
 Demonstrates a two-user group conversation between different authenticated users, confirming that live refresh updates the conversation while keeping the message input and controls visible.
+
+#### Real-Time Group Chat Connected
+
+![Real-Time Group Chat Connected](screenshots/group-messaging/21_real_time_group_chat_connected.png)
+
+Demonstrates the upgraded group chat after WebSocket support was added. The Real-Time Chat: Connected indicator confirms that the browser successfully connected to the backend WebSocket broker through the deployed HTTPS domain.
+
 
 ---
 
@@ -582,7 +591,7 @@ The production environment is hosted on AWS EC2, providing a reliable cloud infr
 
 
 
-Nginx serves as a reverse proxy between users and the backend services. Incoming requests are routed through Nginx, which forwards traffic to the appropriate application services while improving security and request handling.
+Nginx serves as a reverse proxy between users and the application services. Incoming HTTPS requests are routed through Nginx, which forwards frontend traffic to the React service, API traffic to the Spring Boot backend, and WebSocket traffic through the `/ws/` route for real-time group chat support.
 
 
 
@@ -1027,7 +1036,7 @@ Several enhancements can be implemented to further improve the platform's functi
 
 
 
-- Real-time messaging using WebSockets, a communication protocol that enables persistent bidirectional communication between clients and servers.
+- Advanced WebSocket features such as typing indicators, online/offline presence, and richer real-time collaboration tools.
 
 - Message delivery and read receipts.
 
