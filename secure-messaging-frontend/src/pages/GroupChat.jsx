@@ -468,14 +468,14 @@ async function sendMessage() {
                             >
                               <div
                                   style={
-                                    isMine
+                                    msg.sender === currentUsername
                                         ? styles.myMessageBubble
                                         : styles.otherMessageBubble
                                   }
                               >
 
 				<p style={styles.sender}>
-				  {isMine ? "You" : msg.sender} •{" "}
+                  {msg.sender === currentUsername ? "You" : msg.sender} •{" "}
 				  {new Date(msg.timestamp + "Z").toLocaleTimeString([], {
     					hour: "numeric",
     					minute: "2-digit",
