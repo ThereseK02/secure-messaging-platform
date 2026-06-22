@@ -502,7 +502,7 @@ The group conversation page uses a two-page workflow:
 
 Messages are shown in a chat-style layout with sender labels and timestamps. The current user's messages are labeled as **You**, while messages from other participants show the sender's username.
 
-### Live Refresh
+### Real-Time Group Chat
 
 Group messages now support real-time updates using Spring WebSocket/STOMP on the backend and a SockJS/STOMP client in React. When a group member sends a message, the backend saves the message through the existing authenticated REST endpoint and then broadcasts a WebSocket notification to the active group topic.
 
