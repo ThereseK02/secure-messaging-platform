@@ -1,6 +1,6 @@
 
 package com.securemessaging.controller;
-
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 
 import com.securemessaging.entity.GroupEntity;
@@ -33,20 +33,23 @@ public class MessagingController {
     private final DatabaseUserService databaseUserService;
     private final GroupEntityRepository groupRepository;
     private final GroupMemberEntityRepository groupMemberRepository;
-    private final GroupMessageEntityRepository groupMessageRepository;	
+    private final GroupMessageEntityRepository groupMessageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
-public MessagingController(DatabaseMessagingService databaseMessagingService,
-                           DatabaseUserService databaseUserService,
-                           GroupEntityRepository groupRepository,
-                           GroupMemberEntityRepository groupMemberRepository,
-                           GroupMessageEntityRepository groupMessageRepository) {
-    this.databaseMessagingService = databaseMessagingService;
-    this.databaseUserService = databaseUserService;
-    this.groupRepository = groupRepository;
-    this.groupMemberRepository = groupMemberRepository;
-    this.groupMessageRepository = groupMessageRepository;
-}
+    public MessagingController(DatabaseMessagingService databaseMessagingService,
+                               DatabaseUserService databaseUserService,
+                               GroupEntityRepository groupRepository,
+                               GroupMemberEntityRepository groupMemberRepository,
+                               GroupMessageEntityRepository groupMessageRepository,
+                               SimpMessagingTemplate messagingTemplate) {
+        this.databaseMessagingService = databaseMessagingService;
+        this.databaseUserService = databaseUserService;
+        this.groupRepository = groupRepository;
+        this.groupMemberRepository = groupMemberRepository;
+        this.groupMessageRepository = groupMessageRepository;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @GetMapping("/messages")
     public ResponseEntity<?> getMessages() {
@@ -381,12 +384,22 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             LocalDateTime.now()
     );
 
-    groupMessageRepository.save(message);
+    GroupMessageEntity savedMessage = groupMessageRepository.save(message);
+
+    messagingTemplate.convertAndSend(
+            "/topic/groups/" + groupId,
+            Map.of(
+                    "type", "NEW_GROUP_MESSAGE",
+                    "groupId", groupId,
+                    "messageId", savedMessage.getId()
+            )
+    );
 
     return ResponseEntity.ok(
             Map.of(
                     "status", "Group message sent",
-                    "groupId", groupId
+                    "groupId", groupId,
+                    "messageId", savedMessage.getId()
             )
     );
 }

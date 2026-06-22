@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 import api from "../services/api";
 
 export default function GroupChat() {
@@ -16,6 +18,8 @@ export default function GroupChat() {
   const currentUsername = localStorage.getItem("username");
   const messagesEndRef = useRef(null);
   const messagesBoxRef = useRef(null);
+  const stompClientRef = useRef(null);
+  const [realTimeConnected, setRealTimeConnected] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
   const [selectedGroupName, setSelectedGroupName] = useState("");
   const [showGroups, setShowGroups] = useState(false);
@@ -30,6 +34,16 @@ export default function GroupChat() {
   function addEmoji(emoji) {
     setMessage((currentMessage) => `${currentMessage}${emoji}`);
     setShowEmojiPicker(false);
+  }
+
+  function getWebSocketUrl() {
+    const apiBaseUrl = api.defaults.baseURL || "";
+
+    if (apiBaseUrl.startsWith("http")) {
+      return `${apiBaseUrl.replace(/\/$/, "")}/ws`;
+    }
+
+    return `${window.location.origin}/ws`;
   }
   function showNotification(type, text) {
     setNotification({type, text});
@@ -182,6 +196,44 @@ async function sendMessage() {
   }, [selectedGroupId, showConversation]);
 
   useEffect(() => {
+    if (!selectedGroupId || !showConversation) {
+      setRealTimeConnected(false);
+      return;
+    }
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(getWebSocketUrl()),
+      reconnectDelay: 5000,
+      debug: () => {},
+      onConnect: () => {
+        setRealTimeConnected(true);
+
+        client.subscribe(`/topic/groups/${selectedGroupId}`, () => {
+          loadMessages(selectedGroupId);
+        });
+      },
+      onStompError: () => {
+        setRealTimeConnected(false);
+      },
+      onWebSocketClose: () => {
+        setRealTimeConnected(false);
+      },
+    });
+
+    stompClientRef.current = client;
+    client.activate();
+
+    return () => {
+      setRealTimeConnected(false);
+
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate();
+        stompClientRef.current = null;
+      }
+    };
+  }, [selectedGroupId, showConversation]);
+
+  useEffect(() => {
     if (messagesBoxRef.current) {
       messagesBoxRef.current.scrollTop = messagesBoxRef.current.scrollHeight;
     }
@@ -190,7 +242,7 @@ async function sendMessage() {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [showConversation]);
-  
+
   return (
       <div style={styles.page}>
       
@@ -386,10 +438,11 @@ async function sendMessage() {
 		  {messages.length} messages
 		</p>
 
-		<p style={styles.liveIndicator}>
-  			🟢 Live Refresh: ON
-		</p>
-
+                <p style={styles.liveIndicator}>
+                  {realTimeConnected
+                      ? "🟢 Real-Time Chat: Connected"
+                      : "🟡 Live Refresh fallback active"}
+                </p>
                 <div
                     ref={messagesBoxRef}
                     className="messagesBox"
