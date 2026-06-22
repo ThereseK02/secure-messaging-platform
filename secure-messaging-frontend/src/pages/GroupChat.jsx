@@ -461,7 +461,7 @@ async function sendMessage() {
                                key={msg.id}
                                 style={{
                                     display: "flex",
-                                    justifyContent: msg.sender === currentUser ? "flex-end" : "flex-start",
+                                    justifyContent: msg.sender === currentUsername ? "flex-end" : "flex-start",
                                     marginTop: sameSenderAsPrevious ? "6px" : "22px",
                                     marginBottom: "0",
                                 }}
