@@ -61,6 +61,7 @@ public class SecurityConfig {
                          "/",
                          "/health",
                          "/api/health",
+                         "/ws/**",
                          "/users/login",
                          "/users/register",
                          "/api/users/login",
