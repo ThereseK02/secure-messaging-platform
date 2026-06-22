@@ -451,15 +451,19 @@ async function sendMessage() {
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
                   ) : (
-                      messages.map((msg) => {
-                        const isMine = msg.sender === currentUsername;
+                      messages.map((msg, index) => {
+                              const previousMessage = messages[index - 1];
+                              const sameSenderAsPrevious =
+                                  previousMessage && previousMessage.sender === msg.sender;
 
                         return (
                             <div
-                                key={msg.id}
+                               key={msg.id}
                                 style={{
-                                  ...styles.messageRow,
-                                  justifyContent: isMine ? "flex-end" : "flex-start",
+                                    display: "flex",
+                                    justifyContent: msg.sender === currentUser ? "flex-end" : "flex-start",
+                                    marginTop: sameSenderAsPrevious ? "6px" : "22px",
+                                    marginBottom: "0",
                                 }}
                             >
                               <div
