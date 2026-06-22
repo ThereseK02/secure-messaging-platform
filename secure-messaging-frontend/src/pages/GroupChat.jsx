@@ -165,26 +165,6 @@ async function sendMessage() {
       );
     }
   }
-
-
-
-useEffect(() => {
-    loadGroups();
-}, []);
-
-useEffect(() => {
-    if (!selectedGroupId || !showConversation) return;
-
-    loadMessages(selectedGroupId);
-
-    const intervalId = setInterval(() => {
-        loadMessages(selectedGroupId);
-    }, 3000);
-
-    return () => clearInterval(intervalId);
-}, [selectedGroupId, showConversation]);
-
-
   useEffect(() => {
     loadGroups();
   }, []);
@@ -210,6 +190,7 @@ useEffect(() => {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [showConversation]);
+  
   return (
       <div style={styles.page}>
       
