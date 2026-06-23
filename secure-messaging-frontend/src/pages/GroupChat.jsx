@@ -18,6 +18,7 @@ export default function GroupChat() {
   const currentUsername = localStorage.getItem("username");
   const messagesEndRef = useRef(null);
   const messagesBoxRef = useRef(null);
+  const shouldAutoScrollRef = useRef(true);
   const stompClientRef = useRef(null);
   const [realTimeConnected, setRealTimeConnected] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
@@ -234,8 +235,12 @@ async function sendMessage() {
   }, [selectedGroupId, showConversation]);
 
   useEffect(() => {
-    if (messagesBoxRef.current) {
-      messagesBoxRef.current.scrollTop = messagesBoxRef.current.scrollHeight;
+    const box = messagesBoxRef.current;
+
+    if (!box) return;
+
+    if (shouldAutoScrollRef.current) {
+      box.scrollTop = box.scrollHeight;
     }
   }, [messages]);
 
@@ -447,6 +452,16 @@ async function sendMessage() {
                     ref={messagesBoxRef}
                     className="messagesBox"
                     style={styles.messagesBox}
+                    onScroll={() => {
+                      const box = messagesBoxRef.current;
+
+                      if (!box) return;
+
+                      const distanceFromBottom =
+                          box.scrollHeight - box.scrollTop - box.clientHeight;
+
+                      shouldAutoScrollRef.current = distanceFromBottom < 80;
+                    }}
                 >
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
