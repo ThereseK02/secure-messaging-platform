@@ -145,6 +145,8 @@ async function sendMessage() {
   }
 
   try {
+    shouldAutoScrollRef.current = true;
+
     await api.post(`/api/groups/${selectedGroupId}/send`, { message });
     setMessage("");
     await loadMessages(selectedGroupId);
