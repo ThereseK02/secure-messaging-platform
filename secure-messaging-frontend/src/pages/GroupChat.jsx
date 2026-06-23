@@ -239,11 +239,11 @@ async function sendMessage() {
   useEffect(() => {
     const box = messagesBoxRef.current;
 
-    if (!box) return;
+    if (!box || !shouldAutoScrollRef.current) return;
 
-    if (shouldAutoScrollRef.current) {
+    requestAnimationFrame(() => {
       box.scrollTop = box.scrollHeight;
-    }
+    });
   }, [messages]);
 
   useEffect(() => {
