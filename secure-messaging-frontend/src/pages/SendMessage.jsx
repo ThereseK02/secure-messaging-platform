@@ -218,6 +218,12 @@ export default function SendMessage() {
                     placeholder="Type your encrypted message..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSend();
+                        }
+                    }}
                     spellCheck={false}
                     data-gramm="false"
                     data-gramm_editor="false"
