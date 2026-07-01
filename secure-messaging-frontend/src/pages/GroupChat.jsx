@@ -50,6 +50,38 @@ export default function GroupChat() {
 
     return `${window.location.origin}/ws`;
   }
+
+  function getMessageDateLabel(timestamp) {
+    const messageDate = new Date(timestamp + "Z");
+    const today = new Date();
+    const yesterday = new Date();
+
+    yesterday.setDate(today.getDate() - 1);
+
+    if (messageDate.toDateString() === today.toDateString()) {
+      return "Today";
+    }
+
+    if (messageDate.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    }
+
+    return messageDate.toLocaleDateString([], {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  function shouldShowDateSeparator(messages, index) {
+    if (index === 0) return true;
+
+    const currentDate = new Date(messages[index].timestamp + "Z").toDateString();
+    const previousDate = new Date(messages[index - 1].timestamp + "Z").toDateString();
+
+    return currentDate !== previousDate;
+  }
+
   function showNotification(type, text) {
     setNotification({type, text});
 
@@ -496,33 +528,40 @@ async function sendMessage() {
                                   previousMessage && previousMessage.sender === msg.sender;
 
                         return (
-                            <div
-                               key={msg.id}
-                                style={{
+                            <div key={msg.id}>
+                              {shouldShowDateSeparator(messages, index) && (
+                                  <div style={styles.dateSeparator}>
+                                    {getMessageDateLabel(msg.timestamp)}
+                                  </div>
+                              )}
+
+                              <div
+                                  style={{
                                     display: "flex",
                                     justifyContent: msg.sender === currentUsername ? "flex-end" : "flex-start",
                                     marginTop: sameSenderAsPrevious ? "6px" : "22px",
                                     marginBottom: "0",
-                                }}
-                            >
-                              <div
-                                  style={
-                                    msg.sender === currentUsername
-                                        ? styles.myMessageBubble
-                                        : styles.otherMessageBubble
-                                  }
+                                  }}
                               >
+                                <div
+                                    style={
+                                      msg.sender === currentUsername
+                                          ? styles.myMessageBubble
+                                          : styles.otherMessageBubble
+                                    }
+                                >
 
-				<p style={styles.sender}>
-                  {msg.sender === currentUsername ? "You" : msg.sender} •{" "}
-				  {new Date(msg.timestamp + "Z").toLocaleTimeString([], {
-    					hour: "numeric",
-    					minute: "2-digit",
-  				})}
-				</p>
+                                  <p style={styles.sender}>
+                                    {msg.sender === currentUsername ? "You" : msg.sender} •{" "}
+                                    {new Date(msg.timestamp + "Z").toLocaleTimeString([], {
+                                      hour: "numeric",
+                                      minute: "2-digit",
+                                    })}
+                                  </p>
 
-<p style={styles.messageText}>{msg.message}</p>
+                                  <p style={styles.messageText}>{msg.message}</p>
 
+                                </div>
                               </div>
                             </div>
                         );
@@ -882,6 +921,20 @@ messageCard: {
     margin: 0,
     lineHeight: "1.35"
   },
+
+  dateSeparator: {
+    alignSelf: "center",
+    color: "#cbd5e1",
+    backgroundColor: "rgba(148, 163, 184, 0.14)",
+    border: "1px solid rgba(148, 163, 184, 0.25)",
+    borderRadius: "999px",
+    padding: "5px 12px",
+    fontSize: "12px",
+    fontWeight: "700",
+    margin: "14px auto 8px auto",
+    width: "fit-content",
+  },
+
   timestamp: {
     color: "#94a3b8",
     fontSize: "12px",
