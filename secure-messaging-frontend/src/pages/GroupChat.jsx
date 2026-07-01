@@ -20,8 +20,12 @@ export default function GroupChat() {
   const messagesBoxRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
   const stompClientRef = useRef(null);
-  const [realTimeConnected, setRealTimeConnected] = useState(false);
-  const [showConversation, setShowConversation] = useState(false);
+  const [realTimeConnected, setRealTimeConnected] =
+      useState(false);
+  const [hasNewMessagesBelow, setHasNewMessagesBelow] =
+      useState(false);
+  const [showConversation, setShowConversation] =
+      useState(false);
   const [selectedGroupName, setSelectedGroupName] = useState("");
   const [showGroups, setShowGroups] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -239,7 +243,14 @@ async function sendMessage() {
   useEffect(() => {
     const box = messagesBoxRef.current;
 
-    if (!box || !shouldAutoScrollRef.current) return;
+    if (!box) return;
+
+    if (!shouldAutoScrollRef.current) {
+      setHasNewMessagesBelow(true);
+      return;
+    }
+
+    setHasNewMessagesBelow(false);
 
     requestAnimationFrame(() => {
       box.scrollTop = box.scrollHeight;
@@ -450,6 +461,13 @@ async function sendMessage() {
                       ? "🟢 Real-Time Chat: Connected"
                       : "🟡 Live Refresh fallback active"}
                 </p>
+
+                {hasNewMessagesBelow && (
+                    <p style={styles.newMessagesIndicator}>
+                      New group messages below
+                    </p>
+                )}
+
                 <div
                     ref={messagesBoxRef}
                     className="messagesBox"
@@ -463,6 +481,10 @@ async function sendMessage() {
                           box.scrollHeight - box.scrollTop - box.clientHeight;
 
                       shouldAutoScrollRef.current = distanceFromBottom < 80;
+
+                      if (distanceFromBottom < 80) {
+                        setHasNewMessagesBelow(false);
+                      }
                     }}
                 >
                   {messages.length === 0 ? (
@@ -591,14 +613,26 @@ const styles = {
     cursor: "pointer",
     marginBottom: "16px",
   },
-
   liveIndicator: {
-  color: "#22c55e",
-  fontSize: "13px",
-  fontWeight: "600",
-  marginTop: "4px",
-  marginBottom: "15px",
-},
+    color: "#22c55e",
+    fontSize: "13px",
+    fontWeight: "600",
+    marginTop: "4px",
+    marginBottom: "15px",
+  },
+
+  newMessagesIndicator: {
+    color: "#fde68a",
+    backgroundColor: "rgba(234, 179, 8, 0.12)",
+    border: "1px solid rgba(234, 179, 8, 0.45)",
+    borderRadius: "999px",
+    padding: "6px 12px",
+    fontSize: "13px",
+    fontWeight: "700",
+    textAlign: "center",
+    width: "fit-content",
+    margin: "0 auto 10px auto",
+  },
 
   navButtonRow: {
     display: "flex",
