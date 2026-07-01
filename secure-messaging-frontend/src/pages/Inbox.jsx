@@ -338,15 +338,6 @@ export default function Inbox() {
                               border: "1px solid #334155",
                             }}
                         >
-                          <p
-                              style={{
-                                color: "#93c5fd",
-                                fontWeight: "bold",
-                                marginBottom: "10px",
-                              }}
-                          >
-                            Attachment
-                          </p>
 
                           {messageAttachments.map((attachment) => (
                               <div key={attachment.id} style={{ marginBottom: "12px" }}>
@@ -357,7 +348,7 @@ export default function Inbox() {
                                       marginBottom: "6px",
                                     }}
                                 >
-                                  {attachment.filename}
+                                  📎 {attachment.filename}
                                 </p>
 
                                 <button
