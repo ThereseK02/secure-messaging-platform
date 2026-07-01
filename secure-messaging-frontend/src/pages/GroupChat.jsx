@@ -40,6 +40,18 @@ export default function GroupChat() {
     setMessage((currentMessage) => `${currentMessage}${emoji}`);
     setShowEmojiPicker(false);
   }
+  function scrollToLatestGroupMessage() {
+    const box = messagesBoxRef.current;
+
+    if (!box) return;
+
+    shouldAutoScrollRef.current = true;
+    setHasNewMessagesBelow(false);
+
+    requestAnimationFrame(() => {
+      box.scrollTop = box.scrollHeight;
+    });
+  }
 
   function getWebSocketUrl() {
     const apiBaseUrl = api.defaults.baseURL || "";
@@ -495,9 +507,13 @@ async function sendMessage() {
                 </p>
 
                 {hasNewMessagesBelow && (
-                    <p style={styles.newMessagesIndicator}>
+                    <button
+                        type="button"
+                        style={styles.newMessagesIndicator}
+                        onClick={scrollToLatestGroupMessage}
+                    >
                       New group messages below
-                    </p>
+                    </button>
                 )}
 
                 <div
@@ -671,8 +687,8 @@ const styles = {
     textAlign: "center",
     width: "fit-content",
     margin: "0 auto 10px auto",
+    cursor: "pointer",
   },
-
   navButtonRow: {
     display: "flex",
     gap: "16px",
