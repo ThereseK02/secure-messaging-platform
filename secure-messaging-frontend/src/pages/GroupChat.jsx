@@ -500,11 +500,21 @@ async function sendMessage() {
 		  {messages.length} messages
 		</p>
 
-                <p style={styles.liveIndicator}>
-                  {realTimeConnected
-                      ? "🟢 Real-Time Chat: Connected"
-                      : "🟡 Live Refresh fallback active"}
-                </p>
+                <div style={styles.liveStatusRow}>
+                  <p style={styles.liveIndicator}>
+                    {realTimeConnected
+                        ? "🟢 Real-Time Chat: Connected"
+                        : "🟡 Live Refresh fallback active"}
+                  </p>
+
+                  <button
+                      type="button"
+                      style={styles.secondaryRefreshButton}
+                      onClick={refreshMessages}
+                  >
+                    Refresh
+                  </button>
+                </div>
 
                 {hasNewMessagesBelow && (
                     <button
@@ -629,16 +639,11 @@ async function sendMessage() {
         </div>
     )}
   </div>
-    <div style={styles.messageButtonColumn}>
+  <div style={styles.messageButtonColumn}>
     <button style={styles.sendButton} onClick={sendMessage}>
       Send Group Message
     </button>
-
-    <button style={styles.refreshButton} onClick={refreshMessages}>
-      Refresh Messages
-    </button>
-
-</div>
+  </div>
 </div>
 
               </div>
@@ -674,12 +679,31 @@ const styles = {
     cursor: "pointer",
     marginBottom: "16px",
   },
+  liveStatusRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    marginTop: "4px",
+    marginBottom: "15px",
+  },
+
   liveIndicator: {
     color: "#22c55e",
     fontSize: "13px",
     fontWeight: "600",
-    marginTop: "4px",
-    marginBottom: "15px",
+    margin: 0,
+  },
+
+  secondaryRefreshButton: {
+    border: "1px solid rgba(56, 189, 248, 0.45)",
+    backgroundColor: "rgba(30, 58, 138, 0.35)",
+    color: "#bfdbfe",
+    borderRadius: "999px",
+    padding: "4px 10px",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
   },
 
   newMessagesIndicator: {
