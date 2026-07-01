@@ -588,16 +588,22 @@ async function sendMessage() {
                 </div>
 
 <div style={styles.messageInputRow}>
- <textarea
-     placeholder="Write a group message"
-     value={message}
-     onChange={(e) => setMessage(e.target.value)}
-     spellCheck={false}
-     data-gramm="false"
-     data-gramm_editor="false"
-     data-enable-grammarly="false"
-     style={styles.textarea}
- />
+  <textarea
+  placeholder="Write a group message"
+  value={message}
+  onChange={(e) => setMessage(e.target.value)}
+  onKeyDown={(e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}}
+  spellCheck={false}
+  data-gramm="false"
+  data-gramm_editor="false"
+  data-enable-grammarly="false"
+  style={styles.textarea}
+  />
 
   <div style={styles.emojiPickerWrapper}>
     <button
