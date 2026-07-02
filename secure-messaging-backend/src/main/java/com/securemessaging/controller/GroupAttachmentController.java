@@ -5,6 +5,8 @@ import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
 import com.securemessaging.service.AttachmentService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,6 +118,49 @@ public class GroupAttachmentController {
                         })
                         .toList()
         );
+    }
+
+    @GetMapping("/{groupId}/attachments/{attachmentId}/download")
+    public ResponseEntity<?> downloadGroupAttachment(@PathVariable("groupId") Long groupId,
+                                                     @PathVariable("attachmentId") Long attachmentId) throws Exception {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
+
+        AttachmentEntity attachment = attachmentService.findById(attachmentId);
+
+        if (attachment.getGroupId() == null || !attachment.getGroupId().equals(groupId)) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group attachment not found")
+            );
+        }
+
+        if (!currentUsername.equals(attachment.getSender())) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Group attachment download is currently available to the sender only")
+            );
+        }
+
+        byte[] decryptedBytes = attachmentService.decryptAttachmentForUser(attachmentId, currentUsername);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + attachment.getOriginalFilename() + "\""
+                )
+                .contentType(MediaType.parseMediaType(
+                        attachment.getContentType() != null
+                                ? attachment.getContentType()
+                                : "application/octet-stream"
+                ))
+                .body(decryptedBytes);
     }
 
 }
