@@ -294,22 +294,20 @@ export default function SendMessage() {
                                 marginBottom: "10px"
                             }}
                         >
-                        <span
-                            style={{
-                                color: "#ffffff",
-                                fontWeight: "900",
-                                fontSize: "16px",
-                                marginRight: "6px",
-                                textShadow: "0 0 6px rgba(255, 255, 255, 0.35)",
-                            }}
-                        >
-
-                                    📎
-                                  </span>
-                            {attachment.filename}
+        <span
+            style={{
+                color: "#ffffff",
+                fontWeight: "900",
+                fontSize: "16px",
+                marginRight: "6px",
+                textShadow: "0 0 6px rgba(255, 255, 255, 0.35)",
+            }}
+        >
+            📎
+        </span>
+                            {selectedFile.name}
                         </div>
                     )}
-
                        </div>
 
                 <div style={{ marginTop: "14px" }}>
