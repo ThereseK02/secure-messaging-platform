@@ -68,6 +68,40 @@ public class AttachmentService {
         return attachmentRepository.save(attachment);
     }
 
+    public AttachmentEntity saveEncryptedGroupAttachment(String senderUsername,
+                                                         Long groupId,
+                                                         Long groupMessageId,
+                                                         MultipartFile file) throws Exception {
+        SecureMessagingSystem.User sender =
+                databaseUserService.findDomainUser(senderUsername);
+
+        SecretKey aesKey = generateAesKey();
+        byte[] iv = generateIv();
+
+        byte[] encryptedFileBytes = encryptFileBytes(file.getBytes(), aesKey, iv);
+
+        String encryptedKeyForSenderBase64 =
+                encryptAesKeyForUser(aesKey, sender);
+
+        AttachmentEntity attachment = new AttachmentEntity(
+                senderUsername,
+                senderUsername,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize(),
+                encryptedFileBytes,
+                Base64.getEncoder().encodeToString(iv),
+                encryptedKeyForSenderBase64,
+                encryptedKeyForSenderBase64,
+                LocalDateTime.now()
+        );
+
+        attachment.setGroupId(groupId);
+        attachment.setGroupMessageId(groupMessageId);
+
+        return attachmentRepository.save(attachment);
+    }
+
     public byte[] decryptAttachmentForUser(Long attachmentId, String currentUsername) throws Exception {
         AttachmentEntity attachment = findById(attachmentId);
 
