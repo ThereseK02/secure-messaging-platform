@@ -399,7 +399,8 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             Map.of(
                     "status", "Group message sent",
                     "groupId", groupId,
-                    "messageId", savedMessage.getId()
+                    "messageId", savedMessage.getId(),
+                    "sender", currentUsername
             )
     );
 }
