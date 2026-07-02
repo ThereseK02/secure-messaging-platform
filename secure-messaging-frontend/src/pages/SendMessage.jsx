@@ -261,7 +261,18 @@ export default function SendMessage() {
                         }}
                         title="Secure attachment"
                     >
-                        📎 Secure file
+                        <span
+                            style={{
+                                color: "#ffffff",
+                                fontWeight: "900",
+                                fontSize: "18px",
+                                marginRight: "8px",
+                                textShadow: "0 0 6px rgba(255, 255, 255, 0.35)",
+                            }}
+                        >
+                            📎
+                        </span>
+                        Secure file
                     </label>
 
                     <input
@@ -283,7 +294,19 @@ export default function SendMessage() {
                                 marginBottom: "10px"
                             }}
                         >
-                            📎 {selectedFile.name}
+                        <span
+                            style={{
+                                color: "#ffffff",
+                                fontWeight: "900",
+                                fontSize: "16px",
+                                marginRight: "6px",
+                                textShadow: "0 0 6px rgba(255, 255, 255, 0.35)",
+                            }}
+                        >
+
+                                    📎
+                                  </span>
+                            {attachment.filename}
                         </div>
                     )}
 

@@ -348,7 +348,18 @@ export default function Inbox() {
                                       marginBottom: "6px",
                                     }}
                                 >
-                                  📎 {attachment.filename}
+                                  <span
+                                      style={{
+                                        color: "#ffffff",
+                                        fontWeight: "900",
+                                        fontSize: "18px",
+                                        marginRight: "8px",
+                                        textShadow: "0 0 6px rgba(255, 255, 255, 0.35)",
+                                      }}
+                                  >
+  📎
+</span>
+                                  {attachment.filename}
                                 </p>
 
                                 <button
