@@ -132,6 +132,10 @@ public class AttachmentService {
         return attachmentRepository.findByReceiverOrderByTimestampDesc(receiver);
     }
 
+    public List<AttachmentEntity> findGroupAttachments(Long groupId) {
+        return attachmentRepository.findByGroupIdOrderByTimestampDesc(groupId);
+    }
+
     private SecretKey generateAesKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);

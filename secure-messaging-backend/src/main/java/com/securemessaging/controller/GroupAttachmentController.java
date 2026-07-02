@@ -83,4 +83,40 @@ public class GroupAttachmentController {
                 )
         );
     }
+
+    @GetMapping("/{groupId}/attachments")
+    public ResponseEntity<?> getGroupAttachments(@PathVariable("groupId") Long groupId) {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
+
+        return ResponseEntity.ok(
+                attachmentService.findGroupAttachments(groupId)
+                        .stream()
+                        .map(attachment -> {
+                            Map<String, Object> item = new java.util.LinkedHashMap<>();
+                            item.put("id", attachment.getId());
+                            item.put("groupId", attachment.getGroupId());
+                            item.put("groupMessageId", attachment.getGroupMessageId());
+                            item.put("filename", attachment.getOriginalFilename());
+                            item.put("sender", attachment.getSender());
+                            item.put("contentType", attachment.getContentType() != null
+                                    ? attachment.getContentType()
+                                    : "application/octet-stream");
+                            item.put("fileSize", attachment.getFileSize());
+                            item.put("timestamp", attachment.getTimestamp());
+                            return item;
+                        })
+                        .toList()
+        );
+    }
+
 }
+
