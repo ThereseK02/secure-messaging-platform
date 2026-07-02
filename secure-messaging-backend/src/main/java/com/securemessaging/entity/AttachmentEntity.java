@@ -14,8 +14,15 @@ public class AttachmentEntity {
 
     private String sender;
     private String receiver;
+
     @Column(name = "message_id")
     private Long messageId;
+
+    @Column(name = "group_id")
+    private Long groupId;
+
+    @Column(name = "group_message_id")
+    private Long groupMessageId;
 
     private String originalFilename;
     private String contentType;
@@ -77,5 +84,21 @@ public class AttachmentEntity {
 
     public void setMessageId(Long messageId) {
         this.messageId = messageId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getGroupMessageId() {
+        return groupMessageId;
+    }
+
+    public void setGroupMessageId(Long groupMessageId) {
+        this.groupMessageId = groupMessageId;
     }
 }
