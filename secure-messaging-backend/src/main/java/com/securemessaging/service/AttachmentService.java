@@ -2,7 +2,11 @@ package com.securemessaging.service;
 
 import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.entity.AttachmentEntity;
+import com.securemessaging.entity.GroupAttachmentKeyEntity;
+import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.repository.AttachmentRepository;
+import com.securemessaging.repository.GroupAttachmentKeyRepository;
+import com.securemessaging.repository.GroupMemberEntityRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,13 +27,18 @@ public class AttachmentService {
 
     private final AttachmentRepository attachmentRepository;
     private final DatabaseUserService databaseUserService;
+    private final GroupMemberEntityRepository groupMemberRepository;
+    private final GroupAttachmentKeyRepository groupAttachmentKeyRepository;
 
     public AttachmentService(AttachmentRepository attachmentRepository,
-                             DatabaseUserService databaseUserService) {
+                             DatabaseUserService databaseUserService,
+                             GroupMemberEntityRepository groupMemberRepository,
+                             GroupAttachmentKeyRepository groupAttachmentKeyRepository) {
         this.attachmentRepository = attachmentRepository;
         this.databaseUserService = databaseUserService;
+        this.groupMemberRepository = groupMemberRepository;
+        this.groupAttachmentKeyRepository = groupAttachmentKeyRepository;
     }
-
     public AttachmentEntity saveEncryptedAttachment(String senderUsername,
                                                     String receiverUsername,
                                                     MultipartFile file,
@@ -99,7 +108,28 @@ public class AttachmentService {
         attachment.setGroupId(groupId);
         attachment.setGroupMessageId(groupMessageId);
 
-        return attachmentRepository.save(attachment);
+        AttachmentEntity savedAttachment = attachmentRepository.save(attachment);
+
+        List<GroupMemberEntity> groupMembers =
+                groupMemberRepository.findByGroupId(groupId);
+
+        for (GroupMemberEntity member : groupMembers) {
+            SecureMessagingSystem.User memberUser =
+                    databaseUserService.findDomainUser(member.getUsername());
+
+            String encryptedKeyForMemberBase64 =
+                    encryptAesKeyForUser(aesKey, memberUser);
+
+            groupAttachmentKeyRepository.save(
+                    new GroupAttachmentKeyEntity(
+                            savedAttachment.getId(),
+                            member.getUsername(),
+                            encryptedKeyForMemberBase64
+                    )
+            );
+        }
+
+        return savedAttachment;
     }
 
     public byte[] decryptAttachmentForUser(Long attachmentId, String currentUsername) throws Exception {
