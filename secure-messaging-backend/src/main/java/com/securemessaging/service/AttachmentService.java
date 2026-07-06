@@ -153,6 +153,24 @@ public class AttachmentService {
         return decryptFileBytes(attachment.getEncryptedFileBytes(), aesKeyBytes, iv);
     }
 
+    public byte[] decryptGroupAttachmentForUser(Long attachmentId, String currentUsername) throws Exception {
+        AttachmentEntity attachment = findById(attachmentId);
+
+        GroupAttachmentKeyEntity groupAttachmentKey =
+                groupAttachmentKeyRepository.findByAttachmentIdAndUsername(attachmentId, currentUsername)
+                        .orElseThrow(() -> new SecurityException("No group attachment key found for this user"));
+
+        SecureMessagingSystem.User currentUser =
+                databaseUserService.findDomainUser(currentUsername);
+
+        byte[] aesKeyBytes =
+                decryptAesKeyForUser(groupAttachmentKey.getEncryptedKeyBase64(), currentUser);
+
+        byte[] iv = Base64.getDecoder().decode(attachment.getIvBase64());
+
+        return decryptFileBytes(attachment.getEncryptedFileBytes(), aesKeyBytes, iv);
+    }
+
     public AttachmentEntity findById(Long id) {
         return attachmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Attachment not found"));

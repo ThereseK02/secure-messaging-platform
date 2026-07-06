@@ -142,13 +142,15 @@ public class GroupAttachmentController {
             );
         }
 
-        if (!currentUsername.equals(attachment.getSender())) {
+        byte[] decryptedBytes;
+
+        try {
+            decryptedBytes = attachmentService.decryptGroupAttachmentForUser(attachmentId, currentUsername);
+        } catch (SecurityException e) {
             return ResponseEntity.status(403).body(
-                    Map.of("error", "Group attachment download is currently available to the sender only")
+                    Map.of("error", "You do not have a decryption key for this group attachment")
             );
         }
-
-        byte[] decryptedBytes = attachmentService.decryptAttachmentForUser(attachmentId, currentUsername);
 
         return ResponseEntity.ok()
                 .header(
