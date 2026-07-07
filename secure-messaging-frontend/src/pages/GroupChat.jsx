@@ -949,7 +949,7 @@ const styles = {
     gap: "12px",
     alignItems: "end",
     width: "100%",
-    marginTop: "10px",
+    marginTop: "6px",
   },
 
   buttonRow: {
@@ -1057,9 +1057,9 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "clamp(260px, 38vh, 430px)",
-    minHeight: "240px",
-    maxHeight: "430px",
+    height: "clamp(220px, 32vh, 360px)",
+    minHeight: "210px",
+    maxHeight: "360px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
@@ -1136,7 +1136,7 @@ groupButton: {
     width: "100%",
     maxWidth: "1200px",
     alignItems: "stretch",
-    minHeight: "clamp(520px, 72vh, 680px)",
+    minHeight: "clamp(470px, 64vh, 620px)",
   },
   chatSidebar: {
     width: "260px",
@@ -1203,10 +1203,10 @@ messageCard: {
   },
   textarea: {
     width: "100%",
-    height: "76px",
-    minHeight: "76px",
-    maxHeight: "76px",
-    padding: "10px 14px",
+    height: "68px",
+    minHeight: "68px",
+    maxHeight: "68px",
+    padding: "9px 14px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
     backgroundColor: "#020617",
@@ -1225,7 +1225,7 @@ messageCard: {
 
 sendButton: {
   width: "170px",
-  height: "46px",
+  height: "42px",
   borderRadius: "12px",
   border: "none",
   background: "linear-gradient(135deg, #d946ef, #8b5cf6)",
