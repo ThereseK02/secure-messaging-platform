@@ -239,11 +239,22 @@ export default function GroupChat() {
     try {
       shouldAutoScrollRef.current = true;
 
+      const messageResponse = await api.post(`/api/groups/${selectedGroupId}/send`, {
+        message: message.trim() || "Attachment",
+      });
+
+      const groupMessageId = messageResponse.data?.messageId;
+
       if (selectedGroupAttachment) {
+        if (!groupMessageId) {
+          showNotification("error", "Group message was created, but its ID was not returned");
+          return;
+        }
+
         const formData = new FormData();
 
+        formData.append("groupMessageId", groupMessageId);
         formData.append("file", selectedGroupAttachment);
-        formData.append("message", message.trim());
 
         await api.post(
             `/api/groups/${selectedGroupId}/attachments/upload`,
@@ -256,8 +267,6 @@ export default function GroupChat() {
         );
 
         setSelectedGroupAttachment(null);
-      } else {
-        await api.post(`/api/groups/${selectedGroupId}/send`, { message });
       }
 
       setMessage("");
