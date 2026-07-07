@@ -877,13 +877,13 @@ const styles = {
     boxSizing: "border-box",
     backgroundColor: "#020617",
     color: "#ffffff",
-    padding: "40px clamp(12px, 3vw, 40px) 60px",
+    padding: "clamp(18px, 2.5vh, 32px) clamp(12px, 3vw, 40px) clamp(24px, 4vh, 48px)",
     fontFamily: "Arial, sans-serif",
   },
   title: {
     color: "#38bdf8",
-    fontSize: "clamp(34px, 4vw, 48px)",
-    marginBottom: "10px",
+    fontSize: "clamp(32px, 3.6vw, 46px)",
+    marginBottom: "8px",
   },
 
   sectionTitleButton: {
@@ -945,11 +945,11 @@ const styles = {
 
   messageInputRow: {
     display: "grid",
-    gridTemplateColumns: "minmax(360px, 1fr) 48px 220px",
-    gap: "16px",
+    gridTemplateColumns: "minmax(320px, 1fr) 44px 200px",
+    gap: "12px",
     alignItems: "end",
     width: "100%",
-    marginTop: "18px"
+    marginTop: "10px",
   },
 
   buttonRow: {
@@ -1057,14 +1057,14 @@ groupButton: {
     marginBottom: "8px",
   },
   messagesBox: {
-    height: "42vh",
-    minHeight: "300px",
-    maxHeight: "500px",
+    height: "clamp(260px, 38vh, 430px)",
+    minHeight: "240px",
+    maxHeight: "430px",
     overflowY: "auto",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
-    padding: "24px 16px 28px",
-    marginBottom: "8px",
+    padding: "18px 14px 22px",
+    marginBottom: "6px",
     display: "flex",
     flexDirection: "column",
     gap: "16px",
@@ -1136,7 +1136,7 @@ groupButton: {
     width: "100%",
     maxWidth: "1200px",
     alignItems: "stretch",
-    minHeight: "65vh",
+    minHeight: "clamp(520px, 72vh, 680px)",
   },
   chatSidebar: {
     width: "260px",
@@ -1203,10 +1203,10 @@ messageCard: {
   },
   textarea: {
     width: "100%",
-    height: "86px",
-    minHeight: "86px",
-    maxHeight: "86px",
-    padding: "12px 14px",
+    height: "76px",
+    minHeight: "76px",
+    maxHeight: "76px",
+    padding: "10px 14px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
     backgroundColor: "#020617",
@@ -1216,12 +1216,12 @@ messageCard: {
     boxSizing: "border-box",
     outline: "none"
   },
-messageButtonColumn: {
-  display: "flex",
-  flexDirection: "column",
-  gap: "12px",
-  justifyContent: "center",
-},
+  messageButtonColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    justifyContent: "center",
+  },
 
 sendButton: {
   width: "170px",
