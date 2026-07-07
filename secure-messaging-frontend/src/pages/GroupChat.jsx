@@ -14,6 +14,7 @@ export default function GroupChat() {
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
   const currentUsername = localStorage.getItem("username");
@@ -224,33 +225,55 @@ export default function GroupChat() {
     showNotification("success", "Group messages refreshed");
   }
 
+  async function sendMessage() {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
 
-async function sendMessage() {
-  if (!selectedGroupId) {
-    showNotification("error", "Please select a group first");
-    return;
+    if (!message.trim() && !selectedGroupAttachment) {
+      showNotification("error", "Please type a message or choose a file");
+      return;
+    }
+
+    try {
+      shouldAutoScrollRef.current = true;
+
+      if (selectedGroupAttachment) {
+        const formData = new FormData();
+
+        formData.append("file", selectedGroupAttachment);
+        formData.append("message", message.trim());
+
+        await api.post(
+            `/api/groups/${selectedGroupId}/attachments/upload`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+        );
+
+        setSelectedGroupAttachment(null);
+      } else {
+        await api.post(`/api/groups/${selectedGroupId}/send`, { message });
+      }
+
+      setMessage("");
+
+      await loadMessages(selectedGroupId);
+      await loadGroupAttachments(selectedGroupId);
+
+      showNotification("success", "Group message sent");
+    } catch (error) {
+      console.error(error);
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to send group message"
+      );
+    }
   }
-
-  if (!message.trim()) {
-    showNotification("error", "Please write a message first");
-    return;
-  }
-
-  try {
-    shouldAutoScrollRef.current = true;
-
-    await api.post(`/api/groups/${selectedGroupId}/send`, { message });
-    setMessage("");
-    await loadMessages(selectedGroupId);
-    showNotification("success", "Group message sent");
-  } catch (error) {
-    console.error(error);
-    showNotification(
-      "error",
-      error.response?.data?.error || "Failed to send group message"
-    );
-  }
-}
 
   async function leaveGroup() {
     if (!selectedGroupId) {
@@ -663,54 +686,75 @@ async function sendMessage() {
                   <div ref={messagesEndRef}/>
                 </div>
 
-<div style={styles.messageInputRow}>
+                <div style={styles.messageInputRow}>
   <textarea
-  placeholder="Write a group message"
-  value={message}
-  onChange={(e) => setMessage(e.target.value)}
-  onKeyDown={(e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}}
-  spellCheck={false}
-  data-gramm="false"
-  data-gramm_editor="false"
-  data-enable-grammarly="false"
-  style={styles.textarea}
+      placeholder="Write a group message"
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      }}
+      spellCheck={false}
+      data-gramm="false"
+      data-gramm_editor="false"
+      data-enable-grammarly="false"
+      style={styles.textarea}
   />
 
-  <div style={styles.emojiPickerWrapper}>
-    <button
-        type="button"
-        onClick={() => setShowEmojiPicker((current) => !current)}
-        style={styles.emojiToggleButton}
-    >
-      😊
-    </button>
+                  <div style={styles.emojiPickerWrapper}>
+                    <button
+                        type="button"
+                        onClick={() => setShowEmojiPicker((current) => !current)}
+                        style={styles.emojiToggleButton}
+                    >
+                      😊
+                    </button>
 
-    {showEmojiPicker && (
-        <div style={styles.emojiPicker}>
-          {emojiOptions.map((emoji) => (
-              <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => addEmoji(emoji)}
-                  style={styles.emojiButton}
-              >
-                {emoji}
-              </button>
-          ))}
-        </div>
-    )}
-  </div>
-  <div style={styles.messageButtonColumn}>
-    <button style={styles.sendButton} onClick={sendMessage}>
-      Send Group Message
-    </button>
-  </div>
-</div>
+                    {showEmojiPicker && (
+                        <div style={styles.emojiPicker}>
+                          {emojiOptions.map((emoji) => (
+                              <button
+                                  key={emoji}
+                                  type="button"
+                                  onClick={() => addEmoji(emoji)}
+                                  style={styles.emojiButton}
+                              >
+                                {emoji}
+                              </button>
+                          ))}
+                        </div>
+                    )}
+                  </div>
+
+                  <div style={styles.messageButtonColumn}>
+                    <div style={styles.groupAttachmentInputRow}>
+                      <label style={styles.groupAttachmentUploadLabel}>
+                        📎 Choose file
+                        <input
+                            type="file"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              setSelectedGroupAttachment(file || null);
+                            }}
+                        />
+                      </label>
+
+                      {selectedGroupAttachment && (
+                          <span style={styles.selectedGroupAttachmentName}>
+                            {selectedGroupAttachment.name}
+                          </span>
+                      )}
+                    </div>
+
+                    <button style={styles.sendButton} onClick={sendMessage}>
+                      Send Group Message
+                    </button>
+                  </div>
+                </div>
 
               </div>
 
@@ -1191,5 +1235,36 @@ refreshButton: {
     whiteSpace: "nowrap",
   },
 
+  groupAttachmentInputRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginTop: "10px",
+    marginBottom: "10px",
+    flexWrap: "wrap",
+  },
+
+  groupAttachmentUploadLabel: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    padding: "8px 12px",
+    borderRadius: "10px",
+    backgroundColor: "rgba(15, 23, 42, 0.75)",
+    border: "1px solid rgba(148, 163, 184, 0.35)",
+    color: "#e5e7eb",
+    fontSize: "13px",
+    cursor: "pointer",
+  },
+
+  selectedGroupAttachmentName: {
+    color: "#cbd5e1",
+    fontSize: "13px",
+    maxWidth: "260px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
 };
 
