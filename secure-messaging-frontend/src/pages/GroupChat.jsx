@@ -14,6 +14,7 @@ export default function GroupChat() {
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [groupAttachments, setGroupAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
   const currentUsername = localStorage.getItem("username");
   const messagesEndRef = useRef(null);
@@ -157,6 +158,17 @@ export default function GroupChat() {
       showNotification("error", "Failed to load group messages");
     }
   }
+  async function loadGroupAttachments(groupId = selectedGroupId) {
+    if (!groupId) return;
+
+    try {
+      const response = await api.get(`/api/groups/${groupId}/attachments`);
+      setGroupAttachments(response.data);
+    } catch (error) {
+      console.error(error);
+      showNotification("error", "Failed to load group attachments");
+    }
+  }
 
   async function loadMembers(groupId = selectedGroupId) {
     if (!groupId) return;
@@ -175,8 +187,8 @@ export default function GroupChat() {
       showNotification("error", "Please select a group first");
       return;
     }
-
     await loadMessages(selectedGroupId);
+    await loadGroupAttachments(selectedGroupId);
     showNotification("success", "Group messages refreshed");
   }
 
@@ -220,6 +232,7 @@ async function sendMessage() {
       showNotification("success", "You left the group successfully");
       setSelectedGroupId("");
       setMessages([]);
+      setGroupAttachments([]);
       setMembers([]);
       await loadGroups();
     } catch (error) {
@@ -238,9 +251,11 @@ async function sendMessage() {
     if (!selectedGroupId || !showConversation) return;
 
     loadMessages(selectedGroupId);
+    loadGroupAttachments(selectedGroupId);
 
     const intervalId = setInterval(() => {
       loadMessages(selectedGroupId);
+      loadGroupAttachments(selectedGroupId);
     }, 3000);
 
     return () => clearInterval(intervalId);
@@ -261,6 +276,7 @@ async function sendMessage() {
 
         client.subscribe(`/topic/groups/${selectedGroupId}`, () => {
           loadMessages(selectedGroupId);
+          loadGroupAttachments(selectedGroupId);
         });
       },
       onStompError: () => {
@@ -419,6 +435,7 @@ async function sendMessage() {
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
+                                      loadGroupAttachments(group.id);
                                       loadMembers(group.id);
                                     }}
                                 >
@@ -453,6 +470,7 @@ async function sendMessage() {
                     onClick={() => {
                       setShowConversation(false);
                       setMessages([]);
+                      setGroupAttachments([]);
                       setMembers([]);
                     }}
                 >
