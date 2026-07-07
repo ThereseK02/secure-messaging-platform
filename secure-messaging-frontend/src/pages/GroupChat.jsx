@@ -264,6 +264,18 @@ export default function GroupChat() {
       return;
     }
 
+    if (
+        selectedGroupAttachment &&
+        selectedGroupAttachment.size > MAX_GROUP_ATTACHMENT_SIZE_BYTES
+    ) {
+      showNotification(
+          "error",
+          `File is too large. Maximum group attachment size is ${MAX_GROUP_ATTACHMENT_SIZE_LABEL}.`
+      );
+      clearSelectedGroupAttachment();
+      return;
+    }
+
     try {
       shouldAutoScrollRef.current = true;
 
@@ -303,8 +315,19 @@ export default function GroupChat() {
       await loadGroupAttachments(selectedGroupId);
 
       showNotification("success", "Group message sent");
+
     } catch (error) {
       console.error(error);
+
+      if (error.response?.status === 413) {
+        showNotification(
+            "error",
+            `File is too large. Maximum group attachment size is ${MAX_GROUP_ATTACHMENT_SIZE_LABEL}.`
+        );
+        clearSelectedGroupAttachment();
+        return;
+      }
+
       showNotification(
           "error",
           error.response?.data?.error || "Failed to send group message"
