@@ -240,7 +240,7 @@ export default function GroupChat() {
       shouldAutoScrollRef.current = true;
 
       const messageResponse = await api.post(`/api/groups/${selectedGroupId}/send`, {
-        message: message.trim() || "Attachment",
+        message: message.trim() || `Attachment: ${selectedGroupAttachment?.name || "file"}`,
       });
 
       const groupMessageId = messageResponse.data?.messageId;
@@ -753,9 +753,19 @@ export default function GroupChat() {
                       </label>
 
                       {selectedGroupAttachment && (
-                          <span style={styles.selectedGroupAttachmentName}>
-                            {selectedGroupAttachment.name}
-                          </span>
+                          <div style={styles.selectedGroupAttachmentRow}>
+                             <span style={styles.selectedGroupAttachmentName}>
+                                  {selectedGroupAttachment.name}
+                             </span>
+
+                             <button
+                                type="button"
+                                style={styles.removeGroupAttachmentButton}
+                                onClick={() => setSelectedGroupAttachment(null)}
+                             >
+                              Remove
+                            </button>
+                          </div>
                       )}
                     </div>
 
@@ -1267,6 +1277,14 @@ refreshButton: {
     cursor: "pointer",
   },
 
+  selectedGroupAttachmentRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    maxWidth: "100%",
+    flexWrap: "wrap",
+  },
+
   selectedGroupAttachmentName: {
     color: "#cbd5e1",
     fontSize: "13px",
@@ -1275,5 +1293,16 @@ refreshButton: {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
+
+  removeGroupAttachmentButton: {
+    padding: "5px 8px",
+    borderRadius: "8px",
+    border: "1px solid rgba(248, 113, 113, 0.45)",
+    backgroundColor: "rgba(127, 29, 29, 0.35)",
+    color: "#fecaca",
+    fontSize: "12px",
+    cursor: "pointer",
+  },
+  
 };
 
