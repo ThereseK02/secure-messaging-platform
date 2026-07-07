@@ -17,7 +17,7 @@ import java.util.Map;
 @RequestMapping({"/groups", "/api/groups"})
 @CrossOrigin(origins = "*")
 public class GroupAttachmentController {
-
+    private static final long MAX_GROUP_ATTACHMENT_SIZE_BYTES = 5 * 1024 * 1024;
     private final AttachmentService attachmentService;
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
@@ -42,6 +42,12 @@ public class GroupAttachmentController {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body(
                     Map.of("error", "File is empty")
+            );
+        }
+
+        if (file.getSize() > MAX_GROUP_ATTACHMENT_SIZE_BYTES) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "File is too large. Maximum group attachment size is 5 MB.")
             );
         }
 
