@@ -605,6 +605,17 @@ async function sendMessage() {
 
                                   <p style={styles.messageText}>{msg.message}</p>
 
+                                  {groupAttachments
+                                      .filter((attachment) => String(attachment.groupMessageId) === String(msg.id))
+                                      .map((attachment) => (
+                                          <div key={attachment.id} style={styles.groupAttachmentCard}>
+                                            <span style={styles.groupAttachmentIcon}>📎</span>
+                                            <span style={styles.groupAttachmentName}>
+            {attachment.filename}
+          </span>
+                                          </div>
+                                      ))}
+
                                 </div>
                               </div>
                             </div>
@@ -1114,5 +1125,31 @@ refreshButton: {
     muted: {
     color: "#94a3b8",
   },
+  groupAttachmentCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "10px",
+    padding: "8px 10px",
+    borderRadius: "10px",
+    backgroundColor: "rgba(15, 23, 42, 0.55)",
+    border: "1px solid rgba(148, 163, 184, 0.25)",
+    color: "#e5e7eb",
+    fontSize: "13px",
+    maxWidth: "100%",
+    boxSizing: "border-box",
+  },
+
+  groupAttachmentIcon: {
+    fontSize: "14px",
+    lineHeight: "1",
+  },
+
+  groupAttachmentName: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+
 };
 
