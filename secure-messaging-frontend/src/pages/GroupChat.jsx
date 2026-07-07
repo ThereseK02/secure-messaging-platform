@@ -20,6 +20,7 @@ export default function GroupChat() {
   const currentUsername = localStorage.getItem("username");
   const messagesEndRef = useRef(null);
   const messagesBoxRef = useRef(null);
+  const groupAttachmentInputRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
   const stompClientRef = useRef(null);
   const [realTimeConnected, setRealTimeConnected] =
@@ -225,6 +226,14 @@ export default function GroupChat() {
     showNotification("success", "Group messages refreshed");
   }
 
+  function clearSelectedGroupAttachment() {
+    setSelectedGroupAttachment(null);
+
+    if (groupAttachmentInputRef.current) {
+      groupAttachmentInputRef.current.value = "";
+    }
+  }
+
   async function sendMessage() {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -266,7 +275,7 @@ export default function GroupChat() {
             }
         );
 
-        setSelectedGroupAttachment(null);
+        clearSelectedGroupAttachment();
       }
 
       setMessage("");
@@ -743,6 +752,7 @@ export default function GroupChat() {
                       <label style={styles.groupAttachmentUploadLabel}>
                         📎 Choose file
                         <input
+                            ref={groupAttachmentInputRef}
                             type="file"
                             style={{ display: "none" }}
                             onChange={(e) => {
@@ -761,7 +771,7 @@ export default function GroupChat() {
                              <button
                                 type="button"
                                 style={styles.removeGroupAttachmentButton}
-                                onClick={() => setSelectedGroupAttachment(null)}
+                                onClick={clearSelectedGroupAttachment}
                              >
                               Remove
                             </button>
