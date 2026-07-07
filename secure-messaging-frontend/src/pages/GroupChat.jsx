@@ -234,6 +234,22 @@ export default function GroupChat() {
     }
   }
 
+  function formatFileSize(sizeInBytes) {
+    if (!sizeInBytes && sizeInBytes !== 0) {
+      return "";
+    }
+
+    if (sizeInBytes < 1024) {
+      return `${sizeInBytes} B`;
+    }
+
+    if (sizeInBytes < 1024 * 1024) {
+      return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   async function sendMessage() {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -686,10 +702,17 @@ export default function GroupChat() {
                                               type="button"
                                               style={styles.groupAttachmentCard}
                                               onClick={() => downloadGroupAttachment(attachment)}
+                                              title="Download attachment"
                                           >
                                             <span style={styles.groupAttachmentIcon}>📎</span>
-                                            <span style={styles.groupAttachmentName}>
-                                            {attachment.filename}
+
+                                            <span style={styles.groupAttachmentText}>
+                                                <span style={styles.groupAttachmentName}>
+                                                {attachment.filename}
+                                            </span>
+                                              <span style={styles.groupAttachmentSize}>
+                                               {formatFileSize(attachment.fileSize)}
+                                            </span>
                                             </span>
                                           </button>
                                       ))}
@@ -764,9 +787,15 @@ export default function GroupChat() {
 
                       {selectedGroupAttachment && (
                           <div style={styles.selectedGroupAttachmentRow}>
-                             <span style={styles.selectedGroupAttachmentName}>
-                                  {selectedGroupAttachment.name}
-                             </span>
+                            <div style={styles.selectedGroupAttachmentText}>
+                              <span style={styles.selectedGroupAttachmentName}>
+                                {selectedGroupAttachment.name}
+                              </span>
+
+                              <span style={styles.selectedGroupAttachmentSize}>
+                                {formatFileSize(selectedGroupAttachment.size)}
+                              </span>
+                            </div>
 
                              <button
                                 type="button"
@@ -1258,10 +1287,21 @@ refreshButton: {
     lineHeight: "1",
   },
 
+  groupAttachmentText: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    minWidth: 0,
+  },
+
   groupAttachmentName: {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+  },
+  groupAttachmentSize: {
+    color: "#94a3b8",
+    fontSize: "11px",
   },
 
   groupAttachmentInputRow: {
@@ -1295,6 +1335,13 @@ refreshButton: {
     flexWrap: "wrap",
   },
 
+  selectedGroupAttachmentText: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    minWidth: 0,
+  },
+
   selectedGroupAttachmentName: {
     color: "#cbd5e1",
     fontSize: "13px",
@@ -1302,6 +1349,11 @@ refreshButton: {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+  },
+
+  selectedGroupAttachmentSize: {
+    color: "#94a3b8",
+    fontSize: "11px",
   },
 
   removeGroupAttachmentButton: {
