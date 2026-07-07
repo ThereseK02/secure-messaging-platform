@@ -459,7 +459,8 @@ export default function GroupChat() {
                 style={{
                   position: "fixed",
                   top: "18px",
-                  right: "18px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
                   zIndex: 9999,
                   width: "min(420px, calc(100vw - 36px))",
                   backgroundColor:
