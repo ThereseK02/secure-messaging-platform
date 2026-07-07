@@ -170,6 +170,38 @@ export default function GroupChat() {
     }
   }
 
+  async function downloadGroupAttachment(attachment) {
+    if (!selectedGroupId || !attachment?.id) {
+      showNotification("error", "Attachment is not available");
+      return;
+    }
+
+    try {
+      const response = await api.get(
+          `/api/groups/${selectedGroupId}/attachments/${attachment.id}/download`,
+          { responseType: "blob" }
+      );
+
+      const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+      const downloadLink = document.createElement("a");
+
+      downloadLink.href = downloadUrl;
+      downloadLink.download = attachment.filename || "group-attachment";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+
+      window.URL.revokeObjectURL(downloadUrl);
+
+      showNotification("success", "Group attachment downloaded");
+    } catch (error) {
+      console.error(error);
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to download group attachment"
+      );
+    }
+  }
   async function loadMembers(groupId = selectedGroupId) {
     if (!groupId) return;
 
@@ -608,12 +640,17 @@ async function sendMessage() {
                                   {groupAttachments
                                       .filter((attachment) => String(attachment.groupMessageId) === String(msg.id))
                                       .map((attachment) => (
-                                          <div key={attachment.id} style={styles.groupAttachmentCard}>
+                                          <button
+                                              key={attachment.id}
+                                              type="button"
+                                              style={styles.groupAttachmentCard}
+                                              onClick={() => downloadGroupAttachment(attachment)}
+                                          >
                                             <span style={styles.groupAttachmentIcon}>📎</span>
                                             <span style={styles.groupAttachmentName}>
-            {attachment.filename}
-          </span>
-                                          </div>
+                                            {attachment.filename}
+                                            </span>
+                                          </button>
                                       ))}
 
                                 </div>
@@ -1125,6 +1162,7 @@ refreshButton: {
     muted: {
     color: "#94a3b8",
   },
+
   groupAttachmentCard: {
     display: "flex",
     alignItems: "center",
@@ -1138,6 +1176,8 @@ refreshButton: {
     fontSize: "13px",
     maxWidth: "100%",
     boxSizing: "border-box",
+    cursor: "pointer",
+    textAlign: "left",
   },
 
   groupAttachmentIcon: {
