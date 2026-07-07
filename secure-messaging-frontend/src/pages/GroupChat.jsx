@@ -4,6 +4,9 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import api from "../services/api";
 
+const MAX_GROUP_ATTACHMENT_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_GROUP_ATTACHMENT_SIZE_LABEL = "5 MB";
+
 export default function GroupChat() {
   const navigate = useNavigate();
 
@@ -780,7 +783,22 @@ export default function GroupChat() {
                             style={{ display: "none" }}
                             onChange={(e) => {
                               const file = e.target.files?.[0];
-                              setSelectedGroupAttachment(file || null);
+
+                              if (!file) {
+                                clearSelectedGroupAttachment();
+                                return;
+                              }
+
+                              if (file.size > MAX_GROUP_ATTACHMENT_SIZE_BYTES) {
+                                showNotification(
+                                    "error",
+                                    `File is too large. Maximum group attachment size is ${MAX_GROUP_ATTACHMENT_SIZE_LABEL}.`
+                                );
+                                clearSelectedGroupAttachment();
+                                return;
+                              }
+
+                              setSelectedGroupAttachment(file);
                             }}
                         />
                       </label>
