@@ -383,6 +383,48 @@ export default function GroupChat() {
     }
   }
 
+  async function deleteGroupMessage(msg) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (msg.sender !== currentUsername) {
+      showNotification("error", "You can delete only your own group messages");
+      return;
+    }
+
+    const messageAttachments = groupAttachments.filter(
+        (attachment) => String(attachment.groupMessageId) === String(msg.id)
+    );
+
+    if (messageAttachments.length > 0) {
+      showNotification("error", "Messages with attachments cannot be deleted yet");
+      return;
+    }
+
+    const confirmed = window.confirm("Delete this group message?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await api.delete(`/api/groups/${selectedGroupId}/messages/${msg.id}`);
+
+      await loadMessages(selectedGroupId);
+      await loadGroupAttachments(selectedGroupId);
+
+      showNotification("success", "Group message deleted");
+    } catch (error) {
+      console.error(error);
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to delete group message"
+      );
+    }
+  }
+
   async function leaveGroup() {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -770,12 +812,21 @@ export default function GroupChat() {
                   ) : filteredGroupMessages.length === 0 ? (
                       <p style={styles.muted}>No group messages match your search.</p>
                   ) : (
+
                       filteredGroupMessages.map((msg, index) => {
                         const previousMessage = filteredGroupMessages[index - 1];
                         const sameSenderAsPrevious =
                             previousMessage && previousMessage.sender === msg.sender;
 
+                        const messageAttachments = groupAttachments.filter(
+                            (attachment) => String(attachment.groupMessageId) === String(msg.id)
+                        );
+
+                        const canDeleteMessage =
+                            msg.sender === currentUsername && messageAttachments.length === 0;
+
                         return (
+
                             <div key={msg.id}>
                               {shouldShowDateSeparator(filteredGroupMessages, index) && (
                                   <div style={styles.dateSeparator}>
@@ -809,33 +860,45 @@ export default function GroupChat() {
 
                                   <p style={styles.messageText}>{msg.message}</p>
 
-                                  {groupAttachments
-                                      .filter((attachment) => String(attachment.groupMessageId) === String(msg.id))
-                                      .map((attachment) => (
-                                          <button
-                                              key={attachment.id}
-                                              type="button"
-                                              style={styles.groupAttachmentCard}
-                                              onClick={() => downloadGroupAttachment(attachment)}
-                                              title="Download attachment"
-                                          >
-                                            <span style={styles.groupAttachmentIcon}>📎</span>
+                                  {messageAttachments.map((attachment) => (
+                                      <button
+                                          key={attachment.id}
+                                          type="button"
+                                          style={styles.groupAttachmentCard}
+                                          onClick={() => downloadGroupAttachment(attachment)}
+                                          title="Download attachment"
+                                      >
+                                        <span style={styles.groupAttachmentIcon}>📎</span>
 
-                                            <span style={styles.groupAttachmentText}>
-                                                <span style={styles.groupAttachmentName}>
-                                                {attachment.filename}
-                                            </span>
-                                              <span style={styles.groupAttachmentSize}>
-                                               {formatFileSize(attachment.fileSize)}
-                                            </span>
-                                            </span>
-                                          </button>
-                                      ))}
-                                    {msg.seenCount !== undefined && msg.memberCount !== undefined && (
-                                       <p style={styles.seenStatus}>
-                                          Seen by {msg.seenCount} of {msg.memberCount}
-                                        </p>
+                                        <span style={styles.groupAttachmentText}>
+                                            <span style={styles.groupAttachmentName}>
+                                            {attachment.filename}
+                                        </span>
+                                          <span style={styles.groupAttachmentSize}>
+                                           {formatFileSize(attachment.fileSize)}
+                                        </span>
+                                        </span>
+                                      </button>
+                                  ))}
+
+                                  {canDeleteMessage && (
+                                      <div style={styles.messageActions}>
+                                        <button
+                                            type="button"
+                                            style={styles.deleteMessageButton}
+                                            onClick={() => deleteGroupMessage(msg)}
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
                                   )}
+
+                                  {msg.seenCount !== undefined && msg.memberCount !== undefined && (
+                                      <p style={styles.seenStatus}>
+                                        Seen by {msg.seenCount} of {msg.memberCount}
+                                      </p>
+                                  )}
+
                                 </div>
                               </div>
                             </div>
@@ -1308,6 +1371,22 @@ messageCard: {
     fontSize: "15px",
     margin: 0,
     lineHeight: "1.35"
+  },
+
+  messageActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "8px",
+  },
+
+  deleteMessageButton: {
+    backgroundColor: "transparent",
+    color: "#fca5a5",
+    border: "1px solid #7f1d1d",
+    borderRadius: "999px",
+    padding: "4px 10px",
+    fontSize: "12px",
+    cursor: "pointer",
   },
 
   seenStatus: {
