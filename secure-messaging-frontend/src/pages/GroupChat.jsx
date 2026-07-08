@@ -1484,30 +1484,32 @@ messageCard: {
   messageActions: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "8px",
-    marginTop: "8px",
+    gap: "10px",
+    marginTop: "10px",
+    alignItems: "center",
   },
 
   editMessageButton: {
-    backgroundColor: "transparent",
-    color: "#93c5fd",
-    border: "1px solid #1d4ed8",
+    backgroundColor: "#1e3a8a",
+    color: "#dbeafe",
+    border: "1px solid #60a5fa",
     borderRadius: "999px",
-    padding: "4px 10px",
+    padding: "5px 13px",
     fontSize: "12px",
+    fontWeight: "700",
     cursor: "pointer",
   },
 
   deleteMessageButton: {
-    backgroundColor: "transparent",
-    color: "#fca5a5",
-    border: "1px solid #7f1d1d",
+    backgroundColor: "#7f1d1d",
+    color: "#fee2e2",
+    border: "1px solid #f87171",
     borderRadius: "999px",
-    padding: "4px 10px",
+    padding: "5px 13px",
     fontSize: "12px",
+    fontWeight: "700",
     cursor: "pointer",
   },
-
   editMessageBox: {
     marginTop: "8px",
   },
