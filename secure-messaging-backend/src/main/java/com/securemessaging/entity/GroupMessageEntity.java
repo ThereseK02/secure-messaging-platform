@@ -21,6 +21,8 @@ public class GroupMessageEntity {
 
     private LocalDateTime timestamp;
 
+    private LocalDateTime editedAt;
+
     public GroupMessageEntity() {
     }
 
@@ -57,5 +59,12 @@ public class GroupMessageEntity {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
-}
 
+    public LocalDateTime getEditedAt() {
+        return editedAt;
+    }
+
+    public void setEditedAt(LocalDateTime editedAt) {
+        this.editedAt = editedAt;
+    }
+}

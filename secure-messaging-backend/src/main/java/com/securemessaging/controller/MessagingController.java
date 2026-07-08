@@ -474,6 +474,7 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                     }
 
                     message.setMessage(updatedMessage.trim());
+                    message.setEditedAt(LocalDateTime.now());
                     groupMessageRepository.save(message);
 
                     messagingTemplate.convertAndSend(
@@ -490,7 +491,8 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                                     "status", "Group message edited",
                                     "groupId", groupId,
                                     "messageId", messageId,
-                                    "message", message.getMessage()
+                                    "message", message.getMessage(),
+                                    "editedAt", message.getEditedAt()
                             )
                     );
                 })
@@ -581,17 +583,25 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
         int memberCount = groupMemberRepository.findByGroupId(groupId).size();
 
         List<Map<String, Object>> messageViews = groupMessages.stream()
-                .map(message -> Map.<String, Object>of(
-                        "id", message.getId(),
-                        "groupId", message.getGroupId(),
-                        "sender", message.getSender(),
-                        "message", message.getMessage(),
-                        "timestamp", message.getTimestamp(),
-                        "seenCount", groupMessageReadRepository.countByGroupMessageId(message.getId()),
-                        "memberCount", memberCount
-                ))
-                .toList();
+                .map(message -> {
+                    Map<String, Object> messageView = new java.util.HashMap<>();
 
+                    messageView.put("id", message.getId());
+                    messageView.put("groupId", message.getGroupId());
+                    messageView.put("sender", message.getSender());
+                    messageView.put("message", message.getMessage());
+                    messageView.put("timestamp", message.getTimestamp());
+                    messageView.put("editedAt", message.getEditedAt());
+                    messageView.put(
+                            "seenCount",
+                            groupMessageReadRepository.countByGroupMessageId(message.getId())
+                    );
+                    messageView.put("memberCount", memberCount);
+
+                    return messageView;
+                })
+                .toList();
+        
         return ResponseEntity.ok(messageViews);
     }
 }
