@@ -66,6 +66,29 @@ export default function Inbox() {
     navigate("/");
   }
 
+  function formatMessageTimestamp(timestamp) {
+    if (!timestamp) {
+      return "";
+    }
+
+    const timestampText = String(timestamp);
+    const hasTimezone =
+        timestampText.endsWith("Z") ||
+        /[+-]\d{2}:\d{2}$/.test(timestampText);
+
+    const normalizedTimestamp = hasTimezone
+        ? timestampText
+        : `${timestampText}Z`;
+
+    return new Date(normalizedTimestamp).toLocaleString([], {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
   function formatFileSize(bytes) {
     if (!bytes && bytes !== 0) {
       return "Unknown size";
@@ -132,9 +155,7 @@ export default function Inbox() {
     const searchableText = [
       message.sender,
       message.message,
-      message.timestamp
-          ? new Date(message.timestamp).toLocaleString()
-          : "",
+      formatMessageTimestamp(message.timestamp),
       ...messageAttachments.map((attachment) => attachment.filename),
     ]
         .filter(Boolean)
@@ -487,7 +508,7 @@ export default function Inbox() {
                           color: "#94a3b8",
                         }}
                     >
-                      {new Date(message.timestamp).toLocaleString()}
+                      {formatMessageTimestamp(message.timestamp)}
                     </p>
                   </div>
               );
