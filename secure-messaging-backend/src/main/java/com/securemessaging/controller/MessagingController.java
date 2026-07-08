@@ -7,6 +7,7 @@ import com.securemessaging.entity.GroupEntity;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupMessageReadEntity;
+import com.securemessaging.repository.AttachmentRepository;
 import com.securemessaging.repository.GroupEntityRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
@@ -37,6 +38,7 @@ public class MessagingController {
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
     private final GroupMessageReadRepository groupMessageReadRepository;
+    private final AttachmentRepository attachmentRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
@@ -45,6 +47,7 @@ public class MessagingController {
                                GroupMemberEntityRepository groupMemberRepository,
                                GroupMessageEntityRepository groupMessageRepository,
                                GroupMessageReadRepository groupMessageReadRepository,
+                               AttachmentRepository attachmentRepository,
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
@@ -52,6 +55,7 @@ public class MessagingController {
         this.groupMemberRepository = groupMemberRepository;
         this.groupMessageRepository = groupMessageRepository;
         this.groupMessageReadRepository = groupMessageReadRepository;
+        this.attachmentRepository = attachmentRepository;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -425,6 +429,66 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             )
     );
 }
+
+    @DeleteMapping("/groups/{groupId}/messages/{messageId}")
+    public ResponseEntity<?> deleteOwnGroupMessage(@PathVariable("groupId") Long groupId,
+                                                   @PathVariable("messageId") Long messageId) {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
+
+        return groupMessageRepository.findById(messageId)
+                .map(message -> {
+                    if (!message.getGroupId().equals(groupId)) {
+                        return ResponseEntity.badRequest().body(
+                                Map.of("error", "Message does not belong to this group")
+                        );
+                    }
+
+                    if (!message.getSender().equals(currentUsername)) {
+                        return ResponseEntity.status(403).body(
+                                Map.of("error", "You can delete only your own group messages")
+                        );
+                    }
+
+                    if (!attachmentRepository.findByGroupMessageId(messageId).isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                Map.of("error", "Messages with attachments cannot be deleted yet")
+                        );
+                    }
+
+                    groupMessageReadRepository.deleteByGroupMessageId(messageId);
+                    groupMessageRepository.delete(message);
+
+                    messagingTemplate.convertAndSend(
+                            "/topic/groups/" + groupId,
+                            Map.of(
+                                    "type", "GROUP_MESSAGE_DELETED",
+                                    "groupId", groupId,
+                                    "messageId", messageId
+                            )
+                    );
+
+                    return ResponseEntity.ok(
+                            Map.of(
+                                    "status", "Group message deleted",
+                                    "groupId", groupId,
+                                    "messageId", messageId
+                            )
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.status(404).body(
+                        Map.of("error", "Group message not found")
+                ));
+    }
+
     @GetMapping("/groups/{groupId}/messages")
     public ResponseEntity<?> getGroupMessages(@PathVariable("groupId") Long groupId) {
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder

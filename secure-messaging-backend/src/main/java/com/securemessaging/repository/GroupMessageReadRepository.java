@@ -2,6 +2,8 @@ package com.securemessaging.repository;
 
 import com.securemessaging.entity.GroupMessageReadEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,4 +25,8 @@ public interface GroupMessageReadRepository
     long countByGroupMessageId(Long groupMessageId);
 
     List<GroupMessageReadEntity> findByGroupMessageIdIn(Collection<Long> groupMessageIds);
+
+    @Transactional
+    @Modifying
+    void deleteByGroupMessageId(Long groupMessageId);
 }
