@@ -17,6 +17,7 @@ export default function GroupChat() {
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [groupMessageSearch, setGroupMessageSearch] = useState("");
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -67,6 +68,28 @@ export default function GroupChat() {
     }
 
     return `${window.location.origin}/ws`;
+  }
+  function formatGroupMessageTimestamp(timestamp) {
+    if (!timestamp) {
+      return "";
+    }
+
+    const timestampText = String(timestamp);
+    const hasTimezone =
+        timestampText.endsWith("Z") ||
+        /[+-]\d{2}:\d{2}$/.test(timestampText);
+
+    const normalizedTimestamp = hasTimezone
+        ? timestampText
+        : `${timestampText}Z`;
+
+    return new Date(normalizedTimestamp).toLocaleString([], {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
   }
 
   function getMessageDateLabel(timestamp) {
@@ -236,6 +259,31 @@ export default function GroupChat() {
       groupAttachmentInputRef.current.value = "";
     }
   }
+
+  const normalizedGroupMessageSearch = groupMessageSearch.trim().toLowerCase();
+
+  const filteredGroupMessages = messages.filter((msg) => {
+    if (!normalizedGroupMessageSearch) {
+      return true;
+    }
+
+    const messageAttachments = groupAttachments.filter(
+        (attachment) => String(attachment.groupMessageId) === String(msg.id)
+    );
+
+    const searchableText = [
+      msg.sender,
+      msg.message,
+      formatGroupMessageTimestamp(msg.timestamp),
+      getMessageDateLabel(msg.timestamp),
+      ...messageAttachments.map((attachment) => attachment.filename),
+    ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+    return searchableText.includes(normalizedGroupMessageSearch);
+  });
 
   function formatFileSize(sizeInBytes) {
     if (!sizeInBytes && sizeInBytes !== 0) {
@@ -637,11 +685,38 @@ export default function GroupChat() {
                 </p>
                 <h2 style={styles.sectionTitle}>Messages</h2>
 
-		<p style={styles.messageCount}>
-		  {messages.length} messages
-		</p>
+                <p style={styles.messageCount}>
+                  {messages.length} messages
+                </p>
+
+                <div style={styles.groupSearchRow}>
+                  <input
+                      type="text"
+                      placeholder="Search group messages..."
+                      value={groupMessageSearch}
+                      onChange={(event) => setGroupMessageSearch(event.target.value)}
+                      style={styles.groupSearchInput}
+                  />
+
+                  {groupMessageSearch && (
+                      <button
+                          type="button"
+                          onClick={() => setGroupMessageSearch("")}
+                          style={styles.groupSearchClearButton}
+                      >
+                        Clear
+                      </button>
+                  )}
+                </div>
+
+                {groupMessageSearch && (
+                    <p style={styles.groupSearchSummary}>
+                      Showing {filteredGroupMessages.length} of {messages.length} messages
+                    </p>
+                )}
 
                 <div style={styles.liveStatusRow}>
+
                   <p style={styles.liveIndicator}>
                     {realTimeConnected
                         ? "🟢 Real-Time Chat: Connected"
@@ -686,17 +761,20 @@ export default function GroupChat() {
                       }
                     }}
                 >
+
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
+                  ) : filteredGroupMessages.length === 0 ? (
+                      <p style={styles.muted}>No group messages match your search.</p>
                   ) : (
-                      messages.map((msg, index) => {
-                              const previousMessage = messages[index - 1];
-                              const sameSenderAsPrevious =
-                                  previousMessage && previousMessage.sender === msg.sender;
+                      filteredGroupMessages.map((msg, index) => {
+                        const previousMessage = filteredGroupMessages[index - 1];
+                        const sameSenderAsPrevious =
+                            previousMessage && previousMessage.sender === msg.sender;
 
                         return (
                             <div key={msg.id}>
-                              {shouldShowDateSeparator(messages, index) && (
+                              {shouldShowDateSeparator(filteredGroupMessages, index) && (
                                   <div style={styles.dateSeparator}>
                                     {getMessageDateLabel(msg.timestamp)}
                                   </div>
@@ -942,6 +1020,46 @@ const styles = {
     marginBottom: "18px",
     marginLeft: "26px",
     flexWrap: "wrap",
+  },
+
+  groupSearchRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    width: "100%",
+    maxWidth: "720px",
+    margin: "10px auto 8px",
+  },
+
+  groupSearchInput: {
+    flex: 1,
+    minWidth: "220px",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#020617",
+    color: "#ffffff",
+    fontSize: "14px",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+
+  groupSearchClearButton: {
+    padding: "9px 12px",
+    borderRadius: "10px",
+    border: "1px solid #64748b",
+    backgroundColor: "#0f172a",
+    color: "#e2e8f0",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+  groupSearchSummary: {
+    color: "#94a3b8",
+    fontSize: "13px",
+    textAlign: "center",
+    marginTop: "0",
+    marginBottom: "8px",
   },
 
   messageInputRow: {
