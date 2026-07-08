@@ -102,25 +102,28 @@ export default function SendMessage() {
                 color: "white",
                 display: "flex",
                 justifyContent: "center",
-                alignItems: "center",
+                alignItems: "flex-start",
+                padding: "clamp(14px, 2.5vh, 24px)",
+                boxSizing: "border-box",
                 fontFamily: "Arial, sans-serif"
             }}
         >
             <div
                 style={{
                     backgroundColor: "#0f172a",
-                    padding: "28px",
+                    padding: "clamp(18px, 2.5vh, 24px)",
                     borderRadius: "14px",
-                    width: "520px",
-                    maxHeight: "92vh",
-                    overflowY: "auto"
+                    width: "min(620px, 100%)",
+                    maxHeight: "none",
+                    overflowY: "visible",
+                    boxSizing: "border-box"
                 }}
             >
                 <div
                     style={{
                         display: "flex",
-                        gap: "14px",
-                        marginBottom: "24px"
+                        gap: "12px",
+                        marginBottom: "16px"
                     }}
                 >
                     <button
@@ -161,9 +164,9 @@ export default function SendMessage() {
                 <h1
                     style={{
                         color: "#38bdf8",
-                        fontSize: "42px",
-                        lineHeight: "1.1",
-                        marginBottom: "24px",
+                        fontSize: "clamp(34px, 5vw, 42px)",
+                        lineHeight: "1.05",
+                        marginBottom: "16px",
                         textAlign: "center",
                         fontWeight: "bold"
                     }}
@@ -206,8 +209,8 @@ export default function SendMessage() {
                     style={{
                         width: "100%",
                         boxSizing: "border-box",
-                        padding: "14px",
-                        marginBottom: "20px",
+                        padding: "12px 14px",
+                        marginBottom: "14px",
                         borderRadius: "8px",
                         border: "none",
                         backgroundColor: "#1e293b",
@@ -231,8 +234,8 @@ export default function SendMessage() {
                     style={{
                         width: "100%",
                         boxSizing: "border-box",
-                        height: "190px",
-                        padding: "14px",
+                        height: "130px",
+                        padding: "12px 14px",
                         borderRadius: "8px",
                         border: "none",
                         backgroundColor: "#1e293b",
@@ -244,8 +247,9 @@ export default function SendMessage() {
                 <div
                     style={{
                         width: "100%",
-                        marginBottom: "18px",
-                        padding: "14px",
+                        marginTop: "12px",
+                        marginBottom: "12px",
+                        padding: "12px",
                         borderRadius: "12px",
                         backgroundColor: "#0f172a",
                         border: "1px solid #334155",
@@ -310,7 +314,7 @@ export default function SendMessage() {
                     )}
                        </div>
 
-                <div style={{ marginTop: "14px" }}>
+                <div style={{ marginTop: "8px" }}>
                     <button
                         type="button"
                         onClick={() => setShowEmojiPanel(!showEmojiPanel)}
@@ -332,11 +336,11 @@ export default function SendMessage() {
                             style={{
                                 display: "flex",
                                 gap: "8px",
-                                marginTop: "12px",
+                                marginTop: "8px",
                                 flexWrap: "wrap",
-                                maxHeight: "120px",
+                                maxHeight: "90px",
                                 overflowY: "auto",
-                                padding: "10px",
+                                padding: "8px",
                                 borderRadius: "10px",
                                 border: "1px solid #334155",
                                 backgroundColor: "#0f172a"
@@ -368,8 +372,8 @@ export default function SendMessage() {
                     disabled={isUploadingAttachment}
                     style={{
                         width: "100%",
-                        marginTop: "24px",
-                        padding: "14px",
+                        marginTop: "14px",
+                        padding: "12px",
                         borderRadius: "8px",
                         border: "none",
                         backgroundColor: "#38bdf8",
