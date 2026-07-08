@@ -430,6 +430,75 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
     );
 }
 
+    @PutMapping("/groups/{groupId}/messages/{messageId}")
+    public ResponseEntity<?> editOwnGroupMessage(@PathVariable("groupId") Long groupId,
+                                                 @PathVariable("messageId") Long messageId,
+                                                 @RequestBody Map<String, String> request) {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
+
+        String updatedMessage = request.get("message");
+
+        if (updatedMessage == null || updatedMessage.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Edited message cannot be empty")
+            );
+        }
+
+        return groupMessageRepository.findById(messageId)
+                .map(message -> {
+                    if (!message.getGroupId().equals(groupId)) {
+                        return ResponseEntity.badRequest().body(
+                                Map.of("error", "Message does not belong to this group")
+                        );
+                    }
+
+                    if (!message.getSender().equals(currentUsername)) {
+                        return ResponseEntity.status(403).body(
+                                Map.of("error", "You can edit only your own group messages")
+                        );
+                    }
+
+                    if (!attachmentRepository.findByGroupMessageId(messageId).isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                Map.of("error", "Messages with attachments cannot be edited yet")
+                        );
+                    }
+
+                    message.setMessage(updatedMessage.trim());
+                    groupMessageRepository.save(message);
+
+                    messagingTemplate.convertAndSend(
+                            "/topic/groups/" + groupId,
+                            Map.of(
+                                    "type", "GROUP_MESSAGE_EDITED",
+                                    "groupId", groupId,
+                                    "messageId", messageId
+                            )
+                    );
+
+                    return ResponseEntity.ok(
+                            Map.of(
+                                    "status", "Group message edited",
+                                    "groupId", groupId,
+                                    "messageId", messageId,
+                                    "message", message.getMessage()
+                            )
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.status(404).body(
+                        Map.of("error", "Group message not found")
+                ));
+    }
+
     @DeleteMapping("/groups/{groupId}/messages/{messageId}")
     public ResponseEntity<?> deleteOwnGroupMessage(@PathVariable("groupId") Long groupId,
                                                    @PathVariable("messageId") Long messageId) {

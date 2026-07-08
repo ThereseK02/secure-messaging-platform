@@ -50,7 +50,12 @@ public class GroupMessageEntity {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
 }
+
