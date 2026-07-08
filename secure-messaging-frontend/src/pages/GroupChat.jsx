@@ -1003,6 +1003,7 @@ export default function GroupChat() {
                                   {msg.seenCount !== undefined && msg.memberCount !== undefined && (
                                       <p style={styles.seenStatus}>
                                         Seen by {msg.seenCount} of {msg.memberCount}
+                                        {msg.editedAt && " · edited"}
                                       </p>
                                   )}
 
