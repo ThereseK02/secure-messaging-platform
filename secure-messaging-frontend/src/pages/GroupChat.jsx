@@ -397,6 +397,7 @@ export default function GroupChat() {
       setMessages([]);
       setGroupAttachments([]);
       setMembers([]);
+      setGroupMessageSearch("");
       await loadGroups();
     } catch (error) {
       console.error(error);
@@ -601,8 +602,9 @@ export default function GroupChat() {
                                               : "1px solid #1e293b",
                                     }}
                                     onClick={() => {
-                                      setSelectedGroupId(group.id);
+                                      setSelectedGroupId(String(group.id));
                                       setSelectedGroupName(group.groupName);
+                                      setGroupMessageSearch("");
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
@@ -643,6 +645,7 @@ export default function GroupChat() {
                       setMessages([]);
                       setGroupAttachments([]);
                       setMembers([]);
+                      setGroupMessageSearch("");
                     }}
                 >
                   Back to Groups
