@@ -425,27 +425,40 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             )
     );
 }
+    @GetMapping("/groups/{groupId}/messages")
+    public ResponseEntity<?> getGroupMessages(@PathVariable("groupId") Long groupId) {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
-@GetMapping("/groups/{groupId}/messages")
-public ResponseEntity<?> getGroupMessages(@PathVariable("groupId") Long groupId) {
-    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
 
-    if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
-        return ResponseEntity.status(403).body(
-                Map.of("error", "You are not a member of this group")
-        );
+        List<GroupMessageEntity> groupMessages =
+                groupMessageRepository.findByGroupIdOrderByTimestampAsc(groupId);
+
+        for (GroupMessageEntity message : groupMessages) {
+            markGroupMessageAsRead(groupId, message.getId(), currentUsername);
+        }
+
+        int memberCount = groupMemberRepository.findByGroupId(groupId).size();
+
+        List<Map<String, Object>> messageViews = groupMessages.stream()
+                .map(message -> Map.<String, Object>of(
+                        "id", message.getId(),
+                        "groupId", message.getGroupId(),
+                        "sender", message.getSender(),
+                        "message", message.getMessage(),
+                        "timestamp", message.getTimestamp(),
+                        "seenCount", groupMessageReadRepository.countByGroupMessageId(message.getId()),
+                        "memberCount", memberCount
+                ))
+                .toList();
+
+        return ResponseEntity.ok(messageViews);
     }
-
-    List<GroupMessageEntity> groupMessages =
-            groupMessageRepository.findByGroupIdOrderByTimestampAsc(groupId);
-
-    for (GroupMessageEntity message : groupMessages) {
-        markGroupMessageAsRead(groupId, message.getId(), currentUsername);
-    }
-
-    return ResponseEntity.ok(groupMessages);
-}
 }
