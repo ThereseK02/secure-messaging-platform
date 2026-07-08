@@ -831,7 +831,11 @@ export default function GroupChat() {
                                             </span>
                                           </button>
                                       ))}
-
+                                    {msg.seenCount !== undefined && msg.memberCount !== undefined && (
+                                       <p style={styles.seenStatus}>
+                                          Seen by {msg.seenCount} of {msg.memberCount}
+                                        </p>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -1304,6 +1308,14 @@ messageCard: {
     fontSize: "15px",
     margin: 0,
     lineHeight: "1.35"
+  },
+
+  seenStatus: {
+    color: "#94a3b8",
+    fontSize: "12px",
+    marginTop: "8px",
+    marginBottom: "0",
+    textAlign: "right",
   },
 
   dateSeparator: {
