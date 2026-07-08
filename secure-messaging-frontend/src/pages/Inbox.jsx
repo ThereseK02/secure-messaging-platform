@@ -6,6 +6,7 @@ export default function Inbox() {
   const [messages, setMessages] = useState([]);
   const [attachments, setAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
+  const [messageSearch, setMessageSearch] = useState("");
   const navigate = useNavigate();
 
   function showNotification(type, text) {
@@ -113,6 +114,35 @@ export default function Inbox() {
   const unreadCount = messages.filter(
       (message) => !message.readByReceiver
   ).length;
+
+  const normalizedMessageSearch = messageSearch.trim().toLowerCase();
+
+  const filteredMessages = messages.filter((message) => {
+    if (!normalizedMessageSearch) {
+      return true;
+    }
+
+    const messageAttachments = attachments.filter(
+        (attachment) =>
+            attachment.messageId &&
+            message.id &&
+            String(attachment.messageId) === String(message.id)
+    );
+
+    const searchableText = [
+      message.sender,
+      message.message,
+      message.timestamp
+          ? new Date(message.timestamp).toLocaleString()
+          : "",
+      ...messageAttachments.map((attachment) => attachment.filename),
+    ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+    return searchableText.includes(normalizedMessageSearch);
+  });
 
   async function markMessageAsRead(messageId) {
     try {
@@ -240,13 +270,78 @@ export default function Inbox() {
         >
           Unread: {unreadCount} · Needs attention: 0
         </p>
+
+        <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginTop: "14px",
+              maxWidth: "700px",
+            }}
+        >
+          <input
+              type="text"
+              placeholder="Search messages..."
+              value={messageSearch}
+              onChange={(event) => setMessageSearch(event.target.value)}
+              style={{
+                flex: 1,
+                minWidth: "220px",
+                padding: "12px 14px",
+                borderRadius: "10px",
+                border: "1px solid #38bdf8",
+                backgroundColor: "#020617",
+                color: "#ffffff",
+                fontSize: "15px",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+          />
+
+          {messageSearch && (
+              <button
+                  type="button"
+                  onClick={() => setMessageSearch("")}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    border: "1px solid #64748b",
+                    backgroundColor: "#0f172a",
+                    color: "#e2e8f0",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+              >
+                Clear
+              </button>
+          )}
+        </div>
+
+        {messageSearch && (
+            <p
+                style={{
+                  color: "#94a3b8",
+                  fontSize: "14px",
+                  marginTop: "8px",
+                  marginBottom: 0,
+                }}
+            >
+              Showing {filteredMessages.length} of {messages.length} messages
+            </p>
+        )}
+
       </div>
 
       <div style={{ marginTop: "30px" }}>
         {messages.length === 0 ? (
             <p style={{ color: "#94a3b8" }}>No messages received yet.</p>
+        ) : filteredMessages.length === 0 ? (
+            <p style={{ color: "#94a3b8" }}>
+              No messages match your search.
+            </p>
         ) : (
-            messages.map((message, index) => {
+            filteredMessages.map((message, index) => {
               const messageAttachments = attachments.filter(
                   (attachment) =>
                       attachment.messageId &&
