@@ -18,6 +18,8 @@ export default function GroupChat() {
   const [members, setMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [groupMessageSearch, setGroupMessageSearch] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editingMessageText, setEditingMessageText] = useState("");
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -425,6 +427,64 @@ export default function GroupChat() {
     }
   }
 
+  function startEditingGroupMessage(msg) {
+    setEditingMessageId(msg.id);
+    setEditingMessageText(msg.message || "");
+  }
+
+  function cancelEditingGroupMessage() {
+    setEditingMessageId(null);
+    setEditingMessageText("");
+  }
+
+  async function saveEditedGroupMessage(msg) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (msg.sender !== currentUsername) {
+      showNotification("error", "You can edit only your own group messages");
+      return;
+    }
+
+    const updatedMessage = editingMessageText.trim();
+
+    if (!updatedMessage) {
+      showNotification("error", "Edited message cannot be empty");
+      return;
+    }
+
+    const messageAttachments = groupAttachments.filter(
+        (attachment) => String(attachment.groupMessageId) === String(msg.id)
+    );
+
+    if (messageAttachments.length > 0) {
+      showNotification("error", "Messages with attachments cannot be edited yet");
+      return;
+    }
+
+    try {
+      await api.put(`/api/groups/${selectedGroupId}/messages/${msg.id}`, {
+        message: updatedMessage,
+      });
+
+      setEditingMessageId(null);
+      setEditingMessageText("");
+
+      await loadMessages(selectedGroupId);
+      await loadGroupAttachments(selectedGroupId);
+
+      showNotification("success", "Group message edited");
+    } catch (error) {
+      console.error(error);
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to edit group message"
+      );
+    }
+  }
+
   async function leaveGroup() {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -822,11 +882,13 @@ export default function GroupChat() {
                             (attachment) => String(attachment.groupMessageId) === String(msg.id)
                         );
 
-                        const canDeleteMessage =
+                        const canModifyMessage =
                             msg.sender === currentUsername && messageAttachments.length === 0;
 
-                        return (
+                        const isEditingThisMessage =
+                            editingMessageId === msg.id;
 
+                        return (
                             <div key={msg.id}>
                               {shouldShowDateSeparator(filteredGroupMessages, index) && (
                                   <div style={styles.dateSeparator}>
@@ -858,7 +920,39 @@ export default function GroupChat() {
                                     })}
                                   </p>
 
-                                  <p style={styles.messageText}>{msg.message}</p>
+                                  {isEditingThisMessage ? (
+                                      <div style={styles.editMessageBox}>
+                                        <textarea
+                                            value={editingMessageText}
+                                            onChange={(e) => setEditingMessageText(e.target.value)}
+                                            style={styles.editMessageTextarea}
+                                            spellCheck={false}
+                                            data-gramm="false"
+                                            data-gramm_editor="false"
+                                            data-enable-grammarly="false"
+                                        />
+
+                                        <div style={styles.editMessageActions}>
+                                          <button
+                                              type="button"
+                                              style={styles.saveEditButton}
+                                              onClick={() => saveEditedGroupMessage(msg)}
+                                          >
+                                            Save
+                                          </button>
+
+                                          <button
+                                              type="button"
+                                              style={styles.cancelEditButton}
+                                              onClick={cancelEditingGroupMessage}
+                                          >
+                                            Cancel
+                                          </button>
+                                        </div>
+                                      </div>
+                                  ) : (
+                                      <p style={styles.messageText}>{msg.message}</p>
+                                  )}
 
                                   {messageAttachments.map((attachment) => (
                                       <button
@@ -881,8 +975,16 @@ export default function GroupChat() {
                                       </button>
                                   ))}
 
-                                  {canDeleteMessage && (
+                                  {canModifyMessage && !isEditingThisMessage && (
                                       <div style={styles.messageActions}>
+                                        <button
+                                            type="button"
+                                            style={styles.editMessageButton}
+                                            onClick={() => startEditingGroupMessage(msg)}
+                                        >
+                                          Edit
+                                        </button>
+
                                         <button
                                             type="button"
                                             style={styles.deleteMessageButton}
@@ -1376,7 +1478,18 @@ messageCard: {
   messageActions: {
     display: "flex",
     justifyContent: "flex-end",
+    gap: "8px",
     marginTop: "8px",
+  },
+
+  editMessageButton: {
+    backgroundColor: "transparent",
+    color: "#93c5fd",
+    border: "1px solid #1d4ed8",
+    borderRadius: "999px",
+    padding: "4px 10px",
+    fontSize: "12px",
+    cursor: "pointer",
   },
 
   deleteMessageButton: {
@@ -1385,6 +1498,50 @@ messageCard: {
     border: "1px solid #7f1d1d",
     borderRadius: "999px",
     padding: "4px 10px",
+    fontSize: "12px",
+    cursor: "pointer",
+  },
+
+  editMessageBox: {
+    marginTop: "8px",
+  },
+
+  editMessageTextarea: {
+    width: "100%",
+    boxSizing: "border-box",
+    minHeight: "70px",
+    padding: "10px",
+    borderRadius: "8px",
+    border: "1px solid #334155",
+    backgroundColor: "#0f172a",
+    color: "white",
+    resize: "vertical",
+    fontSize: "14px",
+  },
+
+  editMessageActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+    marginTop: "8px",
+  },
+
+  saveEditButton: {
+    backgroundColor: "#2563eb",
+    color: "white",
+    border: "none",
+    borderRadius: "999px",
+    padding: "5px 12px",
+    fontSize: "12px",
+    cursor: "pointer",
+  },
+
+  cancelEditButton: {
+    backgroundColor: "transparent",
+    color: "#cbd5e1",
+    border: "1px solid #475569",
+    borderRadius: "999px",
+    padding: "5px 12px",
     fontSize: "12px",
     cursor: "pointer",
   },
