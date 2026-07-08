@@ -358,8 +358,8 @@ export default function GroupChat() {
 
         clearSelectedGroupAttachment();
       }
-
       setMessage("");
+      setGroupMessageSearch("");
 
       await loadMessages(selectedGroupId);
       await loadGroupAttachments(selectedGroupId);
@@ -412,12 +412,16 @@ export default function GroupChat() {
     }
 
     try {
+
       await api.delete(`/api/groups/${selectedGroupId}/messages/${msg.id}`);
+
+      setGroupMessageSearch("");
 
       await loadMessages(selectedGroupId);
       await loadGroupAttachments(selectedGroupId);
 
       showNotification("success", "Group message deleted");
+
     } catch (error) {
       console.error(error);
       showNotification(
@@ -471,11 +475,13 @@ export default function GroupChat() {
 
       setEditingMessageId(null);
       setEditingMessageText("");
+      setGroupMessageSearch("");
 
       await loadMessages(selectedGroupId);
       await loadGroupAttachments(selectedGroupId);
 
       showNotification("success", "Group message edited");
+
     } catch (error) {
       console.error(error);
       showNotification(
