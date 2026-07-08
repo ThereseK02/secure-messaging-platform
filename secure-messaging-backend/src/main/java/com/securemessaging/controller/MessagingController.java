@@ -582,6 +582,21 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
 
         int memberCount = groupMemberRepository.findByGroupId(groupId).size();
 
+        List<Long> groupMessageIds = groupMessages.stream()
+                .map(GroupMessageEntity::getId)
+                .toList();
+
+        Map<Long, Long> seenCountsByMessageId = new java.util.HashMap<>();
+
+        if (!groupMessageIds.isEmpty()) {
+            groupMessageReadRepository.findByGroupMessageIdIn(groupMessageIds)
+                    .forEach(read -> seenCountsByMessageId.merge(
+                            read.getGroupMessageId(),
+                            1L,
+                            Long::sum
+                    ));
+        }
+
         List<Map<String, Object>> messageViews = groupMessages.stream()
                 .map(message -> {
                     Map<String, Object> messageView = new java.util.HashMap<>();
@@ -594,7 +609,7 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                     messageView.put("editedAt", message.getEditedAt());
                     messageView.put(
                             "seenCount",
-                            groupMessageReadRepository.countByGroupMessageId(message.getId())
+                            seenCountsByMessageId.getOrDefault(message.getId(), 0L)
                     );
                     messageView.put("memberCount", memberCount);
 
