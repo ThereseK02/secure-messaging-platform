@@ -475,7 +475,6 @@ export default function GroupChat() {
 
       setEditingMessageId(null);
       setEditingMessageText("");
-      setGroupMessageSearch("");
 
       await loadMessages(selectedGroupId);
       await loadGroupAttachments(selectedGroupId);
