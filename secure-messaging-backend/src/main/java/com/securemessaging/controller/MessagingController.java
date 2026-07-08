@@ -6,9 +6,11 @@ import java.time.LocalDateTime;
 import com.securemessaging.entity.GroupEntity;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
+import com.securemessaging.entity.GroupMessageReadEntity;
 import com.securemessaging.repository.GroupEntityRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
+import com.securemessaging.repository.GroupMessageReadRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +36,22 @@ public class MessagingController {
     private final GroupEntityRepository groupRepository;
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
+    private final GroupMessageReadRepository groupMessageReadRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
                                DatabaseUserService databaseUserService,
                                GroupEntityRepository groupRepository,
                                GroupMemberEntityRepository groupMemberRepository,
                                GroupMessageEntityRepository groupMessageRepository,
+                               GroupMessageReadRepository groupMessageReadRepository,
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMessageRepository = groupMessageRepository;
+        this.groupMessageReadRepository = groupMessageReadRepository;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -361,6 +365,21 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
     );
 }
 
+private void markGroupMessageAsRead(Long groupId, Long groupMessageId, String username) {
+        if (groupMessageReadRepository.existsByGroupMessageIdAndUsername(groupMessageId, username)) {
+            return;
+        }
+
+        groupMessageReadRepository.save(
+                new GroupMessageReadEntity(
+                        groupMessageId,
+                        groupId,
+                        username,
+                        LocalDateTime.now()
+                )
+        );
+    }
+
 @PostMapping("/groups/{groupId}/send")
 public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                                           @RequestBody Map<String, String> request) {
@@ -385,6 +404,8 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
     );
 
     GroupMessageEntity savedMessage = groupMessageRepository.save(message);
+
+    markGroupMessageAsRead(groupId, savedMessage.getId(), currentUsername);
 
     messagingTemplate.convertAndSend(
             "/topic/groups/" + groupId,
@@ -418,8 +439,13 @@ public ResponseEntity<?> getGroupMessages(@PathVariable("groupId") Long groupId)
         );
     }
 
-    return ResponseEntity.ok(
-            groupMessageRepository.findByGroupIdOrderByTimestampAsc(groupId)
-    );
+    List<GroupMessageEntity> groupMessages =
+            groupMessageRepository.findByGroupIdOrderByTimestampAsc(groupId);
+
+    for (GroupMessageEntity message : groupMessages) {
+        markGroupMessageAsRead(groupId, message.getId(), currentUsername);
+    }
+
+    return ResponseEntity.ok(groupMessages);
 }
 }

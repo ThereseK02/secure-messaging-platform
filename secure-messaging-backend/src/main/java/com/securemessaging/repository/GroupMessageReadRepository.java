@@ -15,6 +15,11 @@ public interface GroupMessageReadRepository
             String username
     );
 
+    boolean existsByGroupMessageIdAndUsername(
+            Long groupMessageId,
+            String username
+    );
+
     long countByGroupMessageId(Long groupMessageId);
 
     List<GroupMessageReadEntity> findByGroupMessageIdIn(Collection<Long> groupMessageIds);
