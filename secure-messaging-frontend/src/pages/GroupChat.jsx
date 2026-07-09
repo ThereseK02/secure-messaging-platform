@@ -1501,15 +1501,16 @@ messageCard: {
   },
 
   deleteMessageButton: {
-    backgroundColor: "#92400e",
-    color: "#fef3c7",
-    border: "1px solid #fbbf24",
+    backgroundColor: "#d6c6a8",
+    color: "#0f172a",
+    border: "1px solid #f5e6c8",
     borderRadius: "999px",
     padding: "5px 13px",
     fontSize: "12px",
     fontWeight: "700",
     cursor: "pointer",
   },
+  
   editMessageBox: {
     marginTop: "8px",
   },
