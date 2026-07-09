@@ -829,8 +829,8 @@ export default function GroupChat() {
 
                   <p style={styles.liveIndicator}>
                     {realTimeConnected
-                        ? "🟢 Real-Time Chat: Connected"
-                        : "🟡 Live Refresh fallback active"}
+                        ? "Real-Time Chat: Connected"
+                        : "Live Refresh fallback active"}
                   </p>
 
                   <button
@@ -1162,9 +1162,9 @@ const styles = {
   },
 
   liveIndicator: {
-    color: "#22c55e",
+    color: "#d6c6a8",
     fontSize: "13px",
-    fontWeight: "600",
+    fontWeight: "700",
     margin: 0,
   },
 
@@ -1180,9 +1180,9 @@ const styles = {
   },
 
   newMessagesIndicator: {
-    color: "#fde68a",
-    backgroundColor: "rgba(234, 179, 8, 0.12)",
-    border: "1px solid rgba(234, 179, 8, 0.45)",
+    color: "#0f172a",
+    backgroundColor: "#d6c6a8",
+    border: "1px solid #f5e6c8",
     borderRadius: "999px",
     padding: "6px 12px",
     fontSize: "13px",
@@ -1510,7 +1510,7 @@ messageCard: {
     fontWeight: "700",
     cursor: "pointer",
   },
-  
+
   editMessageBox: {
     marginTop: "8px",
   },
