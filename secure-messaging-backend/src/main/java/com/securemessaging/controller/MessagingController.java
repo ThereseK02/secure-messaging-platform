@@ -576,15 +576,36 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
         List<GroupMessageEntity> groupMessages =
                 groupMessageRepository.findByGroupIdOrderByTimestampAsc(groupId);
 
-        for (GroupMessageEntity message : groupMessages) {
-            markGroupMessageAsRead(groupId, message.getId(), currentUsername);
-        }
-
-        int memberCount = groupMemberRepository.findByGroupId(groupId).size();
-
         List<Long> groupMessageIds = groupMessages.stream()
                 .map(GroupMessageEntity::getId)
                 .toList();
+
+        if (!groupMessageIds.isEmpty()) {
+            java.util.Set<Long> alreadyReadMessageIds =
+                    groupMessageReadRepository
+                            .findByGroupMessageIdInAndUsername(groupMessageIds, currentUsername)
+                            .stream()
+                            .map(GroupMessageReadEntity::getGroupMessageId)
+                            .collect(java.util.stream.Collectors.toSet());
+
+            LocalDateTime readAt = LocalDateTime.now();
+
+            List<GroupMessageReadEntity> newReadRecords = groupMessages.stream()
+                    .filter(message -> !alreadyReadMessageIds.contains(message.getId()))
+                    .map(message -> new GroupMessageReadEntity(
+                            message.getId(),
+                            groupId,
+                            currentUsername,
+                            readAt
+                    ))
+                    .toList();
+
+            if (!newReadRecords.isEmpty()) {
+                groupMessageReadRepository.saveAll(newReadRecords);
+            }
+        }
+
+        int memberCount = groupMemberRepository.findByGroupId(groupId).size();
 
         Map<Long, Long> seenCountsByMessageId = new java.util.HashMap<>();
 

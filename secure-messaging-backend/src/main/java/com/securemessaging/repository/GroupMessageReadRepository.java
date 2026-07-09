@@ -25,6 +25,10 @@ public interface GroupMessageReadRepository
     long countByGroupMessageId(Long groupMessageId);
 
     List<GroupMessageReadEntity> findByGroupMessageIdIn(Collection<Long> groupMessageIds);
+    List<GroupMessageReadEntity> findByGroupMessageIdInAndUsername(
+            Collection<Long> groupMessageIds,
+            String username
+    );
 
     @Transactional
     @Modifying
