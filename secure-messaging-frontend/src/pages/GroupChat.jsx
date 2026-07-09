@@ -1501,9 +1501,9 @@ messageCard: {
   },
 
   deleteMessageButton: {
-    backgroundColor: "#7f1d1d",
-    color: "#fee2e2",
-    border: "1px solid #f87171",
+    backgroundColor: "#92400e",
+    color: "#fef3c7",
+    border: "1px solid #fbbf24",
     borderRadius: "999px",
     padding: "5px 13px",
     fontSize: "12px",
