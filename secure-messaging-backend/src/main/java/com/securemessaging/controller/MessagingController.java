@@ -789,12 +789,24 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             }
         }
 
-        int memberCount = groupMemberRepository.findByGroupId(groupId).size();
+        List<GroupMemberEntity> currentMembers =
+                groupMemberRepository.findByGroupId(groupId);
+
+        int memberCount = currentMembers.size();
+
+        java.util.Set<String> currentMemberUsernames =
+                currentMembers.stream()
+                        .map(GroupMemberEntity::getUsername)
+                        .collect(java.util.stream.Collectors.toSet());
 
         Map<Long, Long> seenCountsByMessageId = new java.util.HashMap<>();
 
         if (!groupMessageIds.isEmpty()) {
             groupMessageReadRepository.findByGroupMessageIdIn(groupMessageIds)
+                    .stream()
+                    .filter(read ->
+                            currentMemberUsernames.contains(read.getUsername())
+                    )
                     .forEach(read -> seenCountsByMessageId.merge(
                             read.getGroupMessageId(),
                             1L,
