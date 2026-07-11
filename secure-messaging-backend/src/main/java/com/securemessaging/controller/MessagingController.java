@@ -501,6 +501,67 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                 ));
     }
 
+    @PutMapping("/groups/{groupId}/messages/{messageId}/pin")
+    public ResponseEntity<?> toggleGroupMessagePin(@PathVariable("groupId") Long groupId,
+                                                   @PathVariable("messageId") Long messageId) {
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isEmpty()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
+
+        return groupMessageRepository.findById(messageId)
+                .map(message -> {
+                    if (!message.getGroupId().equals(groupId)) {
+                        return ResponseEntity.badRequest().body(
+                                Map.of("error", "Message does not belong to this group")
+                        );
+                    }
+
+                    boolean shouldPin = !message.isPinned();
+
+                    message.setPinned(shouldPin);
+
+                    if (shouldPin) {
+                        message.setPinnedBy(currentUsername);
+                        message.setPinnedAt(LocalDateTime.now());
+                    } else {
+                        message.setPinnedBy(null);
+                        message.setPinnedAt(null);
+                    }
+
+                    groupMessageRepository.save(message);
+
+                    messagingTemplate.convertAndSend(
+                            "/topic/groups/" + groupId,
+                            Map.of(
+                                    "type", shouldPin ? "GROUP_MESSAGE_PINNED" : "GROUP_MESSAGE_UNPINNED",
+                                    "groupId", groupId,
+                                    "messageId", messageId
+                            )
+                    );
+
+                    Map<String, Object> response = new java.util.HashMap<>();
+                    response.put("status", shouldPin ? "Group message pinned" : "Group message unpinned");
+                    response.put("groupId", groupId);
+                    response.put("messageId", messageId);
+                    response.put("pinned", message.isPinned());
+                    response.put("pinnedBy", message.getPinnedBy());
+                    response.put("pinnedAt", message.getPinnedAt());
+
+                    return ResponseEntity.ok(response);
+
+                })
+                .orElseGet(() -> ResponseEntity.status(404).body(
+                        Map.of("error", "Group message not found")
+                ));
+    }
+
     @DeleteMapping("/groups/{groupId}/messages/{messageId}")
     public ResponseEntity<?> deleteOwnGroupMessage(@PathVariable("groupId") Long groupId,
                                                    @PathVariable("messageId") Long messageId) {
