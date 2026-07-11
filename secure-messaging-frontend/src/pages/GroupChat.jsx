@@ -642,9 +642,10 @@ export default function GroupChat() {
                 style={{
                   position: "fixed",
                   top: "22px",
-                  right: "48px",
+                  right: "clamp(16px, 4vw, 48px)",
                   zIndex: 9999,
-                  width: "min(300px, calc(100vw - 96px))",
+                  width: "min(280px, calc(100vw - 32px))",
+                  maxWidth: "calc(100vw - 32px)",
                   backgroundColor:
                       notification.type === "success"
                           ? "rgba(34, 197, 94, 0.16)"
@@ -660,6 +661,9 @@ export default function GroupChat() {
                   fontWeight: "bold",
                   fontSize: "14px",
                   lineHeight: "1.35",
+                  whiteSpace: "normal",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
                   boxShadow: "0 12px 30px rgba(0, 0, 0, 0.35)",
                   boxSizing: "border-box",
                 }}
