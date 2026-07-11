@@ -33,4 +33,8 @@ public interface GroupMessageReadRepository
     @Transactional
     @Modifying
     void deleteByGroupMessageId(Long groupMessageId);
+
+    @Transactional
+    @Modifying
+    void deleteByGroupId(Long groupId);
 }
