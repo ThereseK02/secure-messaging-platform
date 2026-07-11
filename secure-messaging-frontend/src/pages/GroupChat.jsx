@@ -602,6 +602,7 @@ export default function GroupChat() {
     const intervalId = setInterval(() => {
       loadMessages(selectedGroupId);
       loadGroupAttachments(selectedGroupId);
+      loadMembers(selectedGroupId);
     }, 3000);
 
     return () => clearInterval(intervalId);
@@ -623,6 +624,7 @@ export default function GroupChat() {
         client.subscribe(`/topic/groups/${selectedGroupId}`, () => {
           loadMessages(selectedGroupId);
           loadGroupAttachments(selectedGroupId);
+          loadMembers(selectedGroupId);
         });
       },
       onStompError: () => {
