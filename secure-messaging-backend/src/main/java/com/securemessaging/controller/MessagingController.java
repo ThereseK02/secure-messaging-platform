@@ -628,6 +628,9 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                     messageView.put("message", message.getMessage());
                     messageView.put("timestamp", message.getTimestamp());
                     messageView.put("editedAt", message.getEditedAt());
+                    messageView.put("pinned", message.isPinned());
+                    messageView.put("pinnedBy", message.getPinnedBy());
+                    messageView.put("pinnedAt", message.getPinnedAt());
                     messageView.put(
                             "seenCount",
                             seenCountsByMessageId.getOrDefault(message.getId(), 0L)
