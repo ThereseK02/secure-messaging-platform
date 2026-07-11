@@ -36,6 +36,7 @@ export default function GroupChat() {
   const [showConversation, setShowConversation] =
       useState(false);
   const [selectedGroupName, setSelectedGroupName] = useState("");
+  const [selectedGroupAdmin, setSelectedGroupAdmin] = useState("");
   const [showGroups, setShowGroups] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiOptions = [
@@ -241,6 +242,51 @@ export default function GroupChat() {
     } catch (error) {
       console.error(error);
       showNotification("error", "Failed to load group members");
+    }
+  }
+
+  async function removeGroupMember(username) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (currentUsername !== selectedGroupAdmin) {
+      showNotification("error", "Only the group admin can remove members");
+      return;
+    }
+
+    if (username === selectedGroupAdmin) {
+      showNotification("error", "The group admin cannot be removed");
+      return;
+    }
+
+    const confirmed = window.confirm(
+        `Remove ${username} from this group?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await api.delete(
+          `/api/groups/${selectedGroupId}/members/${encodeURIComponent(username)}`
+      );
+
+      await loadMembers(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status || `${username} was removed from the group`
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to remove group member"
+      );
     }
   }
 
@@ -528,6 +574,8 @@ export default function GroupChat() {
 
       showNotification("success", "You left the group successfully");
       setSelectedGroupId("");
+      setSelectedGroupName("");
+      setSelectedGroupAdmin("");
       setMessages([]);
       setGroupAttachments([]);
       setMembers([]);
@@ -741,6 +789,7 @@ export default function GroupChat() {
                                     onClick={() => {
                                       setSelectedGroupId(String(group.id));
                                       setSelectedGroupName(group.groupName);
+                                      setSelectedGroupAdmin(group.createdBy || "");
                                       setGroupMessageSearch("");
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
@@ -782,6 +831,7 @@ export default function GroupChat() {
                       setMessages([]);
                       setGroupAttachments([]);
                       setMembers([]);
+                      setSelectedGroupAdmin("");
                       setGroupMessageSearch("");
                     }}
                 >
@@ -794,18 +844,32 @@ export default function GroupChat() {
                   </p>
 
                   <div style={styles.memberPills}>
-                    {members.slice(0, 5).map((member) => (
-                        <span key={member} style={styles.memberPill}>
-              {member}
-            </span>
-                    ))}
+                    {members.map((member) => (
+                        <div key={member} style={styles.memberControl}>
+        <span style={styles.memberPill}>
+          {member}
 
-                    {members.length > 5 && (
-                        <span style={styles.memberPill}>
-              +{members.length - 5} more
-            </span>
-                    )}
+          {member === selectedGroupAdmin && (
+              <span style={styles.memberAdminLabel}>
+                Admin
+              </span>
+          )}
+        </span>
+
+                          {currentUsername === selectedGroupAdmin &&
+                              member !== selectedGroupAdmin && (
+                                  <button
+                                      type="button"
+                                      style={styles.removeMemberButton}
+                                      onClick={() => removeGroupMember(member)}
+                                  >
+                                    Remove
+                                  </button>
+                              )}
+                        </div>
+                    ))}
                   </div>
+
                 </div>
 
                 {selectedGroupId && (
@@ -1446,6 +1510,31 @@ groupButton: {
     fontSize: "14px",
     fontWeight: "700",
   },
+
+  memberControl: {
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+  },
+
+  memberAdminLabel: {
+    marginLeft: "6px",
+    color: "#d6c6a5",
+    fontSize: "11px",
+    fontWeight: "700",
+  },
+
+  removeMemberButton: {
+    border: "1px solid #d6c6a5",
+    borderRadius: "7px",
+    padding: "4px 7px",
+    backgroundColor: "transparent",
+    color: "#d6c6a5",
+    fontSize: "11px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
   messageRow: {
     display: "flex",
     width: "90%",
