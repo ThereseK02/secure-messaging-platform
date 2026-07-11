@@ -431,6 +431,33 @@ export default function GroupChat() {
     }
   }
 
+  async function togglePinGroupMessage(msg) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    try {
+      const response = await api.put(
+          `/api/groups/${selectedGroupId}/messages/${msg.id}/pin`
+      );
+
+      await loadMessages(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status || "Group message pin status updated"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to update pinned message"
+      );
+    }
+  }
+
   function startEditingGroupMessage(msg) {
     setEditingMessageId(msg.id);
     setEditingMessageText(msg.message || "");
@@ -980,23 +1007,35 @@ export default function GroupChat() {
                                       </button>
                                   ))}
 
-                                  {canModifyMessage && !isEditingThisMessage && (
+                                  {!isEditingThisMessage && (
                                       <div style={styles.messageActions}>
                                         <button
                                             type="button"
-                                            style={styles.editMessageButton}
-                                            onClick={() => startEditingGroupMessage(msg)}
+                                            style={styles.pinMessageButton}
+                                            onClick={() => togglePinGroupMessage(msg)}
                                         >
-                                          Edit
+                                          {msg.pinned ? "Unpin" : "Pin"}
                                         </button>
 
-                                        <button
-                                            type="button"
-                                            style={styles.deleteMessageButton}
-                                            onClick={() => deleteGroupMessage(msg)}
-                                        >
-                                          Delete
-                                        </button>
+                                        {canModifyMessage && (
+                                            <>
+                                              <button
+                                                  type="button"
+                                                  style={styles.editMessageButton}
+                                                  onClick={() => startEditingGroupMessage(msg)}
+                                              >
+                                                Edit
+                                              </button>
+
+                                              <button
+                                                  type="button"
+                                                  style={styles.deleteMessageButton}
+                                                  onClick={() => deleteGroupMessage(msg)}
+                                              >
+                                                Delete
+                                              </button>
+                                            </>
+                                        )}
                                       </div>
                                   )}
 
@@ -1487,6 +1526,17 @@ messageCard: {
     gap: "10px",
     marginTop: "10px",
     alignItems: "center",
+  },
+
+  pinMessageButton: {
+    backgroundColor: "#0f172a",
+    color: "#d6c6a8",
+    border: "1px solid #d6c6a8",
+    borderRadius: "999px",
+    padding: "5px 13px",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
   },
 
   editMessageButton: {
