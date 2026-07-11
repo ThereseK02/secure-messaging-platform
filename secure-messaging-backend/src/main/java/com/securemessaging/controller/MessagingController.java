@@ -369,6 +369,62 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
     );
 }
 
+    @DeleteMapping("/groups/{groupId}/members/{username}")
+    public ResponseEntity<?> removeGroupMember(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("username") String username) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        if (!group.getCreatedBy().equals(currentUsername)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Only the group admin can remove members")
+            );
+        }
+
+        if (group.getCreatedBy().equals(username)) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "The group admin cannot be removed")
+            );
+        }
+
+        if (groupMemberRepository.findByGroupIdAndUsername(groupId, username).isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group member not found")
+            );
+        }
+
+        groupMemberRepository.deleteByGroupIdAndUsername(groupId, username);
+
+        messagingTemplate.convertAndSend(
+                "/topic/groups/" + groupId,
+                Map.of(
+                        "type", "GROUP_MEMBER_REMOVED",
+                        "groupId", groupId,
+                        "username", username
+                )
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", username + " was removed from the group",
+                        "groupId", groupId,
+                        "username", username
+                )
+        );
+    }
+
 private void markGroupMessageAsRead(Long groupId, Long groupMessageId, String username) {
         if (groupMessageReadRepository.existsByGroupMessageIdAndUsername(groupMessageId, username)) {
             return;
