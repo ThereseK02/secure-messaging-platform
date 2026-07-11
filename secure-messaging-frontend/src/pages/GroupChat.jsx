@@ -642,9 +642,9 @@ export default function GroupChat() {
                 style={{
                   position: "fixed",
                   top: "22px",
-                  right: "24px",
+                  right: "48px",
                   zIndex: 9999,
-                  width: "min(360px, calc(100vw - 36px))",
+                  width: "min(360px, calc(100vw - 96px))",
                   backgroundColor:
                       notification.type === "success"
                           ? "rgba(34, 197, 94, 0.16)"
