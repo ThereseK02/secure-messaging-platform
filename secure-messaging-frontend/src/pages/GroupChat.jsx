@@ -644,7 +644,7 @@ export default function GroupChat() {
                   top: "22px",
                   right: "clamp(16px, 4vw, 48px)",
                   zIndex: 9999,
-                  width: "min(280px, calc(100vw - 32px))",
+                  width: "min(220px, calc(100vw - 32px))",
                   maxWidth: "calc(100vw - 32px)",
                   backgroundColor:
                       notification.type === "success"
