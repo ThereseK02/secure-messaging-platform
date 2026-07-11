@@ -3,11 +3,13 @@ package com.securemessaging.controller;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 
+import com.securemessaging.entity.AttachmentEntity;
 import com.securemessaging.entity.GroupEntity;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupMessageReadEntity;
 import com.securemessaging.repository.AttachmentRepository;
+import com.securemessaging.repository.GroupAttachmentKeyRepository;
 import com.securemessaging.repository.GroupEntityRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
@@ -25,6 +27,7 @@ import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,6 +42,7 @@ public class MessagingController {
     private final GroupMessageEntityRepository groupMessageRepository;
     private final GroupMessageReadRepository groupMessageReadRepository;
     private final AttachmentRepository attachmentRepository;
+    private final GroupAttachmentKeyRepository groupAttachmentKeyRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
@@ -48,6 +52,7 @@ public class MessagingController {
                                GroupMessageEntityRepository groupMessageRepository,
                                GroupMessageReadRepository groupMessageReadRepository,
                                AttachmentRepository attachmentRepository,
+                               GroupAttachmentKeyRepository groupAttachmentKeyRepository,
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
@@ -56,6 +61,7 @@ public class MessagingController {
         this.groupMessageRepository = groupMessageRepository;
         this.groupMessageReadRepository = groupMessageReadRepository;
         this.attachmentRepository = attachmentRepository;
+        this.groupAttachmentKeyRepository = groupAttachmentKeyRepository;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -421,6 +427,67 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
                         "status", username + " was removed from the group",
                         "groupId", groupId,
                         "username", username
+                )
+        );
+    }
+
+    @Transactional
+    @DeleteMapping("/groups/{groupId}")
+    public ResponseEntity<?> deleteGroup(
+            @PathVariable("groupId") Long groupId) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        if (!group.getCreatedBy().equals(currentUsername)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Only the group admin can delete this group")
+            );
+        }
+
+        String deletedGroupName = group.getGroupName();
+
+        List<AttachmentEntity> groupAttachments =
+                attachmentRepository.findByGroupIdOrderByTimestampDesc(groupId);
+
+        List<Long> attachmentIds = groupAttachments.stream()
+                .map(AttachmentEntity::getId)
+                .toList();
+
+        if (!attachmentIds.isEmpty()) {
+            groupAttachmentKeyRepository.deleteByAttachmentIdIn(attachmentIds);
+        }
+
+        attachmentRepository.deleteByGroupId(groupId);
+        groupMessageReadRepository.deleteByGroupId(groupId);
+        groupMessageRepository.deleteByGroupId(groupId);
+        groupMemberRepository.deleteByGroupId(groupId);
+        groupRepository.delete(group);
+
+        messagingTemplate.convertAndSend(
+                "/topic/groups/" + groupId,
+                Map.of(
+                        "type", "GROUP_DELETED",
+                        "groupId", groupId,
+                        "groupName", deletedGroupName
+                )
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", "Group deleted successfully",
+                        "groupId", groupId,
+                        "groupName", deletedGroupName
                 )
         );
     }
