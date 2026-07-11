@@ -23,6 +23,12 @@ public class GroupMessageEntity {
 
     private LocalDateTime editedAt;
 
+    private Boolean pinned = false;
+
+    private String pinnedBy;
+
+    private LocalDateTime pinnedAt;
+
     public GroupMessageEntity() {
     }
 
@@ -66,5 +72,29 @@ public class GroupMessageEntity {
 
     public void setEditedAt(LocalDateTime editedAt) {
         this.editedAt = editedAt;
+    }
+
+    public boolean isPinned() {
+        return Boolean.TRUE.equals(pinned);
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
+
+    public String getPinnedBy() {
+        return pinnedBy;
+    }
+
+    public void setPinnedBy(String pinnedBy) {
+        this.pinnedBy = pinnedBy;
+    }
+
+    public LocalDateTime getPinnedAt() {
+        return pinnedAt;
+    }
+
+    public void setPinnedAt(LocalDateTime pinnedAt) {
+        this.pinnedAt = pinnedAt;
     }
 }
