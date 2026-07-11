@@ -947,8 +947,14 @@ export default function GroupChat() {
                                     }
                                 >
 
+                                  {msg.pinned && (
+                                      <p style={styles.pinnedMessageLabel}>
+                                        Pinned by {msg.pinnedBy || "group member"}
+                                      </p>
+                                  )}
+
                                   <p style={styles.sender}>
-                                    {msg.sender === currentUsername ? "You" : msg.sender} •{" "}
+                                    {msg.sender === currentUsername ? "You" : msg.sender} -{" "}
                                     {new Date(msg.timestamp + "Z").toLocaleTimeString([], {
                                       hour: "numeric",
                                       minute: "2-digit",
@@ -1510,6 +1516,19 @@ messageCard: {
     padding: "16px",
     marginBottom: "12px",
   },
+
+  pinnedMessageLabel: {
+    color: "#d6c6a8",
+    backgroundColor: "rgba(214, 198, 168, 0.10)",
+    border: "1px solid rgba(214, 198, 168, 0.35)",
+    borderRadius: "999px",
+    display: "inline-block",
+    padding: "3px 9px",
+    fontSize: "11px",
+    fontWeight: "800",
+    margin: "0 0 8px 0",
+  },
+
   sender: {
     color: "#bae6fd",
     fontSize: "13px",
