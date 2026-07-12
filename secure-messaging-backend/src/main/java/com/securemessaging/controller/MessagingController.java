@@ -387,6 +387,156 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
     );
 }
 
+    @PutMapping("/groups/{groupId}/members/{username}/promote")
+    public ResponseEntity<?> promoteGroupMember(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("username") String username) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        if (!group.getCreatedBy().equals(currentUsername)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Only the group owner can promote members")
+            );
+        }
+
+        if (group.getCreatedBy().equals(username)) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "The group owner already has the highest role")
+            );
+        }
+
+        GroupMemberEntity member =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(groupId, username)
+                        .orElse(null);
+
+        if (member == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group member not found")
+            );
+        }
+
+        if (member.getRole() == GroupRole.ADMIN) {
+            return ResponseEntity.ok(
+                    Map.of(
+                            "status", username + " is already a group admin",
+                            "groupId", groupId,
+                            "username", username,
+                            "role", GroupRole.ADMIN.name()
+                    )
+            );
+        }
+
+        member.setRole(GroupRole.ADMIN);
+        groupMemberRepository.save(member);
+
+        messagingTemplate.convertAndSend(
+                "/topic/groups/" + groupId,
+                Map.of(
+                        "type", "GROUP_MEMBER_ROLE_CHANGED",
+                        "groupId", groupId,
+                        "username", username,
+                        "role", GroupRole.ADMIN.name()
+                )
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", username + " was promoted to group admin",
+                        "groupId", groupId,
+                        "username", username,
+                        "role", GroupRole.ADMIN.name()
+                )
+        );
+    }
+
+    @PutMapping("/groups/{groupId}/members/{username}/demote")
+    public ResponseEntity<?> demoteGroupAdmin(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("username") String username) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        if (!group.getCreatedBy().equals(currentUsername)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Only the group owner can demote admins")
+            );
+        }
+
+        if (group.getCreatedBy().equals(username)) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "The group owner cannot be demoted")
+            );
+        }
+
+        GroupMemberEntity member =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(groupId, username)
+                        .orElse(null);
+
+        if (member == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group member not found")
+            );
+        }
+
+        if (member.getRole() == GroupRole.MEMBER) {
+            return ResponseEntity.ok(
+                    Map.of(
+                            "status", username + " is already a regular member",
+                            "groupId", groupId,
+                            "username", username,
+                            "role", GroupRole.MEMBER.name()
+                    )
+            );
+        }
+
+        member.setRole(GroupRole.MEMBER);
+        groupMemberRepository.save(member);
+
+        messagingTemplate.convertAndSend(
+                "/topic/groups/" + groupId,
+                Map.of(
+                        "type", "GROUP_MEMBER_ROLE_CHANGED",
+                        "groupId", groupId,
+                        "username", username,
+                        "role", GroupRole.MEMBER.name()
+                )
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", username + " was demoted to regular member",
+                        "groupId", groupId,
+                        "username", username,
+                        "role", GroupRole.MEMBER.name()
+                )
+        );
+    }
+
     @DeleteMapping("/groups/{groupId}/members/{username}")
     public ResponseEntity<?> removeGroupMember(
             @PathVariable("groupId") Long groupId,
