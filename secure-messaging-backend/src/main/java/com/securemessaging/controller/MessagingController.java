@@ -536,7 +536,6 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
                 )
         );
     }
-
     @DeleteMapping("/groups/{groupId}/members/{username}")
     public ResponseEntity<?> removeGroupMember(
             @PathVariable("groupId") Long groupId,
@@ -555,21 +554,49 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
             );
         }
 
-        if (!group.getCreatedBy().equals(currentUsername)) {
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(groupId, currentUsername)
+                        .orElse(null);
+
+        if (currentMember == null) {
             return ResponseEntity.status(403).body(
-                    Map.of("error", "Only the group admin can remove members")
+                    Map.of("error", "You are not a member of this group")
             );
         }
 
-        if (group.getCreatedBy().equals(username)) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("error", "The group admin cannot be removed")
+        boolean isOwner = currentMember.getRole() == GroupRole.OWNER;
+        boolean isAdmin = currentMember.getRole() == GroupRole.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            return ResponseEntity.status(403).body(
+                    Map.of(
+                            "error",
+                            "Only the group owner or an admin can remove members"
+                    )
             );
         }
 
-        if (groupMemberRepository.findByGroupIdAndUsername(groupId, username).isEmpty()) {
+        GroupMemberEntity targetMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(groupId, username)
+                        .orElse(null);
+
+        if (targetMember == null) {
             return ResponseEntity.status(404).body(
                     Map.of("error", "Group member not found")
+            );
+        }
+
+        if (targetMember.getRole() == GroupRole.OWNER) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "The group owner cannot be removed")
+            );
+        }
+
+        if (isAdmin && targetMember.getRole() == GroupRole.ADMIN) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "An admin cannot remove another admin")
             );
         }
 
