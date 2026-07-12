@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "group_members")
-
 public class GroupMemberEntity {
 
     @Id
@@ -15,12 +14,25 @@ public class GroupMemberEntity {
 
     private String username;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private GroupRole role;
+
     public GroupMemberEntity() {
     }
 
     public GroupMemberEntity(Long groupId, String username) {
+        this(groupId, username, GroupRole.MEMBER);
+    }
+
+    public GroupMemberEntity(
+            Long groupId,
+            String username,
+            GroupRole role) {
+
         this.groupId = groupId;
         this.username = username;
+        this.role = role;
     }
 
     public Long getId() {
@@ -33,5 +45,13 @@ public class GroupMemberEntity {
 
     public String getUsername() {
         return username;
+    }
+
+    public GroupRole getRole() {
+        return role;
+    }
+
+    public void setRole(GroupRole role) {
+        this.role = role;
     }
 }

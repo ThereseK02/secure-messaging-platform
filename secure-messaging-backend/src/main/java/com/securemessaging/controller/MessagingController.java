@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import com.securemessaging.entity.AttachmentEntity;
 import com.securemessaging.entity.GroupEntity;
 import com.securemessaging.entity.GroupMemberEntity;
+import com.securemessaging.entity.GroupRole;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupMessageReadEntity;
 import com.securemessaging.repository.AttachmentRepository;
@@ -279,7 +280,11 @@ public ResponseEntity<?> createGroup(@RequestBody Map<String, String> request) {
     GroupEntity savedGroup = groupRepository.save(group);
 
     groupMemberRepository.save(
-            new GroupMemberEntity(savedGroup.getId(), currentUsername)
+            new GroupMemberEntity(
+                    savedGroup.getId(),
+                    currentUsername,
+                    GroupRole.OWNER
+            )
     );
 
     return ResponseEntity.ok(
@@ -344,9 +349,12 @@ public ResponseEntity<?> joinGroup(@PathVariable("groupId") Long groupId) {
     }
 
     groupMemberRepository.save(
-            new GroupMemberEntity(groupId, currentUsername)
+            new GroupMemberEntity(
+                    groupId,
+                    currentUsername,
+                    GroupRole.MEMBER
+            )
     );
-
     return ResponseEntity.ok(
             Map.of(
                     "status", "Joined group successfully",
