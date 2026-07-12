@@ -315,19 +315,23 @@ public ResponseEntity<?> myGroups() {
 
     return ResponseEntity.ok(groups);
 }
-@GetMapping("/groups/{groupId}/members")
-public ResponseEntity<?> groupMembers(
-        @PathVariable("groupId") Long groupId) {
 
-    List<GroupMemberEntity> members =
-            groupMemberRepository.findByGroupId(groupId);
+    @GetMapping("/groups/{groupId}/members")
+    public ResponseEntity<?> groupMembers(
+            @PathVariable("groupId") Long groupId) {
 
-    List<String> usernames = members.stream()
-            .map(GroupMemberEntity::getUsername)
-            .toList();
+        List<GroupMemberEntity> members =
+                groupMemberRepository.findByGroupId(groupId);
 
-    return ResponseEntity.ok(usernames);
-}
+        List<Map<String, String>> memberDetails = members.stream()
+                .map(member -> Map.of(
+                        "username", member.getUsername(),
+                        "role", member.getRole().name()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(memberDetails);
+    }
 
 @PostMapping("/groups/{groupId}/join")
 public ResponseEntity<?> joinGroup(@PathVariable("groupId") Long groupId) {

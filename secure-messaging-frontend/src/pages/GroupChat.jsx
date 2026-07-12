@@ -847,23 +847,30 @@ export default function GroupChat() {
 
                   <div style={styles.memberPills}>
                     {members.map((member) => (
-                        <div key={member} style={styles.memberControl}>
+                        <div
+                            key={member.username}
+                            style={styles.memberControl}
+                        >
         <span style={styles.memberPill}>
-          {member}
+          {member.username}
 
-          {member === selectedGroupAdmin && (
-              <span style={styles.memberAdminLabel}>
-                Admin
-              </span>
-          )}
+          <span style={styles.memberAdminLabel}>
+            {member.role === "OWNER"
+                ? "Owner"
+                : member.role === "ADMIN"
+                    ? "Admin"
+                    : "Member"}
+          </span>
         </span>
 
                           {currentUsername === selectedGroupAdmin &&
-                              member !== selectedGroupAdmin && (
+                              member.username !== selectedGroupAdmin && (
                                   <button
                                       type="button"
                                       style={styles.removeMemberButton}
-                                      onClick={() => removeGroupMember(member)}
+                                      onClick={() =>
+                                          removeGroupMember(member.username)
+                                      }
                                   >
                                     Remove
                                   </button>
