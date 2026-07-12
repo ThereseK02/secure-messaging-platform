@@ -84,8 +84,16 @@ public class GroupInvitationEntity {
         return respondedAt;
     }
 
+    public void setInvitedBy(String invitedBy) {
+        this.invitedBy = invitedBy;
+    }
+
     public void setStatus(GroupInvitationStatus status) {
         this.status = status;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setRespondedAt(LocalDateTime respondedAt) {

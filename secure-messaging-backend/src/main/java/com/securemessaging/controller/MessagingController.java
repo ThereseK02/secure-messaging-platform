@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import com.securemessaging.entity.AttachmentEntity;
 import com.securemessaging.entity.GroupEntity;
+import com.securemessaging.entity.GroupInvitationEntity;
+import com.securemessaging.entity.GroupInvitationStatus;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupRole;
 import com.securemessaging.entity.GroupMessageEntity;
@@ -12,10 +14,11 @@ import com.securemessaging.entity.GroupMessageReadEntity;
 import com.securemessaging.repository.AttachmentRepository;
 import com.securemessaging.repository.GroupAttachmentKeyRepository;
 import com.securemessaging.repository.GroupEntityRepository;
+import com.securemessaging.repository.GroupInvitationRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
 import com.securemessaging.repository.GroupMessageReadRepository;
-
+import com.securemessaging.repository.UserEntityRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,30 +42,36 @@ public class MessagingController {
     private final DatabaseMessagingService databaseMessagingService;
     private final DatabaseUserService databaseUserService;
     private final GroupEntityRepository groupRepository;
+    private final GroupInvitationRepository groupInvitationRepository;
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
     private final GroupMessageReadRepository groupMessageReadRepository;
     private final AttachmentRepository attachmentRepository;
     private final GroupAttachmentKeyRepository groupAttachmentKeyRepository;
+    private final UserEntityRepository userEntityRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
                                DatabaseUserService databaseUserService,
                                GroupEntityRepository groupRepository,
+                               GroupInvitationRepository groupInvitationRepository,
                                GroupMemberEntityRepository groupMemberRepository,
                                GroupMessageEntityRepository groupMessageRepository,
                                GroupMessageReadRepository groupMessageReadRepository,
                                AttachmentRepository attachmentRepository,
                                GroupAttachmentKeyRepository groupAttachmentKeyRepository,
+                               UserEntityRepository userEntityRepository,
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
         this.groupRepository = groupRepository;
+        this.groupInvitationRepository = groupInvitationRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMessageRepository = groupMessageRepository;
         this.groupMessageReadRepository = groupMessageReadRepository;
         this.attachmentRepository = attachmentRepository;
         this.groupAttachmentKeyRepository = groupAttachmentKeyRepository;
+        this.userEntityRepository = userEntityRepository;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -620,6 +629,130 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
         );
     }
 
+    @PostMapping("/groups/{groupId}/invitations")
+    public ResponseEntity<?> inviteRegisteredUserToGroup(
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Map<String, String> request) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(groupId, currentUsername)
+                        .orElse(null);
+
+        if (currentMember == null) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "You are not a member of this group")
+            );
+        }
+
+        if (
+                currentMember.getRole() != GroupRole.OWNER &&
+                        currentMember.getRole() != GroupRole.ADMIN
+        ) {
+            return ResponseEntity.status(403).body(
+                    Map.of(
+                            "error",
+                            "Only the group owner or an admin can invite users"
+                    )
+            );
+        }
+
+        String invitedUsername = request.get("username");
+
+        if (invitedUsername == null || invitedUsername.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Username is required")
+            );
+        }
+
+        invitedUsername = invitedUsername.trim();
+
+        if (invitedUsername.equals(currentUsername)) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "You cannot invite yourself")
+            );
+        }
+
+        if (userEntityRepository.findByUsername(invitedUsername).isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Registered user not found")
+            );
+        }
+
+        if (
+                groupMemberRepository
+                        .findByGroupIdAndUsername(groupId, invitedUsername)
+                        .isPresent()
+        ) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "User is already a group member")
+            );
+        }
+
+        GroupInvitationEntity existingInvitation =
+                groupInvitationRepository
+                        .findByGroupIdAndInvitedUsername(
+                                groupId,
+                                invitedUsername
+                        )
+                        .orElse(null);
+
+        if (
+                existingInvitation != null &&
+                        existingInvitation.getStatus() == GroupInvitationStatus.PENDING
+        ) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "A pending invitation already exists")
+            );
+        }
+
+        GroupInvitationEntity invitation;
+
+        if (existingInvitation == null) {
+            invitation = new GroupInvitationEntity(
+                    groupId,
+                    invitedUsername,
+                    currentUsername,
+                    GroupInvitationStatus.PENDING,
+                    LocalDateTime.now()
+            );
+        } else {
+            invitation = existingInvitation;
+            invitation.setInvitedBy(currentUsername);
+            invitation.setStatus(GroupInvitationStatus.PENDING);
+            invitation.setCreatedAt(LocalDateTime.now());
+            invitation.setRespondedAt(null);
+        }
+
+        GroupInvitationEntity savedInvitation =
+                groupInvitationRepository.save(invitation);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", "Group invitation sent",
+                        "invitationId", savedInvitation.getId(),
+                        "groupId", savedInvitation.getGroupId(),
+                        "groupName", group.getGroupName(),
+                        "invitedUsername", savedInvitation.getInvitedUsername(),
+                        "invitedBy", savedInvitation.getInvitedBy(),
+                        "invitationStatus", savedInvitation.getStatus().name()
+                )
+        );
+    }
+
     @Transactional
     @DeleteMapping("/groups/{groupId}")
     public ResponseEntity<?> deleteGroup(
@@ -660,6 +793,7 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
         attachmentRepository.deleteByGroupId(groupId);
         groupMessageReadRepository.deleteByGroupId(groupId);
         groupMessageRepository.deleteByGroupId(groupId);
+        groupInvitationRepository.deleteByGroupId(groupId);
         groupMemberRepository.deleteByGroupId(groupId);
         groupRepository.delete(group);
 
