@@ -251,13 +251,19 @@ export default function GroupChat() {
       return;
     }
 
-    if (currentUsername !== selectedGroupAdmin) {
-      showNotification("error", "Only the group admin can remove members");
+    if (
+        currentGroupRole !== "OWNER" &&
+        currentGroupRole !== "ADMIN"
+    ) {
+      showNotification(
+          "error",
+          "Only the group owner or an admin can remove members"
+      );
       return;
     }
 
     if (username === selectedGroupAdmin) {
-      showNotification("error", "The group admin cannot be removed");
+      showNotification("error", "The group owner cannot be removed");
       return;
     }
 
@@ -404,6 +410,12 @@ export default function GroupChat() {
       groupAttachmentInputRef.current.value = "";
     }
   }
+
+  const currentGroupMember = members.find(
+      (member) => member.username === currentUsername
+  );
+
+  const currentGroupRole = currentGroupMember?.role;
 
   const normalizedGroupMessageSearch = groupMessageSearch.trim().toLowerCase();
 
@@ -959,44 +971,63 @@ export default function GroupChat() {
                     : "Member"}
           </span>
         </span>
-                          {currentUsername === selectedGroupAdmin &&
-                              member.username !== selectedGroupAdmin && (
-                                  <div style={styles.memberActions}>
-                                    {member.role === "MEMBER" && (
-                                        <button
-                                            type="button"
-                                            style={styles.roleMemberButton}
-                                            onClick={() =>
-                                                promoteGroupMember(member.username)
-                                            }
-                                        >
-                                          Promote
-                                        </button>
-                                    )}
 
-                                    {member.role === "ADMIN" && (
-                                        <button
-                                            type="button"
-                                            style={styles.roleMemberButton}
-                                            onClick={() =>
-                                                demoteGroupAdmin(member.username)
-                                            }
-                                        >
-                                          Demote
-                                        </button>
-                                    )}
+                          {member.username !== currentUsername && (
+                              <>
+                                {currentGroupRole === "OWNER" && (
+                                    <div style={styles.memberActions}>
+                                      {member.role === "MEMBER" && (
+                                          <button
+                                              type="button"
+                                              style={styles.roleMemberButton}
+                                              onClick={() =>
+                                                  promoteGroupMember(member.username)
+                                              }
+                                          >
+                                            Promote
+                                          </button>
+                                      )}
 
-                                    <button
-                                        type="button"
-                                        style={styles.removeMemberButton}
-                                        onClick={() =>
-                                            removeGroupMember(member.username)
-                                        }
-                                    >
-                                      Remove
-                                    </button>
-                                  </div>
-                              )}
+                                      {member.role === "ADMIN" && (
+                                          <button
+                                              type="button"
+                                              style={styles.roleMemberButton}
+                                              onClick={() =>
+                                                  demoteGroupAdmin(member.username)
+                                              }
+                                          >
+                                            Demote
+                                          </button>
+                                      )}
+
+                                      <button
+                                          type="button"
+                                          style={styles.removeMemberButton}
+                                          onClick={() =>
+                                              removeGroupMember(member.username)
+                                          }
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                )}
+
+                                {currentGroupRole === "ADMIN" &&
+                                    member.role === "MEMBER" && (
+                                        <div style={styles.memberActions}>
+                                          <button
+                                              type="button"
+                                              style={styles.removeMemberButton}
+                                              onClick={() =>
+                                                  removeGroupMember(member.username)
+                                              }
+                                          >
+                                            Remove
+                                          </button>
+                                        </div>
+                                    )}
+                              </>
+                          )}
                         </div>
                     ))}
                   </div>
@@ -1187,7 +1218,10 @@ export default function GroupChat() {
                                         </div>
                                       </div>
                                   ) : (
-                                      <p style={styles.messageText}>{msg.message}</p>
+                                      !(
+                                          messageAttachments.length > 0 &&
+                                          msg.message?.startsWith("Attachment:")
+                                      ) && <p style={styles.messageText}>{msg.message}</p>
                                   )}
 
                                   {messageAttachments.map((attachment) => (
