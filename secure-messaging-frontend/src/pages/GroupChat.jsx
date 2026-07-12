@@ -290,6 +290,103 @@ export default function GroupChat() {
     }
   }
 
+  async function promoteGroupMember(username) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (currentUsername !== selectedGroupAdmin) {
+      showNotification("error", "Only the group owner can promote members");
+      return;
+    }
+
+    if (username === selectedGroupAdmin) {
+      showNotification(
+          "error",
+          "The group owner already has the highest role"
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+        `Promote ${username} to group admin?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await api.put(
+          `/api/groups/${selectedGroupId}/members/${encodeURIComponent(username)}/promote`
+      );
+
+      await loadMembers(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          `${username} was promoted to group admin`
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to promote group member"
+      );
+    }
+  }
+
+  async function demoteGroupAdmin(username) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (currentUsername !== selectedGroupAdmin) {
+      showNotification("error", "Only the group owner can demote admins");
+      return;
+    }
+
+    if (username === selectedGroupAdmin) {
+      showNotification("error", "The group owner cannot be demoted");
+      return;
+    }
+
+    const confirmed = window.confirm(
+        `Demote ${username} to regular member?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await api.put(
+          `/api/groups/${selectedGroupId}/members/${encodeURIComponent(username)}/demote`
+      );
+
+      await loadMembers(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          `${username} was demoted to regular member`
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to demote group admin"
+      );
+    }
+  }
+
   async function refreshMessages() {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -862,18 +959,43 @@ export default function GroupChat() {
                     : "Member"}
           </span>
         </span>
-
                           {currentUsername === selectedGroupAdmin &&
                               member.username !== selectedGroupAdmin && (
-                                  <button
-                                      type="button"
-                                      style={styles.removeMemberButton}
-                                      onClick={() =>
-                                          removeGroupMember(member.username)
-                                      }
-                                  >
-                                    Remove
-                                  </button>
+                                  <div style={styles.memberActions}>
+                                    {member.role === "MEMBER" && (
+                                        <button
+                                            type="button"
+                                            style={styles.roleMemberButton}
+                                            onClick={() =>
+                                                promoteGroupMember(member.username)
+                                            }
+                                        >
+                                          Promote
+                                        </button>
+                                    )}
+
+                                    {member.role === "ADMIN" && (
+                                        <button
+                                            type="button"
+                                            style={styles.roleMemberButton}
+                                            onClick={() =>
+                                                demoteGroupAdmin(member.username)
+                                            }
+                                        >
+                                          Demote
+                                        </button>
+                                    )}
+
+                                    <button
+                                        type="button"
+                                        style={styles.removeMemberButton}
+                                        onClick={() =>
+                                            removeGroupMember(member.username)
+                                        }
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
                               )}
                         </div>
                     ))}
@@ -1531,6 +1653,24 @@ groupButton: {
     color: "#d6c6a5",
     fontSize: "11px",
     fontWeight: "700",
+  },
+
+  memberActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+    flexWrap: "wrap",
+  },
+
+  roleMemberButton: {
+    border: "1px solid #d6c6a5",
+    borderRadius: "7px",
+    padding: "4px 7px",
+    backgroundColor: "transparent",
+    color: "#d6c6a5",
+    fontSize: "11px",
+    fontWeight: "700",
+    cursor: "pointer",
   },
 
   removeMemberButton: {
