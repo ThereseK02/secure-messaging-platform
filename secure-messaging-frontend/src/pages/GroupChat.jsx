@@ -11,6 +11,7 @@ export default function GroupChat() {
   const navigate = useNavigate();
 
   const [groups, setGroups] = useState([]);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [joinGroupId, setJoinGroupId] = useState("");
@@ -142,6 +143,72 @@ export default function GroupChat() {
     } catch (error) {
       console.error(error);
       showNotification("error", "Failed to load groups");
+    }
+  }
+
+  async function loadPendingInvitations() {
+    try {
+      const response = await api.get(
+          "/api/groups/invitations/pending"
+      );
+
+      setPendingInvitations(response.data);
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to load pending invitations"
+      );
+    }
+  }
+
+  async function acceptGroupInvitation(invitationId) {
+    try {
+      const response = await api.post(
+          `/api/groups/invitations/${invitationId}/accept`
+      );
+
+      await loadPendingInvitations();
+      await loadGroups();
+      setShowGroups(true);
+
+      showNotification(
+          "success",
+          response.data?.status || "Group invitation accepted"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to accept group invitation"
+      );
+    }
+  }
+
+  async function declineGroupInvitation(invitationId) {
+    try {
+      const response = await api.post(
+          `/api/groups/invitations/${invitationId}/decline`
+      );
+
+      await loadPendingInvitations();
+
+      showNotification(
+          "success",
+          response.data?.status || "Group invitation declined"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to decline group invitation"
+      );
     }
   }
 
@@ -747,6 +814,7 @@ export default function GroupChat() {
   }
   useEffect(() => {
     loadGroups();
+    loadPendingInvitations();
   }, []);
 
   useEffect(() => {
@@ -933,13 +1001,80 @@ export default function GroupChat() {
                 </button>
               </div>
 
-              <div style={styles.section}>
-                <button
-                    style={styles.sectionTitleButton}
-                    onClick={() => setShowGroups(!showGroups)}
-                >
-                  My Groups {showGroups ? "▲" : "▼"}
-                </button>
+               <div style={styles.section}>
+                  <h2 style={styles.sectionTitle}>
+                    Pending Invitations
+                    {pendingInvitations.length > 0 &&
+                        ` (${pendingInvitations.length})`}
+                  </h2>
+
+                  {pendingInvitations.length === 0 ? (
+                      <p style={styles.muted}>
+                        No pending group invitations.
+                      </p>
+                  ) : (
+                      <div style={styles.pendingInvitationList}>
+                        {pendingInvitations.map((invitation) => (
+                            <div
+                                key={invitation.invitationId}
+                                style={styles.pendingInvitationCard}
+                            >
+                              <div style={styles.pendingInvitationDetails}>
+                                <div style={styles.pendingInvitationGroupName}>
+                                  {invitation.groupName} #{invitation.groupId}
+                                </div>
+
+                                <div style={styles.pendingInvitationMeta}>
+                                  Invited by {invitation.invitedBy}
+                                </div>
+
+                                {invitation.createdAt && (
+                                    <div style={styles.pendingInvitationTime}>
+                                      {formatGroupMessageTimestamp(
+                                          invitation.createdAt
+                                      )}
+                                    </div>
+                                )}
+                              </div>
+
+                              <div style={styles.pendingInvitationActions}>
+                                <button
+                                    type="button"
+                                    style={styles.acceptInvitationButton}
+                                    onClick={() =>
+                                        acceptGroupInvitation(
+                                            invitation.invitationId
+                                        )
+                                    }
+                                >
+                                  Accept
+                                </button>
+
+                                <button
+                                    type="button"
+                                    style={styles.declineInvitationButton}
+                                    onClick={() =>
+                                        declineGroupInvitation(
+                                            invitation.invitationId
+                                        )
+                                    }
+                                >
+                                  Decline
+                                </button>
+                              </div>
+                            </div>
+                        ))}
+                      </div>
+                  )}
+                </div>
+
+                <div style={styles.section}>
+                  <button
+                      style={styles.sectionTitleButton}
+                      onClick={() => setShowGroups(!showGroups)}
+                  >
+                    My Groups {showGroups ? "\u25B2" : "\u25BC"}
+                  </button>
 
                 {showGroups && (
                     <>
@@ -1703,6 +1838,77 @@ const styles = {
     fontWeight: "700",
     cursor: "pointer",
   },
+
+  pendingInvitationList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+
+  pendingInvitationCard: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "14px",
+    flexWrap: "wrap",
+    padding: "12px 14px",
+    borderRadius: "12px",
+    border: "1px solid #334155",
+    backgroundColor: "#020617",
+  },
+
+  pendingInvitationDetails: {
+    minWidth: 0,
+  },
+
+  pendingInvitationGroupName: {
+    color: "#e0f2fe",
+    fontSize: "15px",
+    fontWeight: "700",
+  },
+
+  pendingInvitationMeta: {
+    marginTop: "4px",
+    color: "#d6c6a5",
+    fontSize: "13px",
+    fontWeight: "700",
+  },
+
+  pendingInvitationTime: {
+    marginTop: "4px",
+    color: "#94a3b8",
+    fontSize: "12px",
+  },
+
+  pendingInvitationActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+
+  acceptInvitationButton: {
+    padding: "8px 13px",
+    borderRadius: "9px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#1e3a8a",
+    color: "#ffffff",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+  declineInvitationButton: {
+    padding: "8px 13px",
+    borderRadius: "9px",
+    border: "1px solid #d6c6a5",
+    backgroundColor: "transparent",
+    color: "#d6c6a5",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
   groupList: {
     display: "flex",
     gap: "12px",
