@@ -30,6 +30,7 @@ import com.securemessaging.core.SecureMessagingSystem.DecryptedMessageView;
 import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -342,42 +343,24 @@ public ResponseEntity<?> myGroups() {
         return ResponseEntity.ok(memberDetails);
     }
 
-@PostMapping("/groups/{groupId}/join")
-public ResponseEntity<?> joinGroup(@PathVariable("groupId") Long groupId) {
-    String currentUsername = org.springframework.security.core.context.SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+    @PostMapping("/groups/{groupId}/join")
+    public ResponseEntity<?> joinGroup(@PathVariable("groupId") Long groupId) {
+        if (groupRepository.findById(groupId).isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Group not found")
+            );
+        }
 
-    if (groupRepository.findById(groupId).isEmpty()) {
-        return ResponseEntity.badRequest().body(
-                Map.of("error", "Group not found")
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                Map.of(
+                        "error",
+                        "Direct group joining is disabled. You must accept a group invitation."
+                )
         );
     }
 
-    if (groupMemberRepository.findByGroupIdAndUsername(groupId, currentUsername).isPresent()) {
-        return ResponseEntity.ok(
-                Map.of("status", "Already a group member")
-        );
-    }
-
-    groupMemberRepository.save(
-            new GroupMemberEntity(
-                    groupId,
-                    currentUsername,
-                    GroupRole.MEMBER
-            )
-    );
-    return ResponseEntity.ok(
-            Map.of(
-                    "status", "Joined group successfully",
-                    "groupId", groupId
-            )
-    );
-}
-
-@DeleteMapping("/groups/{groupId}/leave")
-public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
+    @DeleteMapping("/groups/{groupId}/leave")
+    public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
     String currentUsername = org.springframework.security.core.context.SecurityContextHolder
             .getContext()
             .getAuthentication()

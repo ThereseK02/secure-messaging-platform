@@ -17,8 +17,10 @@
 - Improved group member management layout
 - Updated role labels for Owner, Admin, and Member
 - Improved group attachment presentation
+- Made all groups private and invitation-only
+- Removed direct group joining by group ID from the user interface
+- Blocked the legacy direct-join endpoint from creating memberships
 
 ### Known limitations
-- Direct group joining is still available and may conflict with invite-only group policy
 - Messages with attachments cannot yet be edited
 - Group attachment ownership and deletion policy is still evolving

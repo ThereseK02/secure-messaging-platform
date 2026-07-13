@@ -14,7 +14,6 @@ export default function GroupChat() {
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [groupName, setGroupName] = useState("");
-  const [joinGroupId, setJoinGroupId] = useState("");
   const [inviteUsername, setInviteUsername] = useState("");
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState([]);
@@ -225,28 +224,7 @@ export default function GroupChat() {
     }
   }
 
-  async function joinGroup() {
-    if (!joinGroupId.trim()) {
-      showNotification("error", "Please enter a group ID");
-      return;
-    }
-
-    try {
-      const response = await api.post(`/api/groups/${joinGroupId}/join`);
-      setJoinGroupId("");
-      await loadGroups();
-
-      showNotification(
-          "success",
-          response.data?.status || "Joined group successfully"
-      );
-    } catch (error) {
-      console.error(error);
-      showNotification("error", "Failed to join group");
-    }
-  }
-
-  async function loadMessages(groupId = selectedGroupId) {
+   async function loadMessages(groupId = selectedGroupId) {
     if (!groupId) return;
 
     try {
@@ -983,21 +961,6 @@ export default function GroupChat() {
 
                 <button style={styles.primaryButton} onClick={createGroup}>
                   Create Group
-                </button>
-              </div>
-
-              <div style={styles.section}>
-                <h2 style={styles.sectionTitle}>Join Group</h2>
-
-                <input
-                    style={styles.input}
-                    placeholder="Group ID"
-                    value={joinGroupId}
-                    onChange={(e) => setJoinGroupId(e.target.value)}
-                />
-
-                <button style={styles.primaryButton} onClick={joinGroup}>
-                  Join Group
                 </button>
               </div>
 
