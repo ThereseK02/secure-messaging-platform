@@ -1,5 +1,14 @@
 ﻿# Secure Messaging Platform
 
+> Documentation update in progress
+> The application is actively evolving. Some feature descriptions, screenshots,
+> endpoints, and architecture details in this README may not yet reflect the
+> latest deployed version.
+
+## Project Documentation
+
+- [Current Application State](CURRENT_STATE.md)
+- [Changelog](CHANGELOG.md)
 
 
 ## Project Overview
