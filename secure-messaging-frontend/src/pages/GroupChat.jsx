@@ -14,6 +14,7 @@ export default function GroupChat() {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [joinGroupId, setJoinGroupId] = useState("");
+  const [inviteUsername, setInviteUsername] = useState("");
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -242,6 +243,52 @@ export default function GroupChat() {
     } catch (error) {
       console.error(error);
       showNotification("error", "Failed to load group members");
+    }
+  }
+
+  async function inviteRegisteredUser() {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (
+        currentGroupRole !== "OWNER" &&
+        currentGroupRole !== "ADMIN"
+    ) {
+      showNotification(
+          "error",
+          "Only the group owner or an admin can invite users"
+      );
+      return;
+    }
+
+    const normalizedInviteUsername = inviteUsername.trim();
+
+    if (!normalizedInviteUsername) {
+      showNotification("error", "Please enter a username");
+      return;
+    }
+
+    try {
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/invitations`,
+          {username: normalizedInviteUsername}
+      );
+
+      setInviteUsername("");
+
+      showNotification(
+          "success",
+          response.data?.status || "Group invitation sent"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error || "Failed to send group invitation"
+      );
     }
   }
 
@@ -902,6 +949,7 @@ export default function GroupChat() {
                                       setSelectedGroupName(group.groupName);
                                       setSelectedGroupAdmin(group.createdBy || "");
                                       setGroupMessageSearch("");
+                                      setInviteUsername("");
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
@@ -944,17 +992,55 @@ export default function GroupChat() {
                       setMembers([]);
                       setSelectedGroupAdmin("");
                       setGroupMessageSearch("");
+                      setInviteUsername("");
                     }}
                 >
                   Back to Groups
                 </button>
 
                 <div style={styles.memberBox}>
+                  {(currentGroupRole === "OWNER" ||
+                      currentGroupRole === "ADMIN") && (
+                      <div style={styles.groupInviteBox}>
+                        <p style={styles.groupInviteLabel}>
+                          Invite registered user
+                        </p>
+
+                        <div style={styles.groupInviteRow}>
+                          <input
+                              type="text"
+                              placeholder="Enter username"
+                              value={inviteUsername}
+                              onChange={(event) =>
+                                  setInviteUsername(event.target.value)
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  event.preventDefault();
+                                  inviteRegisteredUser();
+                                }
+                              }}
+                              style={styles.groupInviteInput}
+                              autoComplete="off"
+                          />
+
+                          <button
+                              type="button"
+                              style={styles.groupInviteButton}
+                              onClick={inviteRegisteredUser}
+                          >
+                            Invite
+                          </button>
+                        </div>
+                      </div>
+                  )}
+
                   <p style={styles.membersLabel}>
                     Members ({members.length})
                   </p>
 
                   <div style={styles.memberPills}>
+
                     {members.map((member) => (
                         <div
                             key={member.username}
@@ -1647,10 +1733,57 @@ groupButton: {
     scrollBehavior: "smooth",
     scrollSnapType: "y proximity",
   },
-    memberBox: {
+
+  memberBox: {
     marginBottom: "14px",
     textAlign: "center",
   },
+
+  groupInviteBox: {
+    marginBottom: "18px",
+    paddingBottom: "16px",
+    borderBottom: "1px solid #1e293b",
+  },
+
+  groupInviteLabel: {
+    color: "#bfdbfe",
+    fontSize: "14px",
+    fontWeight: "700",
+    margin: "0 0 9px 0",
+  },
+
+  groupInviteRow: {
+    display: "flex",
+    alignItems: "stretch",
+    gap: "7px",
+    width: "100%",
+  },
+
+  groupInviteInput: {
+    flex: 1,
+    minWidth: 0,
+    padding: "9px 10px",
+    borderRadius: "8px",
+    border: "1px solid #38bdf8",
+    backgroundColor: "#020617",
+    color: "#ffffff",
+    fontSize: "13px",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+
+  groupInviteButton: {
+    border: "1px solid #d6c6a5",
+    borderRadius: "8px",
+    padding: "8px 11px",
+    backgroundColor: "#0f172a",
+    color: "#d6c6a5",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  },
+
   membersLabel: {
     color: "#bfdbfe",
     fontSize: "15px",
