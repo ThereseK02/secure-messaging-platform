@@ -827,9 +827,9 @@ export default function GroupChat() {
 
   return (
       <div style={styles.page}>
-      
-<style>
-  {`
+
+        <style>
+          {`
     .messagesBox::-webkit-scrollbar {
       display: none;
     }
@@ -838,8 +838,21 @@ export default function GroupChat() {
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
+
+    .memberList::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .memberList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .memberList::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 999px;
+    }
   `}
-</style>
+        </style>
 
   <h1 style={styles.title}>Group Chat</h1>
 
@@ -1039,7 +1052,10 @@ export default function GroupChat() {
                     Members ({members.length})
                   </p>
 
-                  <div style={styles.memberPills}>
+                  <div
+                      className="memberList"
+                      style={styles.memberPills}
+                  >
 
                     {members.map((member) => (
                         <div
@@ -1737,6 +1753,10 @@ groupButton: {
   memberBox: {
     marginBottom: "14px",
     textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    minHeight: 0,
+    flex: 1,
   },
 
   groupInviteBox: {
@@ -1794,9 +1814,14 @@ groupButton: {
   memberPills: {
     display: "flex",
     justifyContent: "center",
+    alignContent: "flex-start",
     columnGap: "6px",
     rowGap: "6px",
     flexWrap: "wrap",
+    maxHeight: "300px",
+    overflowY: "auto",
+    paddingRight: "4px",
+    scrollbarWidth: "thin",
   },
 
   memberPill: {
