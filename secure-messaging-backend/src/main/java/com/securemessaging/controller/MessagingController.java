@@ -126,16 +126,6 @@ public class MessagingController {
         );
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(
-                Map.of(
-                        "status", "User registered successfully",
-                        "username", request.get("username")
-                )
-        );
-    }
-
     @PostMapping("/messages/send")
     public ResponseEntity<?> send(@RequestBody Map<String, String> request) throws Exception {
         String senderUsername = org.springframework.security.core.context.SecurityContextHolder
