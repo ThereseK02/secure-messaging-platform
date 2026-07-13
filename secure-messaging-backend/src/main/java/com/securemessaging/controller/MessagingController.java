@@ -753,6 +753,193 @@ public ResponseEntity<?> leaveGroup(@PathVariable("groupId") Long groupId) {
         );
     }
 
+    @GetMapping("/groups/invitations/pending")
+    public ResponseEntity<?> pendingGroupInvitations() {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        List<GroupInvitationEntity> invitations =
+                groupInvitationRepository
+                        .findByInvitedUsernameAndStatusOrderByCreatedAtDesc(
+                                currentUsername,
+                                GroupInvitationStatus.PENDING
+                        );
+
+        List<Map<String, Object>> invitationDetails =
+                new ArrayList<>();
+
+        for (GroupInvitationEntity invitation : invitations) {
+
+            GroupEntity group =
+                    groupRepository
+                            .findById(invitation.getGroupId())
+                            .orElse(null);
+
+            if (group == null) {
+                continue;
+            }
+
+            invitationDetails.add(
+                    Map.of(
+                            "invitationId", invitation.getId(),
+                            "groupId", invitation.getGroupId(),
+                            "groupName", group.getGroupName(),
+                            "invitedBy", invitation.getInvitedBy(),
+                            "invitationStatus", invitation.getStatus().name(),
+                            "createdAt", invitation.getCreatedAt()
+                    )
+            );
+        }
+
+        return ResponseEntity.ok(invitationDetails);
+    }
+
+    @Transactional
+    @PostMapping("/groups/invitations/{invitationId}/accept")
+    public ResponseEntity<?> acceptGroupInvitation(
+            @PathVariable("invitationId") Long invitationId) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupInvitationEntity invitation =
+                groupInvitationRepository
+                        .findById(invitationId)
+                        .orElse(null);
+
+        if (invitation == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group invitation not found")
+            );
+        }
+
+        if (!invitation.getInvitedUsername().equals(currentUsername)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "This invitation does not belong to you")
+            );
+        }
+
+        if (invitation.getStatus() != GroupInvitationStatus.PENDING) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "This invitation is no longer pending")
+            );
+        }
+
+        GroupEntity group =
+                groupRepository
+                        .findById(invitation.getGroupId())
+                        .orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        boolean alreadyMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                invitation.getGroupId(),
+                                currentUsername
+                        )
+                        .isPresent();
+
+        if (!alreadyMember) {
+            groupMemberRepository.save(
+                    new GroupMemberEntity(
+                            invitation.getGroupId(),
+                            currentUsername,
+                            GroupRole.MEMBER
+                    )
+            );
+        }
+
+        invitation.setStatus(GroupInvitationStatus.ACCEPTED);
+        invitation.setRespondedAt(LocalDateTime.now());
+
+        groupInvitationRepository.save(invitation);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status",
+                        alreadyMember
+                                ? "Invitation accepted; already a group member"
+                                : "Group invitation accepted",
+                        "invitationId", invitation.getId(),
+                        "groupId", invitation.getGroupId(),
+                        "groupName", group.getGroupName(),
+                        "username", currentUsername,
+                        "role", GroupRole.MEMBER.name(),
+                        "invitationStatus", invitation.getStatus().name()
+                )
+        );
+    }
+
+    @PostMapping("/groups/invitations/{invitationId}/decline")
+    public ResponseEntity<?> declineGroupInvitation(
+            @PathVariable("invitationId") Long invitationId) {
+
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        GroupInvitationEntity invitation =
+                groupInvitationRepository
+                        .findById(invitationId)
+                        .orElse(null);
+
+        if (invitation == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group invitation not found")
+            );
+        }
+
+        if (!invitation.getInvitedUsername().equals(currentUsername)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "This invitation does not belong to you")
+            );
+        }
+
+        if (invitation.getStatus() != GroupInvitationStatus.PENDING) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "This invitation is no longer pending")
+            );
+        }
+
+        GroupEntity group =
+                groupRepository
+                        .findById(invitation.getGroupId())
+                        .orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        invitation.setStatus(GroupInvitationStatus.DECLINED);
+        invitation.setRespondedAt(LocalDateTime.now());
+
+        groupInvitationRepository.save(invitation);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", "Group invitation declined",
+                        "invitationId", invitation.getId(),
+                        "groupId", invitation.getGroupId(),
+                        "groupName", group.getGroupName(),
+                        "username", currentUsername,
+                        "invitationStatus", invitation.getStatus().name()
+                )
+        );
+    }
+
     @Transactional
     @DeleteMapping("/groups/{groupId}")
     public ResponseEntity<?> deleteGroup(
