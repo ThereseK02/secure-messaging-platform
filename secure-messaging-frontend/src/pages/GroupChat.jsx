@@ -485,15 +485,22 @@ export default function GroupChat() {
     }
   }
 
-  async function refreshMessages() {
-    if (!selectedGroupId) {
-      showNotification("error", "Please select a group first");
-      return;
+    async function refreshMessages() {
+        if (!selectedGroupId) {
+            showNotification("error", "Please select a group first");
+            return;
+        }
+
+        shouldAutoScrollRef.current = true;
+        setHasNewMessagesBelow(false);
+
+        await loadMessages(selectedGroupId);
+        await loadGroupAttachments(selectedGroupId);
+
+        scrollToLatestGroupMessage();
+
+        showNotification("success", "Group messages refreshed");
     }
-    await loadMessages(selectedGroupId);
-    await loadGroupAttachments(selectedGroupId);
-    showNotification("success", "Group messages refreshed");
-  }
 
   function clearSelectedGroupAttachment() {
     setSelectedGroupAttachment(null);
