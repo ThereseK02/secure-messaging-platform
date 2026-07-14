@@ -40,7 +40,8 @@ public class AuthController {
             authService.register(
                     request.username(),
                     request.email(),
-                    request.password()
+                    request.password(),
+                    request.invitationToken()
             );
 
             return ResponseEntity.ok(

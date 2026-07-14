@@ -1,12 +1,20 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+    useNavigate,
+    useSearchParams
+} from "react-router-dom";
 import api from "../services/api";
 import logo from "../assets/branding/secure-messaging-logo.png";
 
 export default function Register() {
 
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const invitationToken =
+        searchParams.get("invitationToken") || "";
+
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -28,7 +36,8 @@ function showNotification(type, text) {
             await api.post("/users/register", {
                 username,
                 email,
-                password
+                password,
+                invitationToken
             });
 showNotification("success", "Registration successful. Redirecting to login...");
 
@@ -106,11 +115,31 @@ setTimeout(() => {
                     style={{
                         color: "#38bdf8",
                         textAlign: "center",
-                        marginBottom: "30px"
+                        marginBottom: invitationToken
+                            ? "14px"
+                            : "30px"
                     }}
                 >
                     Create your secure account
                 </p>
+
+                {invitationToken && (
+                    <div
+                        style={{
+                            backgroundColor: "#172554",
+                            border: "1px solid #c4a77d",
+                            color: "#e7d7bd",
+                            padding: "12px",
+                            borderRadius: "10px",
+                            marginBottom: "24px",
+                            textAlign: "center",
+                            fontSize: "14px"
+                        }}
+                    >
+                        Complete registration with the email address
+                        that received this group invitation.
+                    </div>
+                )}
 
 {notification && (
     <div
