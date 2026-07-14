@@ -485,23 +485,6 @@ export default function GroupChat() {
     }
   }
 
-    async function refreshMessages() {
-        if (!selectedGroupId) {
-            showNotification("error", "Please select a group first");
-            return;
-        }
-
-        shouldAutoScrollRef.current = true;
-        setHasNewMessagesBelow(false);
-
-        await loadMessages(selectedGroupId);
-        await loadGroupAttachments(selectedGroupId);
-
-        scrollToLatestGroupMessage();
-
-        showNotification("success", "Group messages refreshed");
-    }
-
   function clearSelectedGroupAttachment() {
     setSelectedGroupAttachment(null);
 
@@ -1296,13 +1279,6 @@ export default function GroupChat() {
                         : "Live Refresh fallback active"}
                   </p>
 
-                  <button
-                      type="button"
-                      style={styles.secondaryRefreshButton}
-                      onClick={refreshMessages}
-                  >
-                    Refresh
-                  </button>
                 </div>
 
                 {hasNewMessagesBelow && (
@@ -1650,17 +1626,6 @@ const styles = {
     fontSize: "13px",
     fontWeight: "700",
     margin: 0,
-  },
-
-  secondaryRefreshButton: {
-    border: "1px solid rgba(56, 189, 248, 0.45)",
-    backgroundColor: "rgba(30, 58, 138, 0.35)",
-    color: "#bfdbfe",
-    borderRadius: "999px",
-    padding: "4px 10px",
-    fontSize: "12px",
-    fontWeight: "700",
-    cursor: "pointer",
   },
 
   newMessagesIndicator: {
