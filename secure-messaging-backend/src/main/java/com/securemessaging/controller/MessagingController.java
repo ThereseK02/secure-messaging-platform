@@ -1,9 +1,10 @@
-
 package com.securemessaging.controller;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 
 import com.securemessaging.entity.AttachmentEntity;
+import com.securemessaging.entity.EmailGroupInvitationEntity;
+import com.securemessaging.entity.EmailGroupInvitationStatus;
 import com.securemessaging.entity.GroupEntity;
 import com.securemessaging.entity.GroupInvitationEntity;
 import com.securemessaging.entity.GroupInvitationStatus;
@@ -12,6 +13,7 @@ import com.securemessaging.entity.GroupRole;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupMessageReadEntity;
 import com.securemessaging.repository.AttachmentRepository;
+import com.securemessaging.repository.EmailGroupInvitationRepository;
 import com.securemessaging.repository.GroupAttachmentKeyRepository;
 import com.securemessaging.repository.GroupEntityRepository;
 import com.securemessaging.repository.GroupInvitationRepository;
@@ -21,6 +23,7 @@ import com.securemessaging.repository.GroupMessageReadRepository;
 import com.securemessaging.repository.UserEntityRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.securemessaging.entity.EncryptedMessageEntity;
@@ -30,6 +33,7 @@ import com.securemessaging.core.SecureMessagingSystem.DecryptedMessageView;
 import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
+import com.securemessaging.service.InvitationTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,35 +48,42 @@ public class MessagingController {
     private final DatabaseUserService databaseUserService;
     private final GroupEntityRepository groupRepository;
     private final GroupInvitationRepository groupInvitationRepository;
+    private final EmailGroupInvitationRepository emailGroupInvitationRepository;
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
     private final GroupMessageReadRepository groupMessageReadRepository;
     private final AttachmentRepository attachmentRepository;
     private final GroupAttachmentKeyRepository groupAttachmentKeyRepository;
     private final UserEntityRepository userEntityRepository;
+    private final InvitationTokenService invitationTokenService;
     private final SimpMessagingTemplate messagingTemplate;
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
                                DatabaseUserService databaseUserService,
                                GroupEntityRepository groupRepository,
                                GroupInvitationRepository groupInvitationRepository,
+                               EmailGroupInvitationRepository emailGroupInvitationRepository,
                                GroupMemberEntityRepository groupMemberRepository,
                                GroupMessageEntityRepository groupMessageRepository,
                                GroupMessageReadRepository groupMessageReadRepository,
                                AttachmentRepository attachmentRepository,
                                GroupAttachmentKeyRepository groupAttachmentKeyRepository,
                                UserEntityRepository userEntityRepository,
+                               InvitationTokenService invitationTokenService,
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
         this.groupRepository = groupRepository;
         this.groupInvitationRepository = groupInvitationRepository;
+        this.emailGroupInvitationRepository =
+                emailGroupInvitationRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMessageRepository = groupMessageRepository;
         this.groupMessageReadRepository = groupMessageReadRepository;
         this.attachmentRepository = attachmentRepository;
         this.groupAttachmentKeyRepository = groupAttachmentKeyRepository;
         this.userEntityRepository = userEntityRepository;
+        this.invitationTokenService = invitationTokenService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -722,6 +733,174 @@ public ResponseEntity<?> myGroups() {
                         "invitedUsername", savedInvitation.getInvitedUsername(),
                         "invitedBy", savedInvitation.getInvitedBy(),
                         "invitationStatus", savedInvitation.getStatus().name()
+                )
+        );
+    }
+
+    @PostMapping("/groups/{groupId}/email-invitations")
+    public ResponseEntity<?> inviteUnregisteredUserByEmail(
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Map<String, String> request) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        GroupEntity group =
+                groupRepository.findById(groupId).orElse(null);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Group not found")
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                currentUsername
+                        )
+                        .orElse(null);
+
+        if (currentMember == null) {
+            return ResponseEntity.status(403).body(
+                    Map.of(
+                            "error",
+                            "You are not a member of this group"
+                    )
+            );
+        }
+
+        if (
+                currentMember.getRole() != GroupRole.OWNER &&
+                        currentMember.getRole() != GroupRole.ADMIN
+        ) {
+            return ResponseEntity.status(403).body(
+                    Map.of(
+                            "error",
+                            "Only the group owner or an admin can invite users"
+                    )
+            );
+        }
+
+        String invitedEmail = request.get("email");
+
+        if (invitedEmail == null || invitedEmail.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Email is required")
+            );
+        }
+
+        invitedEmail =
+                invitedEmail
+                        .trim()
+                        .toLowerCase(Locale.ROOT);
+
+        if (!invitedEmail.matches(
+                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
+        )) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Invalid email address")
+            );
+        }
+
+        if (
+                userEntityRepository
+                        .findByEmailIgnoreCase(invitedEmail)
+                        .isPresent()
+        ) {
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "error",
+                            "This email belongs to a registered user. Invite the user by username."
+                    )
+            );
+        }
+
+        EmailGroupInvitationEntity existingInvitation =
+                emailGroupInvitationRepository
+                        .findByGroupIdAndInvitedEmailIgnoreCase(
+                                groupId,
+                                invitedEmail
+                        )
+                        .orElse(null);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (
+                existingInvitation != null &&
+                        existingInvitation.getStatus() ==
+                                EmailGroupInvitationStatus.PENDING &&
+                        existingInvitation.getExpiresAt().isAfter(now)
+        ) {
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "error",
+                            "A pending email invitation already exists"
+                    )
+            );
+        }
+
+        String rawToken =
+                invitationTokenService.generateToken();
+
+        String tokenHash =
+                invitationTokenService.hashToken(rawToken);
+
+        LocalDateTime expiresAt = now.plusDays(7);
+
+        EmailGroupInvitationEntity invitation;
+
+        if (existingInvitation == null) {
+            invitation = new EmailGroupInvitationEntity(
+                    groupId,
+                    invitedEmail,
+                    currentUsername,
+                    tokenHash,
+                    EmailGroupInvitationStatus.PENDING,
+                    now,
+                    expiresAt
+            );
+        } else {
+            invitation = existingInvitation;
+            invitation.setInvitedBy(currentUsername);
+            invitation.setTokenHash(tokenHash);
+            invitation.setStatus(
+                    EmailGroupInvitationStatus.PENDING
+            );
+            invitation.setCreatedAt(now);
+            invitation.setExpiresAt(expiresAt);
+            invitation.setUsedAt(null);
+            invitation.setRegisteredUsername(null);
+        }
+
+        EmailGroupInvitationEntity savedInvitation =
+                emailGroupInvitationRepository.save(invitation);
+
+        String registrationLink =
+                "https://brain-secure-messaging.com/register" +
+                        "?invitationToken=" + rawToken;
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status",
+                        "Email group invitation created",
+                        "invitationId",
+                        savedInvitation.getId(),
+                        "groupId",
+                        savedInvitation.getGroupId(),
+                        "groupName",
+                        group.getGroupName(),
+                        "invitedEmail",
+                        savedInvitation.getInvitedEmail(),
+                        "expiresAt",
+                        savedInvitation.getExpiresAt(),
+                        "registrationLink",
+                        registrationLink
                 )
         );
     }
