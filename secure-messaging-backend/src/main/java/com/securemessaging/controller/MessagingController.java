@@ -1153,19 +1153,16 @@ public ResponseEntity<?> myGroups() {
                 )
         );
     }
+    private void markGroupMessageAsRead(
+            Long groupId,
+            Long groupMessageId,
+            String username) {
 
-private void markGroupMessageAsRead(Long groupId, Long groupMessageId, String username) {
-        if (groupMessageReadRepository.existsByGroupMessageIdAndUsername(groupMessageId, username)) {
-            return;
-        }
-
-        groupMessageReadRepository.save(
-                new GroupMessageReadEntity(
-                        groupMessageId,
-                        groupId,
-                        username,
-                        LocalDateTime.now()
-                )
+        groupMessageReadRepository.insertReadIfAbsent(
+                groupMessageId,
+                groupId,
+                username,
+                LocalDateTime.now()
         );
     }
 
@@ -1427,27 +1424,15 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                 .toList();
 
         if (!groupMessageIds.isEmpty()) {
-            java.util.Set<Long> alreadyReadMessageIds =
-                    groupMessageReadRepository
-                            .findByGroupMessageIdInAndUsername(groupMessageIds, currentUsername)
-                            .stream()
-                            .map(GroupMessageReadEntity::getGroupMessageId)
-                            .collect(java.util.stream.Collectors.toSet());
-
             LocalDateTime readAt = LocalDateTime.now();
 
-            List<GroupMessageReadEntity> newReadRecords = groupMessages.stream()
-                    .filter(message -> !alreadyReadMessageIds.contains(message.getId()))
-                    .map(message -> new GroupMessageReadEntity(
-                            message.getId(),
-                            groupId,
-                            currentUsername,
-                            readAt
-                    ))
-                    .toList();
-
-            if (!newReadRecords.isEmpty()) {
-                groupMessageReadRepository.saveAll(newReadRecords);
+            for (GroupMessageEntity message : groupMessages) {
+                groupMessageReadRepository.insertReadIfAbsent(
+                        message.getId(),
+                        groupId,
+                        currentUsername,
+                        readAt
+                );
             }
         }
 
