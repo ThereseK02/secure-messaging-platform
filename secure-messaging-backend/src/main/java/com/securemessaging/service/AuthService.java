@@ -14,13 +14,25 @@ public class AuthService {
         this.databaseUserService = databaseUserService;
         this.jwtUtil = jwtUtil;
     }
-    public void register(String username, String password) {
+
+    public void register(
+            String username,
+            String email,
+            String password) {
+
         try {
-                databaseUserService.register(username, password);
+            databaseUserService.register(
+                    username,
+                    email,
+                    password
+            );
         } catch (Exception e) {
-                throw new RuntimeException("Registration failed: " + e.getMessage());
-            }
+            throw new RuntimeException(
+                    "Registration failed: " + e.getMessage()
+            );
         }
+    }
+
     public String login(String username, String password) {
 
         try {

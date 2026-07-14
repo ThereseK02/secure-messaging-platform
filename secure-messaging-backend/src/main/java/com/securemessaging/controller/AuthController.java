@@ -2,6 +2,7 @@ package com.securemessaging.controller;
 
 import com.securemessaging.dto.LoginRequest;
 import com.securemessaging.dto.LoginResponse;
+import com.securemessaging.dto.RegistrationRequest;
 import com.securemessaging.service.AuthService;
 
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-       @PostMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
         String token = authService.login(
@@ -29,11 +30,14 @@ public class AuthController {
                 new LoginResponse(token)
         );
     }
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> register(
+            @RequestBody RegistrationRequest request) {
 
         authService.register(
                 request.username(),
+                request.email(),
                 request.password()
         );
 

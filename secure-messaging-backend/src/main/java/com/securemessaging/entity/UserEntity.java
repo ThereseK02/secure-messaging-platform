@@ -10,6 +10,9 @@ public class UserEntity {
     @Id
     private String username;
 
+    @Column(unique = true)
+    private String email;
+
     @Column(nullable = false)
     private String passwordHash;
 
@@ -24,8 +27,16 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(String username, String passwordHash, String publicKeyBase64, String privateKeyBase64, LocalDateTime createdAt) {
+    public UserEntity(
+            String username,
+            String email,
+            String passwordHash,
+            String publicKeyBase64,
+            String privateKeyBase64,
+            LocalDateTime createdAt) {
+
         this.username = username;
+        this.email = email;
         this.passwordHash = passwordHash;
         this.publicKeyBase64 = publicKeyBase64;
         this.privateKeyBase64 = privateKeyBase64;
@@ -33,9 +44,15 @@ public class UserEntity {
     }
 
     public String getUsername() { return username; }
+    public String getEmail() {
+        return email;
+    }
     public String getPasswordHash() { return passwordHash; }
     public String getPublicKeyBase64() { return publicKeyBase64; }
     public String getPrivateKeyBase64() { return privateKeyBase64; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
 

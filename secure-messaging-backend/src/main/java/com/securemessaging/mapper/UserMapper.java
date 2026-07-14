@@ -15,6 +15,7 @@ public class UserMapper {
     public static UserEntity toEntity(User user) {
         return new UserEntity(
                 user.getUsername(),
+                null,
                 user.getPasswordHash(),
                 Base64.getEncoder().encodeToString(user.getRsaPublicKey().getEncoded()),
                 Base64.getEncoder().encodeToString(user.getRsaPrivateKey().getEncoded()),

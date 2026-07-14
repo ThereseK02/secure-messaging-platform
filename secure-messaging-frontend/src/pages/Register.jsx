@@ -6,10 +6,11 @@ import logo from "../assets/branding/secure-messaging-logo.png";
 
 export default function Register() {
 
-const navigate = useNavigate();
-const [username, setUsername] = useState("");
-const [password, setPassword] = useState("");
-const [notification, setNotification] = useState(null);
+    const navigate = useNavigate();
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [notification, setNotification] = useState(null);
 
 function showNotification(type, text) {
     setNotification({ type, text });
@@ -24,12 +25,11 @@ function showNotification(type, text) {
         e.preventDefault();
 
         try {
-
             await api.post("/users/register", {
                 username,
+                email,
                 password
             });
-
 showNotification("success", "Registration successful. Redirecting to login...");
 
 setTimeout(() => {
@@ -39,7 +39,12 @@ setTimeout(() => {
         } catch (error) {
 
             console.error(error);
-showNotification("error", "Registration failed");
+            showNotification(
+                "error",
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                "Registration failed"
+            );
         }
     }
 
@@ -140,6 +145,24 @@ showNotification("error", "Registration failed");
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        style={{
+                            width: "100%",
+                            padding: "14px",
+                            marginBottom: "24px",
+                            borderRadius: "10px",
+                            border: "1px solid #2563eb",
+                            backgroundColor: "#0f172a",
+                            color: "white",
+                            fontSize: "16px",
+                            boxSizing: "border-box"
+                        }}
+                    />
+
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         style={{
                             width: "100%",
                             padding: "14px",
