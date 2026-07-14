@@ -7,6 +7,7 @@ import com.securemessaging.service.AuthService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping({"/users", "/api/users"})
@@ -35,12 +36,21 @@ public class AuthController {
     public ResponseEntity<?> register(
             @RequestBody RegistrationRequest request) {
 
-        authService.register(
-                request.username(),
-                request.email(),
-                request.password()
-        );
+        try {
+            authService.register(
+                    request.username(),
+                    request.email(),
+                    request.password()
+            );
 
-        return ResponseEntity.ok("Registration successful");
+            return ResponseEntity.ok(
+                    "Registration successful"
+            );
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", e.getMessage())
+            );
+        }
     }
 }

@@ -26,9 +26,11 @@ public class AuthService {
                     email,
                     password
             );
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Registration failed: " + e.getMessage()
+                    "Registration failed"
             );
         }
     }
