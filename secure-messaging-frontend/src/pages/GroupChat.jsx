@@ -2283,7 +2283,7 @@ groupButton: {
     gap: "20px",
     width: "100%",
     maxWidth: "1200px",
-    height: "clamp(470px, 64vh, 620px)",
+    height: "clamp(620px, 78vh, 760px)",
     alignItems: "stretch",
   },
   chatSidebar: {
