@@ -15,6 +15,9 @@ export default function GroupChat() {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [inviteUsername, setInviteUsername] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [emailRegistrationLink, setEmailRegistrationLink] =
+      useState("");
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -333,6 +336,88 @@ export default function GroupChat() {
       showNotification(
           "error",
           error.response?.data?.error || "Failed to send group invitation"
+      );
+    }
+  }
+
+  async function inviteUnregisteredUserByEmail() {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (
+        currentGroupRole !== "OWNER" &&
+        currentGroupRole !== "ADMIN"
+    ) {
+      showNotification(
+          "error",
+          "Only the group owner or an admin can invite users"
+      );
+      return;
+    }
+
+    const normalizedInviteEmail =
+        inviteEmail.trim().toLowerCase();
+
+    if (!normalizedInviteEmail) {
+      showNotification("error", "Please enter an email address");
+      return;
+    }
+
+    try {
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/email-invitations`,
+          { email: normalizedInviteEmail }
+      );
+
+      setInviteEmail("");
+      setEmailRegistrationLink(
+          response.data?.registrationLink || ""
+      );
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          "Email group invitation created"
+      );
+    } catch (error) {
+      console.error(error);
+
+      setEmailRegistrationLink("");
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to create email invitation"
+      );
+    }
+  }
+
+  async function copyEmailRegistrationLink() {
+    if (!emailRegistrationLink) {
+      showNotification(
+          "error",
+          "No registration link is available"
+      );
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+          emailRegistrationLink
+      );
+
+      showNotification(
+          "success",
+          "Registration link copied"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          "Failed to copy registration link"
       );
     }
   }
@@ -1060,6 +1145,8 @@ export default function GroupChat() {
                                       setSelectedGroupAdmin(group.createdBy || "");
                                       setGroupMessageSearch("");
                                       setInviteUsername("");
+                                      setInviteEmail("");
+                                      setEmailRegistrationLink("");
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
@@ -1103,6 +1190,8 @@ export default function GroupChat() {
                       setSelectedGroupAdmin("");
                       setGroupMessageSearch("");
                       setInviteUsername("");
+                      setInviteEmail("");
+                      setEmailRegistrationLink("");
                     }}
                 >
                   Back to Groups
@@ -1112,36 +1201,107 @@ export default function GroupChat() {
                   {(currentGroupRole === "OWNER" ||
                       currentGroupRole === "ADMIN") && (
                       <div style={styles.groupInviteBox}>
-                        <p style={styles.groupInviteLabel}>
-                          Invite registered user
-                        </p>
+                        <div style={styles.groupInviteSection}>
+                          <p style={styles.groupInviteLabel}>
+                            Invite registered user
+                          </p>
 
-                        <div style={styles.groupInviteRow}>
-                          <input
-                              type="text"
-                              placeholder="Enter username"
-                              value={inviteUsername}
-                              onChange={(event) =>
-                                  setInviteUsername(event.target.value)
-                              }
-                              onKeyDown={(event) => {
-                                if (event.key === "Enter") {
-                                  event.preventDefault();
-                                  inviteRegisteredUser();
+                          <div style={styles.groupInviteRow}>
+                            <input
+                                type="text"
+                                placeholder="Enter username"
+                                value={inviteUsername}
+                                onChange={(event) =>
+                                    setInviteUsername(
+                                        event.target.value
+                                    )
                                 }
-                              }}
-                              style={styles.groupInviteInput}
-                              autoComplete="off"
-                          />
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter") {
+                                    event.preventDefault();
+                                    inviteRegisteredUser();
+                                  }
+                                }}
+                                style={styles.groupInviteInput}
+                                autoComplete="off"
+                            />
 
-                          <button
-                              type="button"
-                              style={styles.groupInviteButton}
-                              onClick={inviteRegisteredUser}
-                          >
-                            Invite
-                          </button>
+                            <button
+                                type="button"
+                                style={styles.groupInviteButton}
+                                onClick={inviteRegisteredUser}
+                            >
+                              Invite
+                            </button>
+                          </div>
                         </div>
+
+                        <div style={styles.groupInviteSection}>
+                          <p style={styles.groupInviteLabel}>
+                            Invite unregistered user by email
+                          </p>
+
+                          <div style={styles.groupInviteRow}>
+                            <input
+                                type="email"
+                                placeholder="Enter email"
+                                value={inviteEmail}
+                                onChange={(event) => {
+                                  setInviteEmail(
+                                      event.target.value
+                                  );
+                                  setEmailRegistrationLink("");
+                                }}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter") {
+                                    event.preventDefault();
+                                    inviteUnregisteredUserByEmail();
+                                  }
+                                }}
+                                style={styles.groupInviteInput}
+                                autoComplete="off"
+                            />
+
+                            <button
+                                type="button"
+                                style={styles.groupInviteButton}
+                                onClick={
+                                  inviteUnregisteredUserByEmail
+                                }
+                            >
+                              Create
+                            </button>
+                          </div>
+                        </div>
+
+                        {emailRegistrationLink && (
+                            <div
+                                style={
+                                  styles.emailRegistrationLinkBox
+                                }
+                            >
+                              <p
+                                  style={
+                                    styles.emailRegistrationLinkText
+                                  }
+                              >
+                                Secure registration link created.
+                                It expires in seven days.
+                              </p>
+
+                              <button
+                                  type="button"
+                                  style={
+                                    styles.copyRegistrationLinkButton
+                                  }
+                                  onClick={
+                                    copyEmailRegistrationLink
+                                  }
+                              >
+                                Copy registration link
+                              </button>
+                            </div>
+                        )}
                       </div>
                   )}
 
@@ -1913,6 +2073,13 @@ groupButton: {
     marginBottom: "18px",
     paddingBottom: "16px",
     borderBottom: "1px solid #1e293b",
+    width: "100%",
+    maxWidth: "100%",
+    boxSizing: "border-box",
+  },
+
+  groupInviteSection: {
+    marginBottom: "14px",
   },
 
   groupInviteLabel: {
@@ -1952,6 +2119,36 @@ groupButton: {
     fontWeight: "700",
     cursor: "pointer",
     whiteSpace: "nowrap",
+  },
+
+  emailRegistrationLinkBox: {
+    marginTop: "4px",
+    padding: "10px",
+    borderRadius: "9px",
+    border: "1px solid rgba(214, 198, 165, 0.65)",
+    backgroundColor: "rgba(30, 41, 59, 0.7)",
+    boxSizing: "border-box",
+  },
+
+  emailRegistrationLinkText: {
+    margin: "0 0 9px 0",
+    color: "#d6c6a5",
+    fontSize: "12px",
+    lineHeight: "1.4",
+    textAlign: "center",
+  },
+
+  copyRegistrationLinkButton: {
+    width: "100%",
+    border: "1px solid #38bdf8",
+    borderRadius: "8px",
+    padding: "8px 10px",
+    backgroundColor: "#0f172a",
+    color: "#bfdbfe",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxSizing: "border-box",
   },
 
   membersLabel: {
