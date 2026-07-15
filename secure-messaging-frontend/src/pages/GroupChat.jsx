@@ -1524,6 +1524,39 @@ export default function GroupChat() {
                                           ? styles.myMessageBubble
                                           : styles.otherMessageBubble
                                     }
+                                    role={!isEditingThisMessage ? "button" : undefined}
+                                    tabIndex={!isEditingThisMessage ? 0 : undefined}
+                                    aria-label={!isEditingThisMessage ? "Open message actions" : undefined}
+                                    aria-expanded={
+                                      !isEditingThisMessage
+                                          ? openMessageActionsId === msg.id
+                                          : undefined
+                                    }
+                                    onClick={(event) => {
+                                      if (isEditingThisMessage) {
+                                        return;
+                                      }
+
+                                      if (event.target.closest("button, textarea, input, a")) {
+                                        return;
+                                      }
+
+                                      setOpenMessageActionsId(
+                                          openMessageActionsId === msg.id ? null : msg.id
+                                      );
+                                    }}
+                                    onKeyDown={(event) => {
+                                      if (
+                                          !isEditingThisMessage &&
+                                          (event.key === "Enter" || event.key === " ")
+                                      ) {
+                                        event.preventDefault();
+
+                                        setOpenMessageActionsId(
+                                            openMessageActionsId === msg.id ? null : msg.id
+                                        );
+                                      }
+                                    }}
                                 >
 
                                   {msg.pinned && (
@@ -1598,62 +1631,43 @@ export default function GroupChat() {
                                       </button>
                                   ))}
 
-                                  {!isEditingThisMessage && (
-                                      <div style={styles.messageActions}>
+                                  {!isEditingThisMessage && openMessageActionsId === msg.id && (
+                                      <div style={styles.messageActionsMenu}>
                                         <button
                                             type="button"
-                                            style={styles.messageActionsToggle}
-                                            onClick={() =>
-                                                setOpenMessageActionsId(
-                                                    openMessageActionsId === msg.id ? null : msg.id
-                                                )
-                                            }
-                                            aria-label="Open message actions"
-                                            aria-expanded={openMessageActionsId === msg.id}
-                                            title="Message actions"
+                                            style={styles.messageActionMenuButton}
+                                            onClick={() => {
+                                              setOpenMessageActionsId(null);
+                                              togglePinGroupMessage(msg);
+                                            }}
                                         >
-                                          ⋯
+                                          {msg.pinned ? "Unpin" : "Pin"}
                                         </button>
 
-                                        {openMessageActionsId === msg.id && (
-                                            <div style={styles.messageActionsMenu}>
+                                        {canModifyMessage && (
+                                            <>
                                               <button
                                                   type="button"
                                                   style={styles.messageActionMenuButton}
                                                   onClick={() => {
                                                     setOpenMessageActionsId(null);
-                                                    togglePinGroupMessage(msg);
+                                                    startEditingGroupMessage(msg);
                                                   }}
                                               >
-                                                {msg.pinned ? "Unpin" : "Pin"}
+                                                Edit
                                               </button>
 
-                                              {canModifyMessage && (
-                                                  <>
-                                                    <button
-                                                        type="button"
-                                                        style={styles.messageActionMenuButton}
-                                                        onClick={() => {
-                                                          setOpenMessageActionsId(null);
-                                                          startEditingGroupMessage(msg);
-                                                        }}
-                                                    >
-                                                      Edit
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        style={styles.messageActionMenuButton}
-                                                        onClick={() => {
-                                                          setOpenMessageActionsId(null);
-                                                          deleteGroupMessage(msg);
-                                                        }}
-                                                    >
-                                                      Delete
-                                                    </button>
-                                                  </>
-                                              )}
-                                            </div>
+                                              <button
+                                                  type="button"
+                                                  style={styles.messageActionMenuButton}
+                                                  onClick={() => {
+                                                    setOpenMessageActionsId(null);
+                                                    deleteGroupMessage(msg);
+                                                  }}
+                                              >
+                                                Delete
+                                              </button>
+                                            </>
                                         )}
                                       </div>
                                   )}
@@ -2286,6 +2300,7 @@ groupButton: {
     scrollSnapAlign: "start",
   },
   myMessageBubble: {
+    position: "relative",
     background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
     color: "#f8fafc",
     border: "1px solid #38bdf8",
@@ -2297,6 +2312,7 @@ groupButton: {
   },
 
   otherMessageBubble: {
+    position: "relative",
     backgroundColor: "#020617",
     color: "#f8fafc",
     border: "1px solid #38bdf8",
@@ -2397,8 +2413,11 @@ messageCard: {
     justifyContent: "center",
     padding: 0,
   },
-
   messageActionsMenu: {
+    position: "absolute",
+    right: "12px",
+    bottom: "42px",
+    zIndex: 20,
     display: "flex",
     alignItems: "center",
     gap: "6px",
@@ -2407,8 +2426,8 @@ messageCard: {
     border: "1px solid #334155",
     backgroundColor: "#020617",
     boxShadow: "0 8px 20px rgba(0, 0, 0, 0.30)",
+    whiteSpace: "nowrap",
   },
-
   messageActionMenuButton: {
     border: "1px solid #475569",
     borderRadius: "8px",
