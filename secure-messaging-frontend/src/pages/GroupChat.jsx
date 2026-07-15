@@ -1567,18 +1567,6 @@ export default function GroupChat() {
                                       }
                                     }}
                                 >
-                                  {!isEditingThisMessage &&
-                                      (
-                                          hoveredMessageActionsId === msg.id ||
-                                          openMessageActionsId === msg.id
-                                      ) && (
-                                          <span
-                                              style={styles.messageActionsHint}
-                                              aria-hidden="true"
-                                          >
-          ⋯
-        </span>
-                                      )}
                                   {msg.pinned && (
                                       <p style={styles.pinnedMessageLabel}>
                                         Pinned by {msg.pinnedBy || "group member"}
@@ -1703,13 +1691,36 @@ export default function GroupChat() {
                                       </div>
                                   )}
 
-                                  {msg.seenCount !== undefined && msg.memberCount !== undefined && (
-                                      <p style={styles.seenStatus}>
-                                        Seen by {msg.seenCount} of {msg.memberCount}
-                                        {msg.editedAt && " · edited"}
-                                      </p>
-                                  )}
+                                  {(
+                                      (!isEditingThisMessage &&
+                                          (
+                                              hoveredMessageActionsId === msg.id ||
+                                              openMessageActionsId === msg.id
+                                          )) ||
+                                      (msg.seenCount !== undefined && msg.memberCount !== undefined)
+                                  ) && (
+                                      <div style={styles.messageMetadataRow}>
+                                        {!isEditingThisMessage &&
+                                            (
+                                                hoveredMessageActionsId === msg.id ||
+                                                openMessageActionsId === msg.id
+                                            ) && (
+                                                <span
+                                                    style={styles.messageActionsHint}
+                                                    aria-hidden="true"
+                                                >
+                                                  ⋯
+                                                </span>
+                                            )}
 
+                                        {msg.seenCount !== undefined && msg.memberCount !== undefined && (
+                                            <p style={styles.seenStatus}>
+                                              Seen by {msg.seenCount} of {msg.memberCount}
+                                              {msg.editedAt && " · edited"}
+                                            </p>
+                                        )}
+                                      </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -2420,9 +2431,7 @@ messageCard: {
     lineHeight: "1.35"
   },
   messageActionsHint: {
-    position: "absolute",
-    bottom: "10px",
-    right: "98px",
+    flexShrink: 0,
     color: "#ffffff",
     backgroundColor: "rgba(2, 6, 23, 0.92)",
     border: "1px solid rgba(214, 198, 168, 0.90)",
@@ -2500,15 +2509,21 @@ messageCard: {
     fontSize: "12px",
     cursor: "pointer",
   },
-
+  messageMetadataRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "6px",
+    marginTop: "8px",
+    minWidth: 0,
+  },
   seenStatus: {
     color: "#94a3b8",
     fontSize: "12px",
-    marginTop: "8px",
-    marginBottom: "0",
+    margin: 0,
     textAlign: "right",
+    whiteSpace: "nowrap",
   },
-
   dateSeparator: {
     alignSelf: "center",
     color: "#cbd5e1",
