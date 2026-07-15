@@ -1959,9 +1959,13 @@ groupButton: {
     columnGap: "6px",
     rowGap: "6px",
     flexWrap: "wrap",
+    width: "100%",
+    maxWidth: "100%",
     maxHeight: "300px",
     overflowY: "auto",
+    overflowX: "hidden",
     paddingRight: "4px",
+    boxSizing: "border-box",
     scrollbarWidth: "thin",
   },
 
@@ -1973,12 +1977,24 @@ groupButton: {
     padding: "8px 14px",
     fontSize: "14px",
     fontWeight: "700",
+    maxWidth: "100%",
+    minWidth: 0,
+    boxSizing: "border-box",
+    whiteSpace: "normal",
+    overflowWrap: "anywhere",
+    textAlign: "center",
   },
 
   memberControl: {
     display: "flex",
     alignItems: "center",
     gap: "5px",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: 0,
+    boxSizing: "border-box",
   },
 
   memberAdminLabel: {
@@ -1991,8 +2007,11 @@ groupButton: {
   memberActions: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     gap: "5px",
     flexWrap: "wrap",
+    maxWidth: "100%",
+    minWidth: 0,
   },
 
   roleMemberButton: {
@@ -2004,6 +2023,7 @@ groupButton: {
     fontSize: "11px",
     fontWeight: "700",
     cursor: "pointer",
+    flexShrink: 0,
   },
 
   removeMemberButton: {
@@ -2015,6 +2035,7 @@ groupButton: {
     fontSize: "11px",
     fontWeight: "700",
     cursor: "pointer",
+    flexShrink: 0,
   },
 
   messageRow: {
