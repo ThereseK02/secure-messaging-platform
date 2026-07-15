@@ -1652,7 +1652,18 @@ export default function GroupChat() {
                                   ))}
 
                                   {!isEditingThisMessage && openMessageActionsId === msg.id && (
-                                      <div style={styles.messageActionsMenu}>
+                                      <div
+                                          style={{
+                                            ...styles.messageActionsMenu,
+                                            ...(msg.sender === currentUsername
+                                                ? {
+                                                  right: "calc(100% + 8px)",
+                                                }
+                                                : {
+                                                  left: "calc(100% + 8px)",
+                                                }),
+                                          }}
+                                      >
                                         <button
                                             type="button"
                                             style={styles.messageActionMenuButton}
@@ -2435,28 +2446,32 @@ messageCard: {
   },
   messageActionsHint: {
     position: "absolute",
-    top: "6px",
-    right: "9px",
-    color: "#d6c6a8",
+    top: "5px",
+    right: "7px",
+    color: "#ffffff",
+    backgroundColor: "rgba(2, 6, 23, 0.88)",
+    border: "1px solid rgba(214, 198, 168, 0.85)",
+    borderRadius: "999px",
+    padding: "0 5px 2px",
     fontSize: "18px",
     lineHeight: "1",
-    fontWeight: "700",
+    fontWeight: "800",
     pointerEvents: "none",
-    opacity: 0.85,
+    opacity: 1,
+    boxShadow: "0 3px 10px rgba(0, 0, 0, 0.35)",
   },
   messageActionsMenu: {
     position: "absolute",
-    right: "12px",
-    bottom: "42px",
+    top: "6px",
     zIndex: 20,
     display: "flex",
     alignItems: "center",
     gap: "6px",
     padding: "5px",
     borderRadius: "10px",
-    border: "1px solid #334155",
+    border: "1px solid #475569",
     backgroundColor: "#020617",
-    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.30)",
+    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.40)",
     whiteSpace: "nowrap",
   },
   messageActionMenuButton: {
