@@ -24,6 +24,7 @@ export default function GroupChat() {
   const [groupMessageSearch, setGroupMessageSearch] = useState("");
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingMessageText, setEditingMessageText] = useState("");
+  const [openMessageActionsId, setOpenMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -1601,30 +1602,58 @@ export default function GroupChat() {
                                       <div style={styles.messageActions}>
                                         <button
                                             type="button"
-                                            style={styles.pinMessageButton}
-                                            onClick={() => togglePinGroupMessage(msg)}
+                                            style={styles.messageActionsToggle}
+                                            onClick={() =>
+                                                setOpenMessageActionsId(
+                                                    openMessageActionsId === msg.id ? null : msg.id
+                                                )
+                                            }
+                                            aria-label="Open message actions"
+                                            aria-expanded={openMessageActionsId === msg.id}
+                                            title="Message actions"
                                         >
-                                          {msg.pinned ? "Unpin" : "Pin"}
+                                          ⋯
                                         </button>
 
-                                        {canModifyMessage && (
-                                            <>
+                                        {openMessageActionsId === msg.id && (
+                                            <div style={styles.messageActionsMenu}>
                                               <button
                                                   type="button"
-                                                  style={styles.editMessageButton}
-                                                  onClick={() => startEditingGroupMessage(msg)}
+                                                  style={styles.messageActionMenuButton}
+                                                  onClick={() => {
+                                                    setOpenMessageActionsId(null);
+                                                    togglePinGroupMessage(msg);
+                                                  }}
                                               >
-                                                Edit
+                                                {msg.pinned ? "Unpin" : "Pin"}
                                               </button>
 
-                                              <button
-                                                  type="button"
-                                                  style={styles.deleteMessageButton}
-                                                  onClick={() => deleteGroupMessage(msg)}
-                                              >
-                                                Delete
-                                              </button>
-                                            </>
+                                              {canModifyMessage && (
+                                                  <>
+                                                    <button
+                                                        type="button"
+                                                        style={styles.messageActionMenuButton}
+                                                        onClick={() => {
+                                                          setOpenMessageActionsId(null);
+                                                          startEditingGroupMessage(msg);
+                                                        }}
+                                                    >
+                                                      Edit
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        style={styles.messageActionMenuButton}
+                                                        onClick={() => {
+                                                          setOpenMessageActionsId(null);
+                                                          deleteGroupMessage(msg);
+                                                        }}
+                                                    >
+                                                      Delete
+                                                    </button>
+                                                  </>
+                                              )}
+                                            </div>
                                         )}
                                       </div>
                                   )}
@@ -2350,6 +2379,45 @@ messageCard: {
     gap: "10px",
     marginTop: "10px",
     alignItems: "center",
+  },
+
+  messageActionsToggle: {
+    width: "32px",
+    height: "28px",
+    borderRadius: "8px",
+    border: "1px solid #475569",
+    backgroundColor: "#0f172a",
+    color: "#d6c6a8",
+    fontSize: "20px",
+    lineHeight: "1",
+    fontWeight: "700",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+  },
+
+  messageActionsMenu: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "5px",
+    borderRadius: "10px",
+    border: "1px solid #334155",
+    backgroundColor: "#020617",
+    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.30)",
+  },
+
+  messageActionMenuButton: {
+    border: "1px solid #475569",
+    borderRadius: "8px",
+    padding: "5px 10px",
+    backgroundColor: "#0f172a",
+    color: "#d6c6a8",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
   },
 
   pinMessageButton: {
