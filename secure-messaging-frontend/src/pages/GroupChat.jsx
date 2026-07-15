@@ -2419,31 +2419,6 @@ messageCard: {
     margin: 0,
     lineHeight: "1.35"
   },
-
-  messageActions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "10px",
-    marginTop: "10px",
-    alignItems: "center",
-  },
-
-  messageActionsToggle: {
-    width: "32px",
-    height: "28px",
-    borderRadius: "8px",
-    border: "1px solid #475569",
-    backgroundColor: "#0f172a",
-    color: "#d6c6a8",
-    fontSize: "20px",
-    lineHeight: "1",
-    fontWeight: "700",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 0,
-  },
   messageActionsHint: {
     position: "absolute",
     bottom: "10px",
@@ -2484,44 +2459,9 @@ messageCard: {
     fontWeight: "700",
     cursor: "pointer",
   },
-
-  pinMessageButton: {
-    backgroundColor: "#0f172a",
-    color: "#d6c6a8",
-    border: "1px solid #d6c6a8",
-    borderRadius: "999px",
-    padding: "5px 13px",
-    fontSize: "12px",
-    fontWeight: "700",
-    cursor: "pointer",
-  },
-
-  editMessageButton: {
-    backgroundColor: "#1e3a8a",
-    color: "#dbeafe",
-    border: "1px solid #60a5fa",
-    borderRadius: "999px",
-    padding: "5px 13px",
-    fontSize: "12px",
-    fontWeight: "700",
-    cursor: "pointer",
-  },
-
-  deleteMessageButton: {
-    backgroundColor: "#d6c6a8",
-    color: "#0f172a",
-    border: "1px solid #f5e6c8",
-    borderRadius: "999px",
-    padding: "5px 13px",
-    fontSize: "12px",
-    fontWeight: "700",
-    cursor: "pointer",
-  },
-
   editMessageBox: {
     marginTop: "8px",
   },
-
   editMessageTextarea: {
     width: "100%",
     boxSizing: "border-box",
@@ -2534,7 +2474,6 @@ messageCard: {
     resize: "vertical",
     fontSize: "14px",
   },
-
   editMessageActions: {
     display: "flex",
     justifyContent: "flex-end",
