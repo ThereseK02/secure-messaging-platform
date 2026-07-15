@@ -2446,8 +2446,8 @@ messageCard: {
   },
   messageActionsHint: {
     position: "absolute",
-    top: "4px",
-    right: "6px",
+    bottom: "10px",
+    right: "108px",
     color: "#ffffff",
     backgroundColor: "rgba(2, 6, 23, 0.92)",
     border: "1px solid rgba(214, 198, 168, 0.90)",
