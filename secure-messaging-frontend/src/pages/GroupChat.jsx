@@ -875,8 +875,13 @@ export default function GroupChat() {
       -ms-overflow-style: none;
     }
 
+    .memberList {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+    }
+
     .memberList::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
     }
 
     .memberList::-webkit-scrollbar-track {
@@ -884,8 +889,12 @@ export default function GroupChat() {
     }
 
     .memberList::-webkit-scrollbar-thumb {
-      background: #334155;
+      background: rgba(100, 116, 139, 0.28);
       border-radius: 999px;
+    }
+
+    .memberList:hover::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.5);
     }
   `}
         </style>
