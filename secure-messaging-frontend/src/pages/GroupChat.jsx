@@ -2068,10 +2068,9 @@ groupButton: {
     minHeight: 0,
     flex: 1,
   },
-
   groupInviteBox: {
-    marginBottom: "18px",
-    paddingBottom: "16px",
+    marginBottom: "10px",
+    paddingBottom: "10px",
     borderBottom: "1px solid #1e293b",
     width: "100%",
     maxWidth: "100%",
@@ -2079,46 +2078,50 @@ groupButton: {
   },
 
   groupInviteSection: {
-    marginBottom: "14px",
+    marginBottom: "9px",
   },
 
   groupInviteLabel: {
     color: "#bfdbfe",
-    fontSize: "14px",
+    fontSize: "12px",
     fontWeight: "700",
-    margin: "0 0 9px 0",
+    lineHeight: "1.25",
+    margin: "0 0 6px 0",
   },
 
   groupInviteRow: {
     display: "flex",
     alignItems: "stretch",
-    gap: "7px",
+    gap: "5px",
     width: "100%",
   },
 
   groupInviteInput: {
     flex: 1,
     minWidth: 0,
-    padding: "9px 10px",
-    borderRadius: "8px",
+    height: "34px",
+    padding: "5px 8px",
+    borderRadius: "7px",
     border: "1px solid #38bdf8",
     backgroundColor: "#020617",
     color: "#ffffff",
-    fontSize: "13px",
+    fontSize: "12px",
     outline: "none",
     boxSizing: "border-box",
   },
 
   groupInviteButton: {
+    height: "34px",
     border: "1px solid #d6c6a5",
-    borderRadius: "8px",
-    padding: "8px 11px",
+    borderRadius: "7px",
+    padding: "5px 8px",
     backgroundColor: "#0f172a",
     color: "#d6c6a5",
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "700",
     cursor: "pointer",
     whiteSpace: "nowrap",
+    flexShrink: 0,
   },
 
   emailRegistrationLinkBox: {
@@ -2153,24 +2156,26 @@ groupButton: {
 
   membersLabel: {
     color: "#bfdbfe",
-    fontSize: "15px",
+    fontSize: "14px",
     fontWeight: "700",
-    marginBottom: "10px",
+    margin: "2px 0 7px 0",
   },
 
   memberPills: {
     display: "flex",
     justifyContent: "center",
     alignContent: "flex-start",
-    columnGap: "6px",
-    rowGap: "6px",
+    columnGap: "5px",
+    rowGap: "5px",
     flexWrap: "wrap",
     width: "100%",
     maxWidth: "100%",
-    maxHeight: "300px",
+    flex: 1,
+    minHeight: 0,
     overflowY: "auto",
     overflowX: "hidden",
     paddingRight: "4px",
+    paddingBottom: "4px",
     boxSizing: "border-box",
     scrollbarWidth: "thin",
   },
@@ -2289,10 +2294,10 @@ groupButton: {
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
-    padding: "20px",
+    padding: "16px",
     display: "flex",
     flexDirection: "column",
-    gap: "18px",
+    gap: "12px",
     boxSizing: "border-box",
   },
   chatMain: {
