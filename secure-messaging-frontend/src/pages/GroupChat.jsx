@@ -25,6 +25,7 @@ export default function GroupChat() {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingMessageText, setEditingMessageText] = useState("");
   const [openMessageActionsId, setOpenMessageActionsId] = useState(null);
+  const [hoveredMessageActionsId, setHoveredMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -1532,6 +1533,14 @@ export default function GroupChat() {
                                           ? openMessageActionsId === msg.id
                                           : undefined
                                     }
+                                    onMouseEnter={() => setHoveredMessageActionsId(msg.id)}
+                                    onMouseLeave={() => setHoveredMessageActionsId(null)}
+                                    onFocus={() => setHoveredMessageActionsId(msg.id)}
+                                    onBlur={(event) => {
+                                      if (!event.currentTarget.contains(event.relatedTarget)) {
+                                        setHoveredMessageActionsId(null);
+                                      }
+                                    }}
                                     onClick={(event) => {
                                       if (isEditingThisMessage) {
                                         return;
@@ -1558,7 +1567,18 @@ export default function GroupChat() {
                                       }
                                     }}
                                 >
-
+                                  {!isEditingThisMessage &&
+                                      (
+                                          hoveredMessageActionsId === msg.id ||
+                                          openMessageActionsId === msg.id
+                                      ) && (
+                                          <span
+                                              style={styles.messageActionsHint}
+                                              aria-hidden="true"
+                                          >
+          ⋯
+        </span>
+                                      )}
                                   {msg.pinned && (
                                       <p style={styles.pinnedMessageLabel}>
                                         Pinned by {msg.pinnedBy || "group member"}
@@ -2412,6 +2432,17 @@ messageCard: {
     alignItems: "center",
     justifyContent: "center",
     padding: 0,
+  },
+  messageActionsHint: {
+    position: "absolute",
+    top: "6px",
+    right: "9px",
+    color: "#d6c6a8",
+    fontSize: "18px",
+    lineHeight: "1",
+    fontWeight: "700",
+    pointerEvents: "none",
+    opacity: 0.85,
   },
   messageActionsMenu: {
     position: "absolute",
