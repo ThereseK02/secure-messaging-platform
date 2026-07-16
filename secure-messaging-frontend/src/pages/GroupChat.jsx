@@ -2137,7 +2137,7 @@ groupButton: {
     marginBottom: "6px",
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
+    gap: 0,
     scrollPaddingTop: "24px",
     scrollPaddingBottom: "28px",
     scrollBehavior: "smooth",
