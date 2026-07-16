@@ -33,54 +33,46 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 
 ## Table of Contents
 
-
-
 - [Project Overview](#project-overview)
-
 - [Table of Contents](#table-of-contents)
-
 - [Key Features](#key-features)
-
 - [System Architecture](#system-architecture)
-
 - [Technology Stack](#technology-stack)
-
 - [Project Structure](#project-structure)
-
 - [Database Design](#database-design)
-
 - [Security Features](#security-features)
-
 - [Encryption Features](#encryption-features)
-
 - [Welcome Page](#welcome-page)
-
 - [Authentication Workflow](#authentication-workflow)
-
 - [Messaging Features](#messaging-features)
-
 - [Group Messaging](#group-messaging)
-
+    - [Group Creation and Private Membership](#group-creation-and-private-membership)
+    - [Invitations for Registered and Unregistered Users](#invitations-for-registered-and-unregistered-users)
+    - [Group Roles and Administration](#group-roles-and-administration)
+    - [Encrypted Group Attachments](#encrypted-group-attachments)
+    - [Group Message Search](#group-message-search)
+    - [Group Message Actions](#group-message-actions)
+    - [Seen Status and Message Metadata](#seen-status-and-message-metadata)
+    - [Real-Time Group Updates](#real-time-group-updates)
+    - [Group Messaging Screenshots](#group-messaging-screenshots)
 - [Deployment Architecture](#deployment-architecture)
-
 - [Monitoring and Logging](#monitoring-and-logging)
-
 - [CI/CD Pipeline](#cicd-pipeline)
-
 - [Diagrams](#diagrams)
-
 - [Key Contributions](#key-contributions)
-
 - [Future Improvements](#future-improvements)
-
+    - [Group Conversation Awareness](#group-conversation-awareness)
+    - [Secure Decisions and Acknowledgments](#secure-decisions-and-acknowledgments)
+    - [Password and Authentication Management](#password-and-authentication-management)
+    - [Messaging and Notification Improvements](#messaging-and-notification-improvements)
+    - [User Experience Improvements](#user-experience-improvements)
+    - [Scalability Improvements](#scalability-improvements)
+    - [Security Enhancements](#security-enhancements)
 - [Learning Outcomes](#learning-outcomes)
-
 - [Final Conclusion](#final-conclusion)
-
 - [Author](#author)
 
 ---
-
 
 
 ## Key Features
@@ -488,71 +480,227 @@ Shows a received direct message with attachment metadata, unread status, and a s
 
 ## Group Messaging
 
-The Secure Messaging Platform includes a production-ready group messaging workflow that allows authenticated users to create groups, join existing groups, view members, and participate in shared conversations through a chat-style interface.
+The Secure Messaging Platform includes private group conversations for authenticated users. The group workflow supports invitation-based membership, role-based administration, encrypted attachments, searchable message history, message actions, seen counts, and real-time conversation updates.
 
-### Group Creation and Joining
+### Group Creation and Private Membership
 
-Authenticated users can create new groups by entering a group name. Each group receives a unique identifier that other users can use to join the conversation.
+Authenticated users can create private groups by entering a group name. The user who creates the group becomes its `Owner`.
 
-Users can also join existing groups by entering a group ID. Once joined, the group appears under the user's **My Groups** section.
+Groups are invitation-only. The earlier direct-join workflow using a group ID is disabled and no longer creates memberships.
+
+A user becomes a group member only after accepting a valid invitation.
+
+### Invitations for Registered and Unregistered Users
+
+Group owners and administrators can invite participants through two separate workflows:
+
+- Registered users are invited directly by username.
+- Unregistered users receive an email registration invitation.
+
+Registered users can review pending group invitations and either accept or decline them.
+
+After an invitation is accepted, the group appears in the user's **My Groups** section.
+
+The invitation workflow prevents invalid cases such as:
+
+- Inviting the current user
+- Inviting a user who is already a member
+- Creating duplicate pending invitations
+- Inviting a nonexistent username through the registered-user workflow
+
+### Group Roles and Administration
+
+Group participation uses three roles:
+
+- `Owner`
+- `Admin`
+- `Member`
+
+The group owner has the highest level of administrative control.
+
+The owner can:
+
+- Promote eligible members to administrators
+- Demote administrators
+- Remove eligible members
+- Invite registered and unregistered users
+- Manage the group
+
+Administrators can invite users and remove eligible regular members. The group owner cannot be removed.
+
+The interface displays role labels so that participants can distinguish the owner, administrators, and regular members.
 
 ### Group Membership Display
 
-The group chat interface displays current group members using compact member badges. Group creators are identified with an administrator badge, making ownership and membership easier to understand.
+The selected group displays its current members using compact member badges.
+
+Each member entry includes the username and the assigned role. Administrative controls appear only when the current user's role permits the corresponding action.
 
 ### Group Conversation Experience
 
-The group conversation page uses a two-page workflow:
+The Group Chat interface uses a two-page workflow:
 
-1. Page 1 displays Create Group, Join Group, and My Groups.
-2. Page 2 displays the selected group conversation.
-3. Users can return to Page 1 with the Back to Groups button.
-4. Users can leave a group from the conversation view.
+1. The group-management page displays group creation, pending invitations, and **My Groups**.
+2. Selecting a group opens its conversation page.
+3. Users can return to the group-management page with **Back to Groups**.
+4. Eligible users can leave the selected group.
+5. The group owner can manage the group according to the available owner controls.
 
-Messages are shown in a chat-style layout with sender labels and timestamps. The current user's messages are labeled as **You**, while messages from other participants show the sender's username.
+Messages are displayed in a chat-style layout with sender labels, timestamps, date separators, and separate alignment for the current user's messages.
 
-### Real-Time Group Chat
+The message composer supports:
 
-Group messages now support real-time updates using Spring WebSocket/STOMP on the backend and a SockJS/STOMP client in React. When a group member sends a message, the backend saves the message through the existing authenticated REST endpoint and then broadcasts a WebSocket notification to the active group topic.
+- Sending with the **Send** button
+- Sending with `Enter`
+- Adding a new line with `Shift+Enter`
+- Emoji insertion
+- Optional file attachment selection
 
-The frontend listens for the group WebSocket notification and immediately reloads the latest group messages. This allows connected participants to see new messages without manually refreshing the page.
+### Encrypted Group Attachments
 
-The existing REST polling behavior remains available as a fallback. If the WebSocket connection is unavailable, the interface continues to refresh group messages automatically so the conversation remains functional.
+Group members can send encrypted file attachments inside group conversations.
+
+The attachment workflow supports:
+
+- Uploading an attachment with a group message
+- Sending an attachment-only message
+- Sending a text caption with an attachment
+- Displaying attachment name and file size
+- Downloading an attachment from the conversation
+- Restricting attachment access to group members
+
+The backend encrypts the attachment and stores a separately encrypted attachment key for each eligible group member. A user must have a valid encrypted key before the attachment can be decrypted and downloaded.
+
+Messages containing attachments cannot currently be edited or deleted.
+
+### Group Message Search
+
+Users can search the selected group conversation.
+
+Search matching includes:
+
+- Sender username
+- Message text
+- Formatted timestamp
+- Message date
+- Attachment filename
+
+Clearing the search restores the complete conversation history.
+
+### Group Message Actions
+
+Group messages use a compact actions interface instead of displaying permanent action buttons inside every message bubble.
+
+A small `⋯` hint appears when a message is hovered, focused, or opened. Selecting the message displays the available actions.
+
+The message bubble also supports keyboard activation with `Enter` or `Space`.
+
+Available actions include:
+
+- Pin or unpin a message
+- Edit the current user's own text-only message
+- Delete the current user's own text-only message
+
+Authorization is enforced by both the frontend and backend.
+
+### Pinned and Edited Messages
+
+Pinned messages display the username of the member who pinned them.
+
+Edited messages display an `edited` indicator beside their seen-status metadata.
+
+The edit workflow uses an inline text area with Save and Cancel controls. Attachment messages remain protected from editing.
+
+### Seen Status and Message Metadata
+
+Group messages display a seen count using the current group membership total.
+
+Example:
+
+`Seen by 1 of 7`
+
+Edited messages display both the seen count and edited status:
+
+`Seen by 1 of 7 · edited`
+
+The message-actions hint and seen-status text share a responsive metadata row. This prevents overlap and keeps normal, edited, pinned, short, and long messages aligned consistently.
+
+Group unread-count badges have not yet been implemented. They remain part of a future conversation-awareness iteration.
+
+### Real-Time Group Updates
+
+Group conversations use Spring WebSocket/STOMP on the backend and a SockJS/STOMP client in React.
+
+When group activity occurs, the backend publishes a notification to the selected group topic. The frontend then reloads the latest messages, attachments, and member data.
+
+Real-time notifications support events such as:
+
+- New group messages
+- Edited messages
+- Deleted messages
+- Pinned or unpinned messages
+- Membership changes
+- Group changes
+
+Periodic REST polling remains available as a fallback when the WebSocket connection is unavailable.
 
 ### Responsive Layout
 
-The Group Chat interface was refined for laptop and monitor screens. The layout keeps the message input and action buttons visible, uses internal scrolling for the message area, and maintains a compact header and member display.
+The Group Chat interface is designed for laptop and monitor screens.
+
+The layout includes:
+
+- Internal scrolling for the conversation history
+- A visible message composer
+- Compact group and member controls
+- Responsive message metadata
+- Message bubbles that adapt to short and long content
+- Separate alignment for sent and received messages
 
 ### Database Management
 
-Group records, group memberships, and group messages are stored using Hibernate/JPA and PostgreSQL. This supports persistent conversations, reliable member tracking, and future scalability.
+Group data is persisted with Hibernate/JPA and PostgreSQL.
+
+The group messaging workflow uses stored records for:
+
+- Groups
+- Group memberships
+- Registered-user invitations
+- Email invitations
+- Group messages
+- Group message read records
+- Attachments
+- Group attachment encryption keys
+
+Deleting a group also removes its related messages, read records, invitations, memberships, attachments, and group attachment keys.
 
 ### Group Messaging Screenshots
 
-#### Group Management Page
+The screenshots below document earlier working milestones in the iterative development of the Group Chat interface. Some controls and visual indicators shown in these images have since been replaced or refined.
 
-![Group Management Page](screenshots/group-messaging/18_group_management_page.png)
+#### Group Management Milestone
 
-Displays the group management workflow where users can create groups, join existing groups, view available groups, and access group conversations.
+![Group Management Milestone](screenshots/group-messaging/18_group_management_page.png)
 
-#### Active Group Conversation
+Shows an earlier group-management iteration with group creation, direct joining, and group selection. The current implementation has replaced direct joining with invitation-only membership.
 
-![Active Group Conversation](screenshots/group-messaging/19_active_group_conversation.png)
+#### Active Group Conversation Milestone
 
-Shows the active group conversation interface with group context, member display, message count, live refresh status, chat history, and visible message controls.
+![Active Group Conversation Milestone](screenshots/group-messaging/19_active_group_conversation.png)
 
-#### Two-User Group Chat and Live Refresh Test
+Shows an earlier active-conversation layout with group context, members, chat history, message composition, and live refresh behavior. The current interface includes newer search, attachment, role-management, message-action, and metadata features.
 
-![Two-User Group Chat and Live Refresh Test](screenshots/group-messaging/20_group_chat_two_user_autoscroll_test.png)
+#### Two-User Group Chat and Autoscroll Milestone
 
-Demonstrates a two-user group conversation between different authenticated users, confirming that live refresh updates the conversation while keeping the message input and controls visible.
+![Two-User Group Chat and Autoscroll Milestone](screenshots/group-messaging/20_group_chat_two_user_autoscroll_test.png)
 
-#### Real-Time Group Chat Connected
+Documents a two-user conversation test used to verify message exchange, responsive layout, and autoscroll behavior.
 
-![Real-Time Group Chat Connected](screenshots/group-messaging/21_real_time_group_chat_connected.png)
+#### Real-Time Group Chat Milestone
 
-Demonstrates the upgraded group chat after WebSocket support was added. The Real-Time Chat: Connected indicator confirms that the browser successfully connected to the backend WebSocket broker through the deployed HTTPS domain.
+![Real-Time Group Chat Milestone](screenshots/group-messaging/21_real_time_group_chat_connected.png)
 
+Documents the WebSocket connectivity milestone that introduced real-time group update notifications. The earlier green connection indicator shown in the screenshot is no longer treated as the final interface design.
 
 ---
 
@@ -1040,28 +1188,57 @@ Throughout this project, I was responsible for the complete software development
 Several enhancements can be implemented to further improve the platform's functionality, scalability, security, and user experience.
 
 
-
 ### Planned Features
 
+#### Group Conversation Awareness
 
+- Unread group-message counts for each member
+- Unread badges beside groups in the **My Groups** list
+- A visible boundary between previously viewed and newly received messages
+- Typing indicators for active group participants
+- Online and offline presence indicators
+- Presence timeout handling for closed tabs, disconnected clients, and inactive sessions
 
-- Advanced WebSocket features such as typing indicators, online/offline presence, and richer real-time collaboration tools.
+#### Secure Decisions and Acknowledgments
 
-- Message delivery and read receipts.
+- Convert an eligible group message into a structured decision record
+- Require acknowledgment from selected group members or all group members
+- Display pending and completed acknowledgment counts
+- Record the username and timestamp for each acknowledgment
+- Preserve the original decision text and subsequent status changes
+- Allow decisions to be marked as active, completed, superseded, or withdrawn
+- Maintain an auditable decision history
+- Restrict decision-management actions through group roles and permissions
+- Export or review decision and acknowledgment records for administrative purposes
 
-- User profile management.
+#### Password and Authentication Management
 
-- Expanded file and image sharing support, including richer previews, file type validation, and larger attachment workflows.
+- Configurable minimum password length requirements
+- Password strength validation using length and character-composition rules
+- Rejection of weak, common, or compromised passwords
+- Secure password change and password reset workflows
+- Verification of the current password before sensitive account changes
+- Login rate limiting and temporary account protection after repeated failed attempts
+- Multi-Factor Authentication (MFA)
+- Backup recovery codes
+- Active-session and trusted-device management
+- Refresh-token rotation and secure session revocation
+- Security notifications for important account activity
 
-- Push notification system.
+#### Messaging and Notification Improvements
 
-- Message search functionality.
+- Message delivery confirmation beyond the existing read and seen-status features
+- Push notifications for new direct and group messages
+- Optional notification preferences and sound controls
+- Richer real-time collaboration events
 
-- Group administration controls.
+#### User Experience Improvements
 
-- Message editing and deletion.
-
-
+- User profile management
+- Richer file and image previews
+- File type validation
+- Larger attachment workflows
+- Improved attachment management
 
 ### Scalability Improvements
 
@@ -1081,11 +1258,6 @@ Several enhancements can be implemented to further improve the platform's functi
 
 ### Security Enhancements
 
-
-
-- Multi-Factor Authentication (MFA) for additional account protection.
-
-- Refresh token support for improved session management.
 
 - Role-Based Access Control (RBAC) for granular permission management.
 
