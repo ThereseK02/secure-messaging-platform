@@ -676,19 +676,19 @@ Deleting a group also removes its related messages, read records, invitations, m
 
 ### Group Messaging Screenshots
 
-The screenshots below document earlier working milestones in the iterative development of the Group Chat interface. Some controls and visual indicators shown in these images have since been replaced or refined.
+The screenshots below include updated views of the invitation and active-conversation workflows together with selected earlier development milestones. Milestone images are labeled accordingly and may contain controls or visual indicators that were later replaced or refined.
 
-#### Group Management Milestone
+#### Group Management and Invitation Workflow
 
-![Group Management Milestone](screenshots/group-messaging/18_group_management_page.png)
+![Group Management and Invitation Workflow](screenshots/group-messaging/18_group_management_page.png)
 
-Shows an earlier group-management iteration with group creation, direct joining, and group selection. The current implementation has replaced direct joining with invitation-only membership.
+Shows the invitation-based group-management workflow, including group creation, pending invitations, invitation details, Accept and Decline actions, and the **My Groups** section. Direct group joining by group ID is no longer part of the interface.
 
-#### Active Group Conversation Milestone
+#### Active Group Conversation
 
-![Active Group Conversation Milestone](screenshots/group-messaging/19_active_group_conversation.png)
+![Active Group Conversation](screenshots/group-messaging/19_active_group_conversation.png)
 
-Shows an earlier active-conversation layout with group context, members, chat history, message composition, and live refresh behavior. The current interface includes newer search, attachment, role-management, message-action, and metadata features.
+Shows the active group conversation with registered-user and email invitation controls, role-based member administration, message search, message actions, seen and edited metadata, attachment selection, and the group message composer.
 
 #### Two-User Group Chat and Autoscroll Milestone
 
