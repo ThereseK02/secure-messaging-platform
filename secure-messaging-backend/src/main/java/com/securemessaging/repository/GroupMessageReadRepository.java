@@ -21,6 +21,23 @@ public interface GroupMessageReadRepository
 
     long countByGroupMessageId(Long groupMessageId);
 
+    @Query("""
+            SELECT COUNT(message)
+            FROM GroupMessageEntity message
+            WHERE message.groupId = :groupId
+              AND message.sender <> :username
+              AND NOT EXISTS (
+                  SELECT readRecord.id
+                  FROM GroupMessageReadEntity readRecord
+                  WHERE readRecord.groupMessageId = message.id
+                    AND readRecord.username = :username
+              )
+            """)
+    long countUnreadByGroupIdAndUsername(
+            @Param("groupId") Long groupId,
+            @Param("username") String username
+    );
+
     @Transactional
     @Modifying
     @Query(

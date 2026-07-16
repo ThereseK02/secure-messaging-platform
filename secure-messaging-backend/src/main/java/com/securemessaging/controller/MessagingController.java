@@ -316,12 +316,26 @@ public ResponseEntity<?> myGroups() {
 
     List<GroupMemberEntity> memberships =
             groupMemberRepository.findByUsername(currentUsername);
-
-    List<GroupEntity> groups = new ArrayList<>();
+    List<Map<String, Object>> groups = new ArrayList<>();
 
     for (GroupMemberEntity membership : memberships) {
         groupRepository.findById(membership.getGroupId())
-                .ifPresent(groups::add);
+                .ifPresent(group -> {
+                    long unreadCount =
+                            groupMessageReadRepository.countUnreadByGroupIdAndUsername(
+                                    group.getId(),
+                                    currentUsername
+                            );
+
+                    Map<String, Object> groupView = new java.util.HashMap<>();
+
+                    groupView.put("id", group.getId());
+                    groupView.put("groupName", group.getGroupName());
+                    groupView.put("createdBy", group.getCreatedBy());
+                    groupView.put("unreadCount", unreadCount);
+
+                    groups.add(groupView);
+                });
     }
 
     return ResponseEntity.ok(groups);
