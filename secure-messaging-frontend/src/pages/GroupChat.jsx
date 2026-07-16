@@ -1515,7 +1515,7 @@ export default function GroupChat() {
                                   style={{
                                     display: "flex",
                                     justifyContent: msg.sender === currentUsername ? "flex-end" : "flex-start",
-                                    marginTop: sameSenderAsPrevious ? "6px" : "22px",
+                                    marginTop: sameSenderAsPrevious ? "6px" : "14px",
                                     marginBottom: "0",
                                   }}
                               >
