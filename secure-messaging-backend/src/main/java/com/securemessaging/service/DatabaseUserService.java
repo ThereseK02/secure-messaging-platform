@@ -18,6 +18,9 @@ import java.util.Locale;
 @Service
 public class DatabaseUserService {
 
+    private static final int MIN_PASSWORD_LENGTH = 15;
+    private static final int MAX_PASSWORD_BYTES = 72;
+
     private final UserEntityRepository repository;
     private final PasswordEncoder passwordEncoder;
 
@@ -60,6 +63,29 @@ public class DatabaseUserService {
 
         if (password == null || password.isBlank()) {
             throw new RuntimeException("Password is required");
+        }
+
+        int passwordLength =
+                password.codePointCount(
+                        0,
+                        password.length()
+                );
+
+        if (passwordLength < MIN_PASSWORD_LENGTH) {
+            throw new RuntimeException(
+                    "Password must be at least 15 characters"
+            );
+        }
+
+        int passwordBytes =
+                password.getBytes(
+                        StandardCharsets.UTF_8
+                ).length;
+
+        if (passwordBytes > MAX_PASSWORD_BYTES) {
+            throw new RuntimeException(
+                    "Password must not exceed 72 UTF-8 bytes"
+            );
         }
 
         if (!normalizedEmail.matches(

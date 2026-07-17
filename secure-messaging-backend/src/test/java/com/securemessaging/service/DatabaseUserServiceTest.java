@@ -5,6 +5,7 @@ import com.securemessaging.repository.UserEntityRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -14,7 +15,9 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
@@ -23,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class DatabaseUserServiceTest {
+
 
     private UserEntityRepository repository;
     private PasswordEncoder passwordEncoder;
@@ -146,6 +150,93 @@ class DatabaseUserServiceTest {
 
         verify(repository, never())
                 .findById(org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void registrationRejectsPasswordShorterThanFifteenCharacters() {
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.register(
+                                "ShortPasswordUser",
+                                "short@example.com",
+                                "TooShort123!"
+                        )
+                );
+
+        assertEquals(
+                "Password must be at least 15 characters",
+                exception.getMessage()
+        );
+
+        verify(repository, never())
+                .save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void registrationRejectsPasswordLongerThanSeventyTwoBytes() {
+
+        String password =
+                "a".repeat(73);
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.register(
+                                "LongPasswordUser",
+                                "long@example.com",
+                                password
+                        )
+                );
+
+        assertEquals(
+                "Password must not exceed 72 UTF-8 bytes",
+                exception.getMessage()
+        );
+
+        verify(repository, never())
+                .save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void registrationAcceptsValidPasswordAndStoresBcryptHash()
+            throws Exception {
+
+        String password =
+                "correct horse battery staple";
+
+        when(repository.existsById("ValidPasswordUser"))
+                .thenReturn(false);
+
+        when(repository.findByEmailIgnoreCase(
+                "valid@example.com"
+        )).thenReturn(Optional.empty());
+
+        databaseUserService.register(
+                "ValidPasswordUser",
+                "valid@example.com",
+                password
+        );
+
+        ArgumentCaptor<UserEntity> entityCaptor =
+                ArgumentCaptor.forClass(UserEntity.class);
+
+        verify(repository).save(entityCaptor.capture());
+
+        UserEntity savedUser =
+                entityCaptor.getValue();
+
+        assertTrue(
+                savedUser.getPasswordHash().startsWith("$2")
+        );
+
+        assertTrue(
+                passwordEncoder.matches(
+                        password,
+                        savedUser.getPasswordHash()
+                )
+        );
     }
 
     private UserEntity createUser(

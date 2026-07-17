@@ -18,6 +18,7 @@ export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [notification, setNotification] = useState(null);
 
 function showNotification(type, text) {
@@ -31,6 +32,36 @@ function showNotification(type, text) {
     async function handleRegister(e) {
 
         e.preventDefault();
+
+        const passwordLength =
+            Array.from(password).length;
+
+        const passwordBytes =
+            new TextEncoder().encode(password).length;
+
+        if (passwordLength < 15) {
+            showNotification(
+                "error",
+                "Password must be at least 15 characters."
+            );
+            return;
+        }
+
+        if (passwordBytes > 72) {
+            showNotification(
+                "error",
+                "Password must not exceed 72 UTF-8 bytes."
+            );
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showNotification(
+                "error",
+                "Passwords do not match."
+            );
+            return;
+        }
 
         try {
             await api.post("/users/register", {
@@ -171,6 +202,8 @@ setTimeout(() => {
 
                     <input
                         type="text"
+                        autoComplete="username"
+                        required
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
@@ -189,6 +222,8 @@ setTimeout(() => {
 
                     <input
                         type="email"
+                        autoComplete="email"
+                        required
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -209,7 +244,48 @@ setTimeout(() => {
                         type="password"
                         placeholder="Password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) =>
+                            setPassword(e.target.value)}
+                        autoComplete="new-password"
+                        minLength={15}
+                        maxLength={72}
+                        required
+                        style={{
+                            width: "100%",
+                            padding: "14px",
+                            marginBottom: "10px",
+                            borderRadius: "10px",
+                            border: "1px solid #2563eb",
+                            backgroundColor: "#0f172a",
+                            color: "white",
+                            fontSize: "16px",
+                            boxSizing: "border-box"
+                        }}
+                    />
+
+                    <p
+                        style={{
+                            color: "#94a3b8",
+                            fontSize: "13px",
+                            lineHeight: "1.45",
+                            marginTop: "0",
+                            marginBottom: "16px"
+                        }}
+                    >
+                        Use at least 15 characters. Passphrases and spaces
+                        are allowed.
+                    </p>
+
+                    <input
+                        type="password"
+                        placeholder="Confirm password"
+                        value={confirmPassword}
+                        onChange={(e) =>
+                            setConfirmPassword(e.target.value)}
+                        autoComplete="new-password"
+                        minLength={15}
+                        maxLength={72}
+                        required
                         style={{
                             width: "100%",
                             padding: "14px",
