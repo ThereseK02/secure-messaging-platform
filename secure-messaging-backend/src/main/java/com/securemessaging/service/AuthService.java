@@ -20,6 +20,7 @@ import java.util.Locale;
 public class AuthService {
 
     private final DatabaseUserService databaseUserService;
+    private final LoginAttemptService loginAttemptService;
     private final JwtUtil jwtUtil;
     private final InvitationTokenService invitationTokenService;
     private final EmailGroupInvitationRepository emailGroupInvitationRepository;
@@ -28,13 +29,14 @@ public class AuthService {
 
     public AuthService(
             DatabaseUserService databaseUserService,
+            LoginAttemptService loginAttemptService,
             JwtUtil jwtUtil,
             InvitationTokenService invitationTokenService,
             EmailGroupInvitationRepository emailGroupInvitationRepository,
             GroupInvitationRepository groupInvitationRepository,
             GroupEntityRepository groupRepository) {
-
         this.databaseUserService = databaseUserService;
+        this.loginAttemptService = loginAttemptService;
         this.jwtUtil = jwtUtil;
         this.invitationTokenService = invitationTokenService;
         this.emailGroupInvitationRepository =
@@ -192,6 +194,16 @@ public class AuthService {
                 username == null ? "" : username.trim();
 
         try {
+            if (
+                    loginAttemptService.isBlocked(
+                            normalizedUsername
+                    )
+            ) {
+                throw new RuntimeException(
+                        "Invalid username or password"
+                );
+            }
+
             boolean valid =
                     databaseUserService.validateLogin(
                             normalizedUsername,
@@ -199,17 +211,27 @@ public class AuthService {
                     );
 
             if (!valid) {
+                loginAttemptService.recordFailure(
+                        normalizedUsername
+                );
+
                 throw new RuntimeException(
                         "Invalid username or password"
                 );
             }
 
-            return jwtUtil.generateToken(normalizedUsername);
+            loginAttemptService.recordSuccess(
+                    normalizedUsername
+            );
+
+            return jwtUtil.generateToken(
+                    normalizedUsername
+            );
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Login failed: " + e.getMessage()
+                    "Login failed: Invalid username or password"
             );
         }
     }
-    }
+}
