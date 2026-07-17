@@ -1500,4 +1500,55 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
         
         return ResponseEntity.ok(messageViews);
     }
+
+    @PostMapping("/groups/{groupId}/typing")
+    public ResponseEntity<?> updateGroupTypingStatus(
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Map<String, Boolean> request) {
+
+        String currentUsername =
+                org.springframework.security.core.context.SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        if (
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                currentUsername
+                        )
+                        .isEmpty()
+        ) {
+            return ResponseEntity.status(403).body(
+                    Map.of(
+                            "error",
+                            "You are not a member of this group"
+                    )
+            );
+        }
+
+        boolean typing =
+                Boolean.TRUE.equals(request.get("typing"));
+
+        messagingTemplate.convertAndSend(
+                "/topic/groups/" + groupId,
+                Map.of(
+                        "type", "GROUP_TYPING_STATUS",
+                        "groupId", groupId,
+                        "username", currentUsername,
+                        "typing", typing
+                )
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status",
+                        "Group typing status updated",
+                        "groupId", groupId,
+                        "username", currentUsername,
+                        "typing", typing
+                )
+        );
+    }
 }

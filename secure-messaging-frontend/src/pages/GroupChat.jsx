@@ -35,6 +35,10 @@ export default function GroupChat() {
   const groupAttachmentInputRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
   const stompClientRef = useRef(null);
+  const typingStopTimeoutRef = useRef(null);
+  const remoteTypingTimeoutsRef = useRef({});
+  const lastTypingStatusRef = useRef(false);
+  const [typingUsernames, setTypingUsernames] = useState([]);
   const [realTimeConnected, setRealTimeConnected] =
       useState(false);
   const [hasNewMessagesBelow, setHasNewMessagesBelow] =
@@ -627,6 +631,54 @@ export default function GroupChat() {
     return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  async function sendGroupTypingStatus(typing) {
+    if (!selectedGroupId) {
+      return;
+    }
+
+    if (lastTypingStatusRef.current === typing) {
+      return;
+    }
+
+    lastTypingStatusRef.current = typing;
+
+    try {
+      await api.post(
+          `/api/groups/${selectedGroupId}/typing`,
+          { typing }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function handleGroupMessageChange(event) {
+    const nextMessage = event.target.value;
+
+    setMessage(nextMessage);
+
+    if (!nextMessage.trim()) {
+      if (typingStopTimeoutRef.current) {
+        clearTimeout(typingStopTimeoutRef.current);
+        typingStopTimeoutRef.current = null;
+      }
+
+      sendGroupTypingStatus(false);
+      return;
+    }
+
+    sendGroupTypingStatus(true);
+
+    if (typingStopTimeoutRef.current) {
+      clearTimeout(typingStopTimeoutRef.current);
+    }
+
+    typingStopTimeoutRef.current = setTimeout(() => {
+      sendGroupTypingStatus(false);
+      typingStopTimeoutRef.current = null;
+    }, 1500);
+  }
+
   async function sendMessage() {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -683,6 +735,13 @@ export default function GroupChat() {
         clearSelectedGroupAttachment();
       }
       setMessage("");
+
+      if (typingStopTimeoutRef.current) {
+        clearTimeout(typingStopTimeoutRef.current);
+        typingStopTimeoutRef.current = null;
+      }
+
+      await sendGroupTypingStatus(false);
       setGroupMessageSearch("");
 
       await loadMessages(selectedGroupId);
@@ -900,7 +959,63 @@ export default function GroupChat() {
       onConnect: () => {
         setRealTimeConnected(true);
 
-        client.subscribe(`/topic/groups/${selectedGroupId}`, () => {
+        client.subscribe(`/topic/groups/${selectedGroupId}`, (frame) => {
+          let groupEvent = {};
+
+          try {
+            groupEvent = JSON.parse(frame.body || "{}");
+          } catch (error) {
+            console.error(error);
+          }
+
+          if (groupEvent.type === "GROUP_TYPING_STATUS") {
+            const typingUsername = groupEvent.username;
+
+            if (
+                !typingUsername ||
+                typingUsername === currentUsername
+            ) {
+              return;
+            }
+
+            const existingTimeout =
+                remoteTypingTimeoutsRef.current[typingUsername];
+
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+              delete remoteTypingTimeoutsRef.current[typingUsername];
+            }
+
+            if (groupEvent.typing) {
+              setTypingUsernames((currentUsernames) =>
+                  currentUsernames.includes(typingUsername)
+                      ? currentUsernames
+                      : [...currentUsernames, typingUsername]
+              );
+
+              remoteTypingTimeoutsRef.current[typingUsername] =
+                  setTimeout(() => {
+                    setTypingUsernames((currentUsernames) =>
+                        currentUsernames.filter(
+                            (username) => username !== typingUsername
+                        )
+                    );
+
+                    delete remoteTypingTimeoutsRef.current[
+                        typingUsername
+                    ];
+                  }, 2500);
+            } else {
+              setTypingUsernames((currentUsernames) =>
+                  currentUsernames.filter(
+                      (username) => username !== typingUsername
+                  )
+              );
+            }
+
+            return;
+          }
+
           loadMessages(selectedGroupId);
           loadGroupAttachments(selectedGroupId);
           loadMembers(selectedGroupId);
@@ -919,6 +1034,23 @@ export default function GroupChat() {
 
     return () => {
       setRealTimeConnected(false);
+
+      if (lastTypingStatusRef.current) {
+        void sendGroupTypingStatus(false);
+      }
+
+      if (typingStopTimeoutRef.current) {
+        clearTimeout(typingStopTimeoutRef.current);
+        typingStopTimeoutRef.current = null;
+      }
+
+      Object.values(remoteTypingTimeoutsRef.current).forEach(
+          (timeoutId) => clearTimeout(timeoutId)
+      );
+
+      remoteTypingTimeoutsRef.current = {};
+      lastTypingStatusRef.current = false;
+      setTypingUsernames([]);
 
       if (stompClientRef.current) {
         stompClientRef.current.deactivate();
@@ -1731,11 +1863,31 @@ export default function GroupChat() {
                   <div ref={messagesEndRef}/>
                 </div>
 
+                <div
+                    style={{
+                      minHeight: "22px",
+                      padding: "2px 4px 4px",
+                      color: "#d6c6a5",
+                      fontSize: "13px",
+                      fontStyle: "italic",
+                    }}
+                    aria-live="polite"
+                >
+                  {typingUsernames.length === 1 &&
+                      `${typingUsernames[0]} is typing...`}
+
+                  {typingUsernames.length === 2 &&
+                      `${typingUsernames[0]} and ${typingUsernames[1]} are typing...`}
+
+                  {typingUsernames.length > 2 &&
+                      `${typingUsernames.length} people are typing...`}
+                </div>
+
                 <div style={styles.messageInputRow}>
   <textarea
       placeholder="Write a group message"
       value={message}
-      onChange={(e) => setMessage(e.target.value)}
+      onChange={handleGroupMessageChange}
       onKeyDown={(e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
