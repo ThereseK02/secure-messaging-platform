@@ -39,6 +39,7 @@ export default function GroupChat() {
   const remoteTypingTimeoutsRef = useRef({});
   const lastTypingStatusRef = useRef(false);
   const [typingUsernames, setTypingUsernames] = useState([]);
+  const [onlineUsernames, setOnlineUsernames] = useState([]);
   const [realTimeConnected, setRealTimeConnected] =
       useState(false);
   const [hasNewMessagesBelow, setHasNewMessagesBelow] =
@@ -631,6 +632,15 @@ export default function GroupChat() {
     return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  async function sendPresenceHeartbeat() {
+    try {
+      await api.post("/api/presence/heartbeat");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
   async function sendGroupTypingStatus(typing) {
     if (!selectedGroupId) {
       return;
@@ -944,6 +954,63 @@ export default function GroupChat() {
     }, 3000);
 
     return () => clearInterval(intervalId);
+  }, [selectedGroupId, showConversation]);
+
+  useEffect(() => {
+    void sendPresenceHeartbeat();
+
+    const heartbeatIntervalId = setInterval(() => {
+      void sendPresenceHeartbeat();
+    }, 10000);
+
+    return () => {
+      clearInterval(heartbeatIntervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedGroupId || !showConversation) {
+      setOnlineUsernames([]);
+      return;
+    }
+
+    let active = true;
+
+    async function refreshGroupPresence() {
+      try {
+        const response = await api.get(
+            `/api/presence/groups/${selectedGroupId}`
+        );
+
+        if (!active) {
+          return;
+        }
+
+        setOnlineUsernames(
+            Array.isArray(response.data?.onlineUsernames)
+                ? response.data.onlineUsernames
+                : []
+        );
+      } catch (error) {
+        console.error(error);
+
+        if (active) {
+          setOnlineUsernames([]);
+        }
+      }
+    }
+
+    void refreshGroupPresence();
+
+    const presenceIntervalId = setInterval(() => {
+      void refreshGroupPresence();
+    }, 3000);
+
+    return () => {
+      active = false;
+      clearInterval(presenceIntervalId);
+      setOnlineUsernames([]);
+    };
   }, [selectedGroupId, showConversation]);
 
   useEffect(() => {
@@ -1453,18 +1520,35 @@ export default function GroupChat() {
                             key={member.username}
                             style={styles.memberControl}
                         >
-        <span style={styles.memberPill}>
-          {member.username}
+      <span style={styles.memberPill}>
+  <span style={styles.memberNameRow}>
+    <span
+        style={{
+          ...styles.presenceDot,
+          ...(onlineUsernames.includes(member.username)
+              ? styles.presenceDotOnline
+              : styles.presenceDotOffline),
+        }}
+        aria-hidden="true"
+    />
 
-          <span style={styles.memberAdminLabel}>
-            {member.role === "OWNER"
-                ? "Owner"
-                : member.role === "ADMIN"
-                    ? "Admin"
-                    : "Member"}
-          </span>
-        </span>
+    <span>{member.username}</span>
+  </span>
 
+  <span style={styles.memberAdminLabel}>
+    {member.role === "OWNER"
+        ? "Owner"
+        : member.role === "ADMIN"
+            ? "Admin"
+            : "Member"}
+  </span>
+
+  <span style={styles.memberPresenceLabel}>
+    {onlineUsernames.includes(member.username)
+        ? "Online"
+        : "Offline"}
+  </span>
+</span>
                           {member.username !== currentUsername && (
                               <>
                                 {currentGroupRole === "OWNER" && (
@@ -2431,7 +2515,36 @@ groupButton: {
     overflowWrap: "anywhere",
     textAlign: "center",
   },
+  memberNameRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+  },
 
+  presenceDot: {
+    width: "8px",
+    height: "8px",
+    borderRadius: "50%",
+    flexShrink: 0,
+  },
+
+  presenceDotOnline: {
+    backgroundColor: "#38bdf8",
+    boxShadow: "0 0 0 2px rgba(56, 189, 248, 0.18)",
+  },
+
+  presenceDotOffline: {
+    backgroundColor: "#64748b",
+  },
+
+  memberPresenceLabel: {
+    display: "block",
+    marginTop: "3px",
+    color: "#94a3b8",
+    fontSize: "11px",
+    fontWeight: "600",
+  },
   memberControl: {
     display: "flex",
     alignItems: "center",
