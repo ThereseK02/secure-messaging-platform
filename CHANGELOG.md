@@ -39,6 +39,10 @@
 - Defined online status as activity anywhere in the Secure Messaging Platform
 
 ### Security
+- Login attempts are tracked per normalized username in application memory
+- Five failed login attempts trigger a temporary 15-minute block
+- Successful authentication clears previous failed-attempt records
+- Blocked and invalid login attempts return the same generic browser message
 - New registrations store passwords using BCrypt with strength 12
 - Existing SHA-256 password hashes migrate automatically to BCrypt after successful login
 - Legacy password migration uses constant-time hash comparison
@@ -50,6 +54,11 @@
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
 
 ### Tested
+- Added automated tests for login throttling, successful-attempt reset, username normalization, and blank usernames
+- Verified four failed attempts still allow a correct login
+- Verified the fifth failed attempt activates temporary blocking
+- Verified a correct password remains rejected while the temporary block is active
+- Verified restarting the backend clears the current in-memory login-attempt state
 - Added automated tests for BCrypt authentication and legacy password migration
 - Verified successful production migration of Tom from a 44-character SHA-256 hash to a 60-character BCrypt hash
 - Verified subsequent login using the migrated BCrypt hash

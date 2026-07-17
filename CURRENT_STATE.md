@@ -11,7 +11,10 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Incorrect legacy passwords do not trigger migration or modify the stored hash.
 - Blank passwords are rejected during registration and login.
 - Username whitespace is normalized before login and JWT creation.
-- Login throttling, password changes, password resets, token invalidation, and passkeys remain planned.
+- Login throttling temporarily blocks a normalized username for 15 minutes after five failed attempts.
+- Successful authentication clears previous failed-attempt records.
+- Login-attempt state is currently stored in backend application memory.
+- Password changes, password resets, token invalidation, and passkeys remain planned.
 - Browser compromised-password warnings may appear for weak or commonly breached test-account passwords.
 
 ## Direct Messaging
@@ -131,7 +134,6 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Phase 5 conversation and member tools are complete for the current planned scope.
 
 ## Planned Next Work
-- Login throttling and failed-attempt logging
 - Stronger password policy
 - Change Password
 - Password reset and token invalidation
@@ -145,7 +147,8 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Group attachment ownership and deletion policy is still evolving.
 - Presence data is not persisted across backend restarts.
 - Presence indicates application activity rather than the currently viewed group.
-- Failed-login throttling and account lockout are not yet implemented.
+- Login-attempt records are stored in application memory and reset whenever the backend restarts.
+- Login throttling is currently keyed only by normalized username and is not yet distributed across multiple backend instances.
 - Legacy SHA-256 support remains temporarily available until active accounts have migrated to BCrypt.
 - Password changes, password recovery, and passkeys are not yet implemented.
 - Pinned messages do not yet support formal decisions, required acknowledgments, or audit records.
