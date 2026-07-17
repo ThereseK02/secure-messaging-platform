@@ -5,15 +5,28 @@ import com.securemessaging.core.SecureMessagingSystem.User;
 import com.securemessaging.entity.UserEntity;
 import com.securemessaging.mapper.UserMapper;
 import com.securemessaging.repository.UserEntityRepository;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
+import java.util.Locale;
 
 @Service
 public class DatabaseUserService {
 
     private final UserEntityRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DatabaseUserService(UserEntityRepository repository) {
+    public DatabaseUserService(
+            UserEntityRepository repository,
+            PasswordEncoder passwordEncoder) {
+
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void saveUser(User user) {
@@ -23,6 +36,7 @@ public class DatabaseUserService {
 
         repository.save(entity);
     }
+
     public void register(
             String username,
             String email,
@@ -32,7 +46,9 @@ public class DatabaseUserService {
                 username == null ? "" : username.trim();
 
         String normalizedEmail =
-                email == null ? "" : email.trim().toLowerCase();
+                email == null
+                        ? ""
+                        : email.trim().toLowerCase(Locale.ROOT);
 
         if (normalizedUsername.isBlank()) {
             throw new RuntimeException("Username is required");
@@ -40,6 +56,10 @@ public class DatabaseUserService {
 
         if (normalizedEmail.isBlank()) {
             throw new RuntimeException("Email is required");
+        }
+
+        if (password == null || password.isBlank()) {
+            throw new RuntimeException("Password is required");
         }
 
         if (!normalizedEmail.matches(
@@ -56,17 +76,16 @@ public class DatabaseUserService {
             throw new RuntimeException("Email already exists");
         }
 
-        SecureMessagingSystem.PasswordHasher hasher =
-                new SecureMessagingSystem.PasswordHasher();
-
-        String passwordHash = hasher.hash(password);
+        String passwordHash =
+                passwordEncoder.encode(password);
 
         java.security.KeyPairGenerator keyGen =
                 java.security.KeyPairGenerator.getInstance("RSA");
 
         keyGen.initialize(2048);
 
-        java.security.KeyPair keyPair = keyGen.generateKeyPair();
+        java.security.KeyPair keyPair =
+                keyGen.generateKeyPair();
 
         SecureMessagingSystem.User user =
                 new SecureMessagingSystem.User(
@@ -76,7 +95,9 @@ public class DatabaseUserService {
                         (java.security.interfaces.RSAPrivateKey) keyPair.getPrivate()
                 );
 
-        UserEntity entity = UserMapper.toEntity(user);
+        UserEntity entity =
+                UserMapper.toEntity(user);
+
         entity.setEmail(normalizedEmail);
 
         repository.save(entity);
@@ -86,26 +107,117 @@ public class DatabaseUserService {
         return repository.existsById(username);
     }
 
-    public boolean validateLogin(String username, String password) throws Exception {
+    @Transactional
+    public boolean validateLogin(
+            String username,
+            String password) throws Exception {
 
-        var user = repository.findById(username);
+        String normalizedUsername =
+                username == null ? "" : username.trim();
 
-        if (user.isEmpty()) {
+        if (
+                normalizedUsername.isBlank() ||
+                        password == null ||
+                        password.isBlank()
+        ) {
             return false;
         }
 
-        SecureMessagingSystem.PasswordHasher hasher =
-                new SecureMessagingSystem.PasswordHasher();
+        var userOptional =
+                repository.findById(normalizedUsername);
 
-        return hasher.verify(password, user.get().getPasswordHash());
+        if (userOptional.isEmpty()) {
+            return false;
+        }
+
+        UserEntity user =
+                userOptional.get();
+
+        String storedHash =
+                user.getPasswordHash();
+
+        if (storedHash == null || storedHash.isBlank()) {
+            return false;
+        }
+
+        if (isBcryptHash(storedHash)) {
+            return passwordEncoder.matches(
+                    password,
+                    storedHash
+            );
+        }
+
+        if (!isLegacySha256Hash(storedHash)) {
+            return false;
+        }
+
+        boolean legacyPasswordMatches =
+                verifyLegacySha256Password(
+                        password,
+                        storedHash
+                );
+
+        if (!legacyPasswordMatches) {
+            return false;
+        }
+
+        user.setPasswordHash(
+                passwordEncoder.encode(password)
+        );
+
+        repository.save(user);
+
+        return true;
     }
 
-    public SecureMessagingSystem.User findDomainUser(String username) {
+    private boolean isBcryptHash(String storedHash) {
+        return storedHash.startsWith("$2a$") ||
+                storedHash.startsWith("$2b$") ||
+                storedHash.startsWith("$2y$");
+    }
 
-        var user = repository.findById(username);
+    private boolean isLegacySha256Hash(String storedHash) {
+        return storedHash.length() == 44;
+    }
+
+    private boolean verifyLegacySha256Password(
+            String password,
+            String storedHash) throws Exception {
+
+        MessageDigest digest =
+                MessageDigest.getInstance("SHA-256");
+
+        byte[] submittedHash =
+                digest.digest(
+                        password.getBytes(StandardCharsets.UTF_8)
+                );
+
+        byte[] storedHashBytes;
+
+        try {
+            storedHashBytes =
+                    Base64.getDecoder().decode(storedHash);
+
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+
+        return MessageDigest.isEqual(
+                submittedHash,
+                storedHashBytes
+        );
+    }
+
+    public SecureMessagingSystem.User findDomainUser(
+            String username) {
+
+        var user =
+                repository.findById(username);
 
         if (user.isEmpty()) {
-            throw new RuntimeException("User not found: " + username);
+            throw new RuntimeException(
+                    "User not found: " + username
+            );
         }
 
         return UserMapper.toDomain(user.get());

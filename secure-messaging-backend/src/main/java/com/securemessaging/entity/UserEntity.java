@@ -47,7 +47,13 @@ public class UserEntity {
     public String getEmail() {
         return email;
     }
-    public String getPasswordHash() { return passwordHash; }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
     public String getPublicKeyBase64() { return publicKeyBase64; }
     public String getPrivateKeyBase64() { return privateKeyBase64; }
     public LocalDateTime getCreatedAt() { return createdAt; }

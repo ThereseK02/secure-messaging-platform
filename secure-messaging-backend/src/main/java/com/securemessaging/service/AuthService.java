@@ -188,10 +188,13 @@ public class AuthService {
 
     public String login(String username, String password) {
 
+        String normalizedUsername =
+                username == null ? "" : username.trim();
+
         try {
             boolean valid =
                     databaseUserService.validateLogin(
-                            username,
+                            normalizedUsername,
                             password
                     );
 
@@ -201,7 +204,7 @@ public class AuthService {
                 );
             }
 
-            return jwtUtil.generateToken(username);
+            return jwtUtil.generateToken(normalizedUsername);
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -209,4 +212,4 @@ public class AuthService {
             );
         }
     }
-}
+    }
