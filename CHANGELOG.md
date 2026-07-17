@@ -39,6 +39,10 @@
 - Defined online status as activity anywhere in the Secure Messaging Platform
 
 ### Security
+- New registrations store passwords using BCrypt with strength 12
+- Existing SHA-256 password hashes migrate automatically to BCrypt after successful login
+- Legacy password migration uses constant-time hash comparison
+- Blank passwords are rejected during registration and login
 - Group typing updates require authenticated group membership
 - Group presence queries require authenticated group membership
 - Group member removal is restricted by group role
@@ -46,6 +50,9 @@
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
 
 ### Tested
+- Added automated tests for BCrypt authentication and legacy password migration
+- Verified successful production migration of Tom from a 44-character SHA-256 hash to a 60-character BCrypt hash
+- Verified subsequent login using the migrated BCrypt hash
 - Verified group typing indicators between multiple users
 - Verified typing indicators do not leak between groups
 - Verified online users become offline after heartbeat expiration
@@ -61,5 +68,5 @@
 - Group attachment ownership and deletion policy is still evolving
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
-- Authentication hardening, password management, login throttling, and passkeys are not yet implemented
+- Further authentication hardening, password management, login throttling, and passkeys are not yet implemented
 - Decision acknowledgment and audit-record workflows are not yet implemented
