@@ -21,11 +21,20 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (
-            error.response &&
-            (error.response.status === 401 || error.response.status === 403)
-        ) {
+        const requestUrl =
+            error.config?.url || "";
+
+        const isPublicAuthRequest =
+            requestUrl.includes("/users/login") ||
+            requestUrl.includes("/users/register");
+
+        const isUnauthorized =
+            error.response?.status === 401 ||
+            error.response?.status === 403;
+
+        if (isUnauthorized && !isPublicAuthRequest) {
             localStorage.removeItem("token");
+            localStorage.removeItem("username");
             localStorage.setItem("sessionExpired", "true");
             window.location.href = "/login";
         }
