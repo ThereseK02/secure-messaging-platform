@@ -39,6 +39,11 @@
 - Defined online status as activity anywhere in the Secure Messaging Platform
 
 ### Security
+- New registration passwords must contain at least 15 Unicode characters
+- Registration passwords are limited to 72 UTF-8 bytes to remain within BCrypt's supported input size
+- Passwords may contain spaces and are not forced into predictable composition rules
+- Registration includes a password-confirmation field
+- Registration validation uses application-styled messages instead of browser-native validation popups
 - Login attempts are tracked per normalized username in application memory
 - Five failed login attempts trigger a temporary 15-minute block
 - Successful authentication clears previous failed-attempt records
@@ -54,6 +59,12 @@
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
 
 ### Tested
+- Added automated tests for short, oversized, and valid registration passwords
+- Verified a password shorter than 15 characters is rejected
+- Verified mismatched password confirmation is rejected in the browser
+- Verified a valid passphrase registers successfully and authenticates normally
+- Verified the new Gana account stores a 60-character BCrypt hash with the $2a$ prefix
+- Verified registration errors use the application's custom notification styling
 - Added automated tests for login throttling, successful-attempt reset, username normalization, and blank usernames
 - Verified four failed attempts still allow a correct login
 - Verified the fifth failed attempt activates temporary blocking
@@ -77,5 +88,5 @@
 - Group attachment ownership and deletion policy is still evolving
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
-- Further authentication hardening, password management, login throttling, and passkeys are not yet implemented
+- Common-password screening, password management, distributed login throttling, and passkeys are not yet implemented
 - Decision acknowledgment and audit-record workflows are not yet implemented

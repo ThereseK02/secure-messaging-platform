@@ -10,6 +10,10 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Existing legacy SHA-256 password hashes remain usable temporarily and migrate automatically to BCrypt after a successful login.
 - Incorrect legacy passwords do not trigger migration or modify the stored hash.
 - Blank passwords are rejected during registration and login.
+- New registration passwords must contain at least 15 Unicode characters.
+- Registration passwords cannot exceed 72 UTF-8 bytes because the current password encoder is BCrypt.
+- Passphrases and spaces are allowed; uppercase letters, numbers, and symbols are not mandatory.
+- The registration interface requires password confirmation and uses custom application-styled validation messages.
 - Username whitespace is normalized before login and JWT creation.
 - Login throttling temporarily blocks a normalized username for 15 minutes after five failed attempts.
 - Successful authentication clears previous failed-attempt records.
@@ -134,6 +138,7 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Phase 5 conversation and member tools are complete for the current planned scope.
 
 ## Planned Next Work
+- Common and compromised password screening
 - Stronger password policy
 - Change Password
 - Password reset and token invalidation
@@ -150,5 +155,5 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Login-attempt records are stored in application memory and reset whenever the backend restarts.
 - Login throttling is currently keyed only by normalized username and is not yet distributed across multiple backend instances.
 - Legacy SHA-256 support remains temporarily available until active accounts have migrated to BCrypt.
-- Password changes, password recovery, and passkeys are not yet implemented.
+- Common-password screening, password changes, password recovery, and passkeys are not yet implemented.
 - Pinned messages do not yet support formal decisions, required acknowledgments, or audit records.
