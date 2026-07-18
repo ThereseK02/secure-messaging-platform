@@ -39,6 +39,11 @@
 - Defined online status as activity anywhere in the Secure Messaging Platform
 
 ### Security
+- New registration passwords are checked against the Have I Been Pwned Pwned Passwords range service
+- Compromised-password screening sends only the first five characters of a locally generated SHA-1 hash
+- The plaintext password and complete password hash are never transmitted
+- Padded range responses are requested to reduce response-size information leakage
+- External password-screening failures do not block registration; the local common-password blocklist remains active
 - New registration passwords are checked against a local common-password blocklist
 - Password screening also blocks predictable values based on the username, email local part, and application name
 - Common-password comparisons are case-insensitive and ignore outer whitespace
@@ -63,6 +68,12 @@
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
 
 ### Tested
+- Added six automated tests for compromised-password range checking, response parsing, privacy, padding, and service failures
+- Added registration tests for compromised-password rejection and external-service unavailability
+- Verified all 30 backend tests pass
+- Verified a breached password is rejected in production
+- Verified a unique passphrase registers successfully in production
+- Verified the production backend remains healthy after deployment
 - Added five automated tests for local and context-specific password screening
 - Added a registration integration test for common-password rejection
 - Verified Password1234567 is rejected in production
@@ -97,5 +108,5 @@
 - Group attachment ownership and deletion policy is still evolving
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
-- Large-scale compromised-password screening, password management, distributed login throttling, and passkeys are not yet implemented
+- Password management, distributed login throttling, and passkeys are not yet implemented
 - Decision acknowledgment and audit-record workflows are not yet implemented
