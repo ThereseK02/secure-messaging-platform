@@ -139,7 +139,6 @@ This document summarizes the currently implemented and deployed behavior of the 
 
 ## Planned Next Work
 - Common and compromised password screening
-- Stronger password policy
 - Change Password
 - Password reset and token invalidation
 - Passkey enrollment and sign-in
