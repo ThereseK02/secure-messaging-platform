@@ -24,14 +24,24 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        String token = authService.login(
-                request.username(),
-                request.password()
-        );
+        try {
+            String token = authService.login(
+                    request.username(),
+                    request.password()
+            );
 
-        return ResponseEntity.ok(
-                new LoginResponse(token)
-        );
+            return ResponseEntity.ok(
+                    new LoginResponse(token)
+            );
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(
+                    Map.of(
+                            "error",
+                            "Invalid username or password"
+                    )
+            );
+        }
     }
 
     @PostMapping("/register")
