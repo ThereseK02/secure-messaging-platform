@@ -24,17 +24,20 @@ public class DatabaseUserService {
     private final UserEntityRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final CommonPasswordService commonPasswordService;
+    private final CompromisedPasswordService compromisedPasswordService;
 
     public DatabaseUserService(
             UserEntityRepository repository,
             PasswordEncoder passwordEncoder,
-            CommonPasswordService commonPasswordService) {
+            CommonPasswordService commonPasswordService,
+            CompromisedPasswordService compromisedPasswordService) {
 
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.commonPasswordService = commonPasswordService;
+        this.compromisedPasswordService =
+                compromisedPasswordService;
     }
-
     public void saveUser(User user) {
 
         UserEntity entity =
@@ -100,6 +103,19 @@ public class DatabaseUserService {
         ) {
             throw new RuntimeException(
                     "Choose a less common password"
+            );
+        }
+
+        CompromisedPasswordService.CheckResult
+                compromisedPasswordResult =
+                compromisedPasswordService.check(password);
+
+        if (
+                compromisedPasswordResult
+                        == CompromisedPasswordService.CheckResult.COMPROMISED
+        ) {
+            throw new RuntimeException(
+                    "Choose a password that has not appeared in known data breaches"
             );
         }
 

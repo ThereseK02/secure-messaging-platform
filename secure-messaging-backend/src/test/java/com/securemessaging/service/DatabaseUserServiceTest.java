@@ -30,6 +30,9 @@ class DatabaseUserServiceTest {
     private UserEntityRepository repository;
     private PasswordEncoder passwordEncoder;
     private CommonPasswordService commonPasswordService;
+    private CompromisedPasswordService compromisedPasswordService;
+    private CompromisedPasswordService.CheckResult
+            compromisedPasswordResult;
     private DatabaseUserService databaseUserService;
 
     @BeforeEach
@@ -45,11 +48,24 @@ class DatabaseUserServiceTest {
         commonPasswordService =
                 new CommonPasswordService();
 
+        compromisedPasswordResult =
+                CompromisedPasswordService.CheckResult.NOT_COMPROMISED;
+
+        compromisedPasswordService =
+                new CompromisedPasswordService() {
+
+                    @Override
+                    public CheckResult check(String password) {
+                        return compromisedPasswordResult;
+                    }
+                };
+
         databaseUserService =
                 new DatabaseUserService(
                         repository,
                         passwordEncoder,
-                        commonPasswordService
+                        commonPasswordService,
+                        compromisedPasswordService
                 );
     }
 
@@ -262,6 +278,61 @@ class DatabaseUserServiceTest {
         );
 
         verify(repository, never())
+                .save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void registrationRejectsCompromisedPassword() {
+
+        String password =
+                "a unique but breached password 2026";
+
+        compromisedPasswordResult =
+                CompromisedPasswordService.CheckResult.COMPROMISED;
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.register(
+                                "BreachedPasswordUser",
+                                "breached@example.com",
+                                password
+                        )
+                );
+
+        assertEquals(
+                "Choose a password that has not appeared in known data breaches",
+                exception.getMessage()
+        );
+
+        verify(repository, never())
+                .save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void registrationContinuesWhenCompromisedPasswordServiceIsUnavailable()
+            throws Exception {
+
+        String password =
+                "orchids travel quietly after midnight";
+
+        compromisedPasswordResult =
+                CompromisedPasswordService.CheckResult.UNAVAILABLE;
+
+        when(repository.existsById("UnavailableServiceUser"))
+                .thenReturn(false);
+
+        when(repository.findByEmailIgnoreCase(
+                "unavailable@example.com"
+        )).thenReturn(Optional.empty());
+
+        databaseUserService.register(
+                "UnavailableServiceUser",
+                "unavailable@example.com",
+                password
+        );
+
+        verify(repository)
                 .save(org.mockito.ArgumentMatchers.any());
     }
 
