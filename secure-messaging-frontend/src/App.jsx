@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import SendMessage from "./pages/SendMessage";
 import Inbox from "./pages/Inbox";
 import GroupChat from "./pages/GroupChat";
+import ChangePassword from "./pages/ChangePassword";
 import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
@@ -46,6 +47,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <GroupChat />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/change-password"
+                    element={
+                        <ProtectedRoute>
+                            <ChangePassword />
                         </ProtectedRoute>
                     }
                 />

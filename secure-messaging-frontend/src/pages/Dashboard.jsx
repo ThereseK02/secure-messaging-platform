@@ -132,6 +132,21 @@ export default function Dashboard() {
                     </button>
 
                     <button
+                        onClick={() => navigate("/change-password")}
+                        style={{
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #c4a77d",
+                            backgroundColor: "#0f172a",
+                            color: "#e7d7bd",
+                            fontWeight: "bold",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Change Password
+                    </button>
+
+                    <button
                         onClick={handleLogout}
                         style={{
                             padding: "12px",
