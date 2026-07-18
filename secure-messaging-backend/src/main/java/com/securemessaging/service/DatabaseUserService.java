@@ -68,61 +68,23 @@ public class DatabaseUserService {
         }
 
         if (password == null || password.isBlank()) {
-            throw new RuntimeException("Password is required");
-        }
-
-        int passwordLength =
-                password.codePointCount(
-                        0,
-                        password.length()
-                );
-
-        if (passwordLength < MIN_PASSWORD_LENGTH) {
             throw new RuntimeException(
-                    "Password must be at least 15 characters"
+                    "Password is required"
             );
         }
 
-        int passwordBytes =
-                password.getBytes(
-                        StandardCharsets.UTF_8
-                ).length;
-
-        if (passwordBytes > MAX_PASSWORD_BYTES) {
-            throw new RuntimeException(
-                    "Password must not exceed 72 UTF-8 bytes"
-            );
-        }
-
-        if (
-                commonPasswordService.isBlocked(
-                        password,
-                        normalizedUsername,
-                        normalizedEmail
-                )
-        ) {
-            throw new RuntimeException(
-                    "Choose a less common password"
-            );
-        }
-
-        CompromisedPasswordService.CheckResult
-                compromisedPasswordResult =
-                compromisedPasswordService.check(password);
-
-        if (
-                compromisedPasswordResult
-                        == CompromisedPasswordService.CheckResult.COMPROMISED
-        ) {
-            throw new RuntimeException(
-                    "Choose a password that has not appeared in known data breaches"
-            );
-        }
+        validateNewPassword(
+                normalizedUsername,
+                normalizedEmail,
+                password
+        );
 
         if (!normalizedEmail.matches(
                 "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
         )) {
-            throw new RuntimeException("Invalid email address");
+            throw new RuntimeException(
+                    "Invalid email address"
+            );
         }
 
         if (repository.existsById(normalizedUsername)) {
@@ -158,6 +120,77 @@ public class DatabaseUserService {
         entity.setEmail(normalizedEmail);
 
         repository.save(entity);
+    }
+
+    @Transactional
+    public void changePassword(
+            String username,
+            String currentPassword,
+            String newPassword) throws Exception {
+
+        String normalizedUsername =
+                username == null ? "" : username.trim();
+
+        if (normalizedUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        if (
+                currentPassword == null ||
+                        currentPassword.isBlank()
+        ) {
+            throw new RuntimeException(
+                    "Current password is required"
+            );
+        }
+
+        UserEntity user =
+                repository.findById(normalizedUsername)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User account was not found"
+                                )
+                        );
+
+        String storedHash =
+                user.getPasswordHash();
+
+        if (
+                !passwordMatchesStoredHash(
+                        currentPassword,
+                        storedHash
+                )
+        ) {
+            throw new RuntimeException(
+                    "Current password is incorrect"
+            );
+        }
+
+        if (
+                newPassword != null &&
+                        passwordMatchesStoredHash(
+                                newPassword,
+                                storedHash
+                        )
+        ) {
+            throw new RuntimeException(
+                    "New password must be different from the current password"
+            );
+        }
+
+        validateNewPassword(
+                normalizedUsername,
+                user.getEmail(),
+                newPassword
+        );
+
+        user.setPasswordHash(
+                passwordEncoder.encode(newPassword)
+        );
+
+        repository.save(user);
     }
 
     public boolean existsByUsername(String username) {
@@ -225,6 +258,95 @@ public class DatabaseUserService {
         repository.save(user);
 
         return true;
+    }
+
+    private void validateNewPassword(
+            String username,
+            String email,
+            String password) {
+
+        if (password == null || password.isBlank()) {
+            throw new RuntimeException(
+                    "New password is required"
+            );
+        }
+
+        int passwordLength =
+                password.codePointCount(
+                        0,
+                        password.length()
+                );
+
+        if (passwordLength < MIN_PASSWORD_LENGTH) {
+            throw new RuntimeException(
+                    "Password must be at least 15 characters"
+            );
+        }
+
+        int passwordBytes =
+                password.getBytes(
+                        StandardCharsets.UTF_8
+                ).length;
+
+        if (passwordBytes > MAX_PASSWORD_BYTES) {
+            throw new RuntimeException(
+                    "Password must not exceed 72 UTF-8 bytes"
+            );
+        }
+
+        if (
+                commonPasswordService.isBlocked(
+                        password,
+                        username,
+                        email
+                )
+        ) {
+            throw new RuntimeException(
+                    "Choose a less common password"
+            );
+        }
+
+        CompromisedPasswordService.CheckResult
+                compromisedPasswordResult =
+                compromisedPasswordService.check(password);
+
+        if (
+                compromisedPasswordResult
+                        == CompromisedPasswordService.CheckResult.COMPROMISED
+        ) {
+            throw new RuntimeException(
+                    "Choose a password that has not appeared in known data breaches"
+            );
+        }
+    }
+
+    private boolean passwordMatchesStoredHash(
+            String password,
+            String storedHash) throws Exception {
+
+        if (
+                password == null ||
+                        storedHash == null ||
+                        storedHash.isBlank()
+        ) {
+            return false;
+        }
+
+        if (isBcryptHash(storedHash)) {
+            return passwordEncoder.matches(
+                    password,
+                    storedHash
+            );
+        }
+
+        if (isLegacySha256Hash(storedHash)) {
+            return verifyLegacySha256Password(
+                    password,
+                    storedHash
+            );
+        }
+
+        return false;
     }
 
     private boolean isBcryptHash(String storedHash) {

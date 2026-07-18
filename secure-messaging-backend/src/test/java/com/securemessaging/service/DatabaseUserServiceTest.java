@@ -336,6 +336,273 @@ class DatabaseUserServiceTest {
                 .save(org.mockito.ArgumentMatchers.any());
     }
 
+    @Test
+    void changePasswordReplacesCurrentBcryptHash()
+            throws Exception {
+
+        String currentPassword =
+                "current secure passphrase";
+
+        String newPassword =
+                "violet lanterns cross the quiet valley";
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        passwordEncoder.encode(
+                                currentPassword
+                        )
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        databaseUserService.changePassword(
+                "Tom",
+                currentPassword,
+                newPassword
+        );
+
+        assertTrue(
+                passwordEncoder.matches(
+                        newPassword,
+                        user.getPasswordHash()
+                )
+        );
+
+        assertFalse(
+                passwordEncoder.matches(
+                        currentPassword,
+                        user.getPasswordHash()
+                )
+        );
+
+        verify(repository).save(same(user));
+    }
+
+    @Test
+    void changePasswordRejectsIncorrectCurrentPassword() {
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        passwordEncoder.encode(
+                                "correct current password"
+                        )
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.changePassword(
+                                "Tom",
+                                "incorrect current password",
+                                "violet lanterns cross the quiet valley"
+                        )
+                );
+
+        assertEquals(
+                "Current password is incorrect",
+                exception.getMessage()
+        );
+
+        verify(repository, never()).save(
+                org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void changePasswordRejectsCurrentPasswordReuse() {
+
+        String currentPassword =
+                "current secure passphrase";
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        passwordEncoder.encode(
+                                currentPassword
+                        )
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.changePassword(
+                                "Tom",
+                                currentPassword,
+                                currentPassword
+                        )
+                );
+
+        assertEquals(
+                "New password must be different from the current password",
+                exception.getMessage()
+        );
+
+        verify(repository, never()).save(
+                org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void changePasswordRejectsShortNewPassword() {
+
+        String currentPassword =
+                "current secure passphrase";
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        passwordEncoder.encode(
+                                currentPassword
+                        )
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.changePassword(
+                                "Tom",
+                                currentPassword,
+                                "too short"
+                        )
+                );
+
+        assertEquals(
+                "Password must be at least 15 characters",
+                exception.getMessage()
+        );
+
+        verify(repository, never()).save(
+                org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void changePasswordRejectsCommonNewPassword() {
+
+        String currentPassword =
+                "current secure passphrase";
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        passwordEncoder.encode(
+                                currentPassword
+                        )
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.changePassword(
+                                "Tom",
+                                currentPassword,
+                                "Password1234567"
+                        )
+                );
+
+        assertEquals(
+                "Choose a less common password",
+                exception.getMessage()
+        );
+
+        verify(repository, never()).save(
+                org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void changePasswordRejectsCompromisedNewPassword() {
+
+        String currentPassword =
+                "current secure passphrase";
+
+        String newPassword =
+                "a unique but breached password 2026";
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        passwordEncoder.encode(
+                                currentPassword
+                        )
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        compromisedPasswordResult =
+                CompromisedPasswordService.CheckResult.COMPROMISED;
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.changePassword(
+                                "Tom",
+                                currentPassword,
+                                newPassword
+                        )
+                );
+
+        assertEquals(
+                "Choose a password that has not appeared in known data breaches",
+                exception.getMessage()
+        );
+
+        verify(repository, never()).save(
+                org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void changePasswordAcceptsCorrectLegacyCurrentPassword()
+            throws Exception {
+
+        String currentPassword =
+                "LegacyPassword123!";
+
+        String newPassword =
+                "silver rivers move beyond the quiet forest";
+
+        UserEntity user =
+                createUser(
+                        "Tom",
+                        legacySha256Hash(currentPassword)
+                );
+
+        when(repository.findById("Tom"))
+                .thenReturn(Optional.of(user));
+
+        databaseUserService.changePassword(
+                "Tom",
+                currentPassword,
+                newPassword
+        );
+
+        assertTrue(
+                passwordEncoder.matches(
+                        newPassword,
+                        user.getPasswordHash()
+                )
+        );
+
+        verify(repository).save(same(user));
+    }
+
     private UserEntity createUser(
             String username,
             String passwordHash) {

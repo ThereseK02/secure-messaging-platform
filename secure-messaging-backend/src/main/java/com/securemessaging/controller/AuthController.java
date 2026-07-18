@@ -1,9 +1,11 @@
 package com.securemessaging.controller;
 
+import com.securemessaging.dto.ChangePasswordRequest;
 import com.securemessaging.dto.LoginRequest;
 import com.securemessaging.dto.LoginResponse;
 import com.securemessaging.dto.RegistrationRequest;
 import com.securemessaging.service.AuthService;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,4 +56,39 @@ public class AuthController {
             );
         }
     }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordRequest request) {
+
+        String currentUsername =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            authService.changePassword(
+                    currentUsername,
+                    request.currentPassword(),
+                    request.newPassword()
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "Password changed successfully"
+                    )
+            );
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "error",
+                            e.getMessage()
+                    )
+            );
+        }
+    }
+
 }

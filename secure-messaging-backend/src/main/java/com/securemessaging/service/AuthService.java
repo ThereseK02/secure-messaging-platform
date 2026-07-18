@@ -187,6 +187,28 @@ public class AuthService {
             );
         }
     }
+    public void changePassword(
+            String username,
+            String currentPassword,
+            String newPassword) {
+
+        try {
+            databaseUserService.changePassword(
+                    username,
+                    currentPassword,
+                    newPassword
+            );
+
+        } catch (RuntimeException e) {
+            throw e;
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Password change failed"
+            );
+        }
+    }
+
 
     public String login(String username, String password) {
 
