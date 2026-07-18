@@ -32,7 +32,37 @@ function showNotification(type, text) {
     async function handleRegister(e) {
 
         e.preventDefault();
+        if (!username.trim()) {
+            showNotification(
+                "error",
+                "Username is required."
+            );
+            return;
+        }
 
+        if (!email.trim()) {
+            showNotification(
+                "error",
+                "Email is required."
+            );
+            return;
+        }
+
+        if (!password) {
+            showNotification(
+                "error",
+                "Password is required."
+            );
+            return;
+        }
+
+        if (!confirmPassword) {
+            showNotification(
+                "error",
+                "Please confirm your password."
+            );
+            return;
+        }
         const passwordLength =
             Array.from(password).length;
 
@@ -198,7 +228,7 @@ setTimeout(() => {
     </div>
 )}
 
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleRegister} noValidate>
 
                     <input
                         type="text"
