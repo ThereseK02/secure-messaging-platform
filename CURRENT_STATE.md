@@ -26,7 +26,12 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Login throttling temporarily blocks a normalized username for 15 minutes after five failed attempts.
 - Successful authentication clears previous failed-attempt records.
 - Login-attempt state is currently stored in backend application memory.
-- Password changes, password resets, token invalidation, and passkeys remain planned.
+- Authenticated users can change their password from the dashboard.
+- Password changes require the correct current password.
+- New passwords must satisfy the existing minimum-length, BCrypt byte-limit, local-screening, and compromised-password requirements.
+- A successful password change clears the frontend authentication state and redirects the user to Login.
+- Invalid login credentials return a generic authentication error without being misreported as an expired session.
+- Password reset, token revocation, Multi-Factor Authentication, recovery codes, and passkeys remain planned.
 - Browser compromised-password warnings may appear for weak or commonly breached test-account passwords.
 
 ## Direct Messaging
@@ -93,9 +98,9 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Messages containing attachments cannot currently be edited.
 
 ## Pinning
-- Authorized users can pin and unpin group messages.
-- Pinned messages display a pinned label.
-- Pinning currently identifies important messages but does not yet create a formal decision or acknowledgment workflow.
+- Users can pin and unpin their own eligible group messages through the message-actions menu.
+- Pinned messages display a pinned label and identify the user who pinned them.
+- Pinning identifies important messages but does not yet create a formal decision, required acknowledgment, or audit record.
 
 ## Typing Indicators
 - Group members can see when another member is typing.
@@ -127,7 +132,7 @@ This document summarizes the currently implemented and deployed behavior of the 
 - PostgreSQL runs in the `secure-postgres` container.
 - The frontend is built with Node and served from an Nginx production container.
 - Nginx provides SPA fallback routing and reverse-proxy access to the backend.
-- The latest deployed feature commit is `0f9d144 Add group member online presence`.
+- The latest deployed commit is `e114765 Avoid session expired message on failed login`.
 - The production health endpoint returns HTTP 200.
 - The backend STOMP simple broker starts successfully during application startup.
 
@@ -135,23 +140,26 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Group search is complete.
 - Group read and seen status is complete.
 - Group unread counts are complete.
-- Group message edit and delete are complete for text-only messages.
-- Group message pinning is complete.
+- Group message edit and delete are complete for eligible user-owned messages.
+- Group message pinning is complete for eligible user-owned messages.
 - Group member role management is complete.
 - Group member removal is complete.
 - Group deletion is complete.
 - Group attachment support is complete for the current workflow.
 - Group typing indicators are complete.
 - Online and offline member presence is complete.
+- Password policy enforcement and compromised-password screening are complete.
+- Authenticated Change Password is complete.
+- Invalid-login and expired-session responses are handled separately.
 - Phase 5 conversation and member tools are complete for the current planned scope.
 
 ## Planned Next Work
-- Change Password
-- Password reset and token invalidation
-- Passkey enrollment and sign-in
-- Mark Message as Decision
-- Required member acknowledgment
-- Immutable decision audit records
+- Mark eligible group messages as formal decisions
+- Require member acknowledgment for selected decisions
+- Preserve append-only decision and acknowledgment audit records
+- Provide authorized decision-history and acknowledgment-status views
+- Password reset and secure reset-token invalidation
+- Multi-Factor Authentication, recovery codes, and passkey support
 
 ## Known Limitations
 - Messages with attachments cannot yet be edited.
@@ -161,5 +169,5 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Login-attempt records are stored in application memory and reset whenever the backend restarts.
 - Login throttling is currently keyed only by normalized username and is not yet distributed across multiple backend instances.
 - Legacy SHA-256 support remains temporarily available until active accounts have migrated to BCrypt.
-- Password changes, password recovery, and passkeys are not yet implemented.
-- Pinned messages do not yet support formal decisions, required acknowledgments, or audit records.
+- Password recovery, token revocation, Multi-Factor Authentication, recovery codes, and passkeys are not yet implemented.
+- Pinned messages do not yet support formal decisions, required acknowledgments, or append-only audit records.

@@ -1,4 +1,4 @@
-﻿# Secure Messaging Platform
+# Secure Messaging Platform
 
 > Documentation update in progress
 > The application is actively evolving. Some feature descriptions, screenshots,
@@ -83,6 +83,10 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 - JSON Web Token (JWT)-based authentication and authorization
 
 - Secure password storage with BCrypt
+
+- Password policy enforcement and compromised-password screening
+
+- Authenticated Change Password workflow
 
 - Private messaging between registered users
 
@@ -208,12 +212,12 @@ This architecture provides a clear separation of concerns between the presentati
 
 ```text
 secure-messaging-platform/
-├─ secure-messaging-backend/
-├─ secure-messaging-frontend/
-├─ screenshots/
-├─ diagrams/
-├─ docker-compose.yml
-└─ README.md
+â”œâ”€ secure-messaging-backend/
+â”œâ”€ secure-messaging-frontend/
+â”œâ”€ screenshots/
+â”œâ”€ diagrams/
+â”œâ”€ docker-compose.yml
+â””â”€ README.md
 ```
 
 ---
@@ -275,11 +279,27 @@ The Secure Messaging Platform implements multiple layers of security to protect 
 
 
 
-- Hashes passwords using BCrypt
+- Stores new passwords using BCrypt with strength 12
 
 - Avoids storing plain-text passwords
 
-- Improves credential security in the database
+- Requires new passwords to contain at least 15 Unicode characters
+
+- Limits passwords to 72 UTF-8 bytes to remain within BCrypt's supported input size
+
+- Allows passphrases and spaces without forcing predictable character-composition rules
+
+- Screens registration and changed passwords against a local common-password blocklist
+
+- Rejects predictable passwords based on the username, email, and application name
+
+- Checks passwords against the Have I Been Pwned Pwned Passwords range service without transmitting the plaintext password or complete hash
+
+- Requires verification of the current password before an authenticated password change
+
+- Clears the frontend authentication state and requires a new login after a successful password change
+
+- Temporarily supports legacy SHA-256 accounts and migrates them to BCrypt after successful authentication
 
 
 
@@ -379,9 +399,17 @@ The authentication workflow controls how users register, log in, and access prot
 
 - A new user creates an account through the registration page.
 
-- The backend receives the registration request through a REST API endpoint.
+- The registration interface requires password confirmation.
 
-- The password is hashed using BCrypt before being stored.
+- The backend validates the password length, BCrypt byte limit, local blocklist, and context-specific predictable values.
+
+- The backend checks the password against the Have I Been Pwned Pwned Passwords range service using the k-anonymity range workflow.
+
+- Only the first five characters of a locally generated SHA-1 hash are transmitted for compromised-password screening.
+
+- The plaintext password and complete password hash remain within the backend.
+
+- The password is hashed using BCrypt with strength 12 before being stored.
 
 - User information is persisted in the PostgreSQL database.
 
@@ -391,13 +419,39 @@ The authentication workflow controls how users register, log in, and access prot
 
 
 
-- A registered user logs in with valid credentials.
+- A registered user submits a username and password.
 
-- The backend verifies the submitted password against the stored BCrypt hash.
+- The backend normalizes username whitespace before authentication and JWT creation.
+
+- The backend verifies BCrypt passwords and temporarily supports legacy SHA-256 hashes.
+
+- A successful legacy login automatically migrates the stored password hash to BCrypt.
+
+- Five failed attempts for a normalized username trigger a temporary 15-minute login block.
+
+- Invalid credentials and temporary blocking use a generic browser message that does not reveal whether an account exists.
+
+- Public login failures do not trigger the authenticated expired-session workflow.
 
 - If authentication succeeds, the backend generates a JWT token.
 
 - The frontend stores the token and uses it for future protected API requests.
+
+
+
+### Change Password
+
+
+
+- Authenticated users can open the Change Password page from the dashboard.
+
+- The user must provide the correct current password.
+
+- The new password must satisfy the same length, BCrypt byte-limit, local-screening, and compromised-password requirements used during registration.
+
+- After a successful password change, the frontend removes the existing authentication state and redirects the user to Login.
+
+- The previous password no longer authenticates, and the new password can be used for the next login.
 
 
 
@@ -591,7 +645,7 @@ Clearing the search restores the complete conversation history.
 
 Group messages use a compact actions interface instead of displaying permanent action buttons inside every message bubble.
 
-A small `⋯` hint appears when a message is hovered, focused, or opened. Selecting the message displays the available actions.
+A small `â‹¯` hint appears when a message is hovered, focused, or opened. Selecting the message displays the available actions.
 
 The message bubble also supports keyboard activation with `Enter` or `Space`.
 
@@ -621,11 +675,11 @@ Example:
 
 Edited messages display both the seen count and edited status:
 
-`Seen by 1 of 7 · edited`
+`Seen by 1 of 7 Â· edited`
 
 The message-actions hint and seen-status text share a responsive metadata row. This prevents overlap and keeps normal, edited, pinned, short, and long messages aligned consistently.
 
-Group unread-count badges have not yet been implemented. They remain part of a future conversation-awareness iteration.
+The **My Groups** list displays unread-count badges so users can identify groups with messages they have not yet viewed.
 
 ### Real-Time Group Updates
 
@@ -641,6 +695,11 @@ Real-time notifications support events such as:
 - Pinned or unpinned messages
 - Membership changes
 - Group changes
+- Group-scoped typing activity
+
+Group members can see when another member is typing in the selected group. The indicator disappears after typing stops, the draft is cleared, the message is sent, or the user leaves the conversation.
+
+Authenticated users send an application-wide presence heartbeat every 10 seconds. A user is considered offline after approximately 30 seconds without a heartbeat, while the selected group refreshes member presence approximately every 3 seconds.
 
 Periodic REST polling remains available as a fallback when the WebSocket connection is unavailable.
 
@@ -1192,12 +1251,14 @@ Several enhancements can be implemented to further improve the platform's functi
 
 #### Group Conversation Awareness
 
-- Unread group-message counts for each member
-- Unread badges beside groups in the **My Groups** list
-- A visible boundary between previously viewed and newly received messages
-- Typing indicators for active group participants
-- Online and offline presence indicators
-- Presence timeout handling for closed tabs, disconnected clients, and inactive sessions
+The current platform already includes group unread-count badges, group-scoped typing indicators, online and offline member indicators, and automatic presence timeout handling.
+
+Future refinements may include:
+
+- Persisted or distributed presence storage
+- Presence synchronization across multiple backend instances
+- More detailed availability states
+- Optional user-controlled presence preferences
 
 #### Secure Decisions and Acknowledgments
 
@@ -1213,14 +1274,15 @@ Several enhancements can be implemented to further improve the platform's functi
 
 #### Password and Authentication Management
 
-- Configurable minimum password length requirements
-- Password strength validation using length and character-composition rules
-- Rejection of weak, common, or compromised passwords
-- Secure password change and password reset workflows
-- Verification of the current password before sensitive account changes
-- Login rate limiting and temporary account protection after repeated failed attempts
+The current platform already includes a 15-character minimum password policy, a BCrypt byte limit, local and context-specific password screening, compromised-password checking, authenticated Change Password, current-password verification, and temporary login throttling.
+
+Remaining improvements include:
+
+- Secure Forgot Password and reset-token workflows
+- Token revocation after password reset or important account changes
 - Multi-Factor Authentication (MFA)
 - Backup recovery codes
+- Passkey enrollment and sign-in
 - Active-session and trusted-device management
 - Refresh-token rotation and secure session revocation
 - Security notifications for important account activity

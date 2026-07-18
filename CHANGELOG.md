@@ -22,6 +22,8 @@
 - Online and offline indicators for group members
 - Application-wide presence heartbeat and automatic offline timeout
 - Real-time group updates through STOMP and SockJS
+- Authenticated Change Password workflow
+- Dashboard navigation to the protected Change Password page
 
 ### Changed
 - Improved group member management layout
@@ -37,8 +39,14 @@
 - Blocked the legacy direct-join endpoint from creating memberships
 - Scoped typing indicators to the currently selected group
 - Defined online status as activity anywhere in the Secure Messaging Platform
+- Invalid login credentials now return an unauthorized response
+- Public login failures no longer trigger the expired-session workflow
+- Successful password changes clear the frontend authentication state and redirect to Login
 
 ### Security
+- Password changes require an authenticated session and verification of the current password
+- New passwords submitted through Change Password use the existing minimum-length, BCrypt byte-limit, local-screening, and compromised-password requirements
+- Invalid login responses remain generic and do not reveal whether a username exists
 - New registration passwords are checked against the Have I Been Pwned Pwned Passwords range service
 - Compromised-password screening sends only the first five characters of a locally generated SHA-1 hash
 - The plaintext password and complete password hash are never transmitted
@@ -101,12 +109,20 @@
 - Verified group owners cannot remove themselves
 - Verified non-owners cannot delete groups
 - Verified complete deletion of a populated group and its related database records
+- Added automated backend tests for authenticated password changes
+- Verified successful password change with the correct current password
+- Verified rejection when the current password is incorrect
+- Verified the previous password no longer authenticates after a successful change
+- Verified the new password authenticates successfully
+- Verified failed login displays only the generic login error
+- Verified successful login still reaches the authenticated dashboard
 - Verified the production deployment and health endpoint after the latest changes
+- Verified all 37 backend tests pass
 
 ### Known Limitations
 - Messages with attachments cannot yet be edited
 - Group attachment ownership and deletion policy is still evolving
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
-- Password management, distributed login throttling, and passkeys are not yet implemented
-- Decision acknowledgment and audit-record workflows are not yet implemented
+- Password recovery, token revocation, Multi-Factor Authentication, recovery codes, distributed login throttling, and passkeys are not yet implemented
+- Formal decision, required acknowledgment, and append-only audit-record workflows are not yet implemented
