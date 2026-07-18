@@ -6,6 +6,7 @@ import com.securemessaging.entity.AttachmentEntity;
 import com.securemessaging.entity.EmailGroupInvitationEntity;
 import com.securemessaging.entity.EmailGroupInvitationStatus;
 import com.securemessaging.entity.GroupEntity;
+import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupInvitationEntity;
 import com.securemessaging.entity.GroupInvitationStatus;
 import com.securemessaging.entity.GroupMemberEntity;
@@ -34,6 +35,7 @@ import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
 import com.securemessaging.service.InvitationTokenService;
+import com.securemessaging.service.GroupDecisionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +58,7 @@ public class MessagingController {
     private final GroupAttachmentKeyRepository groupAttachmentKeyRepository;
     private final UserEntityRepository userEntityRepository;
     private final InvitationTokenService invitationTokenService;
+    private final GroupDecisionService groupDecisionService;
     private final SimpMessagingTemplate messagingTemplate;
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
@@ -70,6 +73,7 @@ public class MessagingController {
                                GroupAttachmentKeyRepository groupAttachmentKeyRepository,
                                UserEntityRepository userEntityRepository,
                                InvitationTokenService invitationTokenService,
+                               GroupDecisionService groupDecisionService,
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
@@ -84,6 +88,7 @@ public class MessagingController {
         this.groupAttachmentKeyRepository = groupAttachmentKeyRepository;
         this.userEntityRepository = userEntityRepository;
         this.invitationTokenService = invitationTokenService;
+        this.groupDecisionService = groupDecisionService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -1356,6 +1361,91 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                 .orElseGet(() -> ResponseEntity.status(404).body(
                         Map.of("error", "Group message not found")
                 ));
+    }
+
+    @PostMapping("/groups/{groupId}/messages/{messageId}/decision")
+    public ResponseEntity<?> createGroupDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("messageId") Long messageId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionEntity decision =
+                    groupDecisionService.createDecision(
+                            groupId,
+                            messageId,
+                            currentUsername
+                    );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "status", "Group decision created",
+                            "decisionId", decision.getId(),
+                            "groupId", decision.getGroupId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "sourceSender",
+                            decision.getSourceSender(),
+                            "decisionText",
+                            decision.getDecisionTextSnapshot(),
+                            "createdBy",
+                            decision.getCreatedBy(),
+                            "createdAt",
+                            decision.getCreatedAt()
+                    )
+            );
+
+        } catch (RuntimeException exception) {
+
+            String errorMessage =
+                    exception.getMessage() == null
+                            ? "Unable to create group decision"
+                            : exception.getMessage();
+
+            if (
+                    errorMessage.equals(
+                            "You are not a member of this group"
+                    ) ||
+                            errorMessage.equals(
+                                    "Only the group owner or an admin can create decisions"
+                            )
+            ) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(
+                                Map.of(
+                                        "error",
+                                        errorMessage
+                                )
+                        );
+            }
+
+            if (errorMessage.equals("Group message not found")) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(
+                                Map.of(
+                                        "error",
+                                        errorMessage
+                                )
+                        );
+            }
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            Map.of(
+                                    "error",
+                                    errorMessage
+                            )
+                    );
+        }
     }
 
     @DeleteMapping("/groups/{groupId}/messages/{messageId}")
