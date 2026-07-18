@@ -27,9 +27,9 @@ import static org.mockito.Mockito.when;
 
 class DatabaseUserServiceTest {
 
-
     private UserEntityRepository repository;
     private PasswordEncoder passwordEncoder;
+    private CommonPasswordService commonPasswordService;
     private DatabaseUserService databaseUserService;
 
     @BeforeEach
@@ -42,10 +42,14 @@ class DatabaseUserServiceTest {
          */
         passwordEncoder = new BCryptPasswordEncoder(4);
 
+        commonPasswordService =
+                new CommonPasswordService();
+
         databaseUserService =
                 new DatabaseUserService(
                         repository,
-                        passwordEncoder
+                        passwordEncoder,
+                        commonPasswordService
                 );
     }
 
@@ -237,6 +241,28 @@ class DatabaseUserServiceTest {
                         savedUser.getPasswordHash()
                 )
         );
+    }
+
+    @Test
+    void registrationRejectsCommonPassword() {
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> databaseUserService.register(
+                                "CommonPasswordUser",
+                                "common@example.com",
+                                "Password1234567"
+                        )
+                );
+
+        assertEquals(
+                "Choose a less common password",
+                exception.getMessage()
+        );
+
+        verify(repository, never())
+                .save(org.mockito.ArgumentMatchers.any());
     }
 
     private UserEntity createUser(

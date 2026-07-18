@@ -23,13 +23,16 @@ public class DatabaseUserService {
 
     private final UserEntityRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final CommonPasswordService commonPasswordService;
 
     public DatabaseUserService(
             UserEntityRepository repository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            CommonPasswordService commonPasswordService) {
 
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.commonPasswordService = commonPasswordService;
     }
 
     public void saveUser(User user) {
@@ -85,6 +88,18 @@ public class DatabaseUserService {
         if (passwordBytes > MAX_PASSWORD_BYTES) {
             throw new RuntimeException(
                     "Password must not exceed 72 UTF-8 bytes"
+            );
+        }
+
+        if (
+                commonPasswordService.isBlocked(
+                        password,
+                        normalizedUsername,
+                        normalizedEmail
+                )
+        ) {
+            throw new RuntimeException(
+                    "Choose a less common password"
             );
         }
 
