@@ -39,6 +39,10 @@
 - Defined online status as activity anywhere in the Secure Messaging Platform
 
 ### Security
+- New registration passwords are checked against a local common-password blocklist
+- Password screening also blocks predictable values based on the username, email local part, and application name
+- Common-password comparisons are case-insensitive and ignore outer whitespace
+- Rejected passwords return a generic message without revealing the matched blocklist entry
 - New registration passwords must contain at least 15 Unicode characters
 - Registration passwords are limited to 72 UTF-8 bytes to remain within BCrypt's supported input size
 - Passwords may contain spaces and are not forced into predictable composition rules
@@ -59,6 +63,11 @@
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
 
 ### Tested
+- Added five automated tests for local and context-specific password screening
+- Added a registration integration test for common-password rejection
+- Verified Password1234567 is rejected in production
+- Verified a non-listed passphrase registers successfully
+- Verified all 22 backend tests pass
 - Added automated tests for short, oversized, and valid registration passwords
 - Verified a password shorter than 15 characters is rejected
 - Verified mismatched password confirmation is rejected in the browser
@@ -88,5 +97,5 @@
 - Group attachment ownership and deletion policy is still evolving
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
-- Common-password screening, password management, distributed login throttling, and passkeys are not yet implemented
+- Large-scale compromised-password screening, password management, distributed login throttling, and passkeys are not yet implemented
 - Decision acknowledgment and audit-record workflows are not yet implemented
