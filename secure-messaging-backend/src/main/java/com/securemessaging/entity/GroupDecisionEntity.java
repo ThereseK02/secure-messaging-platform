@@ -51,6 +51,10 @@ public class GroupDecisionEntity {
     @Column(name = "threshold", length = 40)
     private GroupDecisionThreshold threshold;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "governance_mode", length = 40)
+    private GroupDecisionGovernanceMode governanceMode;
+
     @Column(name = "voting_deadline")
     private LocalDateTime votingDeadline;
 
@@ -78,6 +82,8 @@ public class GroupDecisionEntity {
         this.status = GroupDecisionStatus.PROPOSED;
         this.category = GroupDecisionCategory.ROUTINE_OPERATION;
         this.threshold = GroupDecisionThreshold.SIMPLE_MAJORITY;
+        this.governanceMode =
+                GroupDecisionGovernanceMode.OWNER_REVIEW;
         this.votingDeadline = null;
         this.tieBreakDeadline = null;
         this.createdAt = createdAt;
@@ -117,6 +123,10 @@ public class GroupDecisionEntity {
 
     public GroupDecisionThreshold getThreshold() {
         return threshold;
+    }
+
+    public GroupDecisionGovernanceMode getGovernanceMode() {
+        return governanceMode;
     }
 
     public LocalDateTime getVotingDeadline() {

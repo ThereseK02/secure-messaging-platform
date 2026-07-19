@@ -2,6 +2,7 @@ package com.securemessaging.service;
 
 import com.securemessaging.entity.GroupDecisionCategory;
 import com.securemessaging.entity.GroupDecisionEntity;
+import com.securemessaging.entity.GroupDecisionGovernanceMode;
 import com.securemessaging.entity.GroupDecisionStatus;
 import com.securemessaging.entity.GroupDecisionThreshold;
 import com.securemessaging.entity.GroupDecisionEventEntity;
@@ -162,6 +163,10 @@ class GroupDecisionServiceTest {
         assertEquals(
                 GroupDecisionThreshold.SIMPLE_MAJORITY,
                 capturedDecision.getThreshold()
+        );
+        assertEquals(
+                GroupDecisionGovernanceMode.OWNER_REVIEW,
+                capturedDecision.getGovernanceMode()
         );
         assertNull(capturedDecision.getVotingDeadline());
         assertNull(capturedDecision.getTieBreakDeadline());
