@@ -1,4 +1,6 @@
 package com.securemessaging.controller;
+
+import com.securemessaging.dto.CreateGroupDecisionRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 
@@ -7,6 +9,7 @@ import com.securemessaging.entity.EmailGroupInvitationEntity;
 import com.securemessaging.entity.EmailGroupInvitationStatus;
 import com.securemessaging.entity.GroupEntity;
 import com.securemessaging.entity.GroupDecisionEntity;
+import com.securemessaging.entity.GroupDecisionGovernanceMode;
 import com.securemessaging.entity.GroupInvitationEntity;
 import com.securemessaging.entity.GroupInvitationStatus;
 import com.securemessaging.entity.GroupMemberEntity;
@@ -1366,7 +1369,9 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
     @PostMapping("/groups/{groupId}/messages/{messageId}/decision")
     public ResponseEntity<?> createGroupDecision(
             @PathVariable("groupId") Long groupId,
-            @PathVariable("messageId") Long messageId) {
+            @PathVariable("messageId") Long messageId,
+            @RequestBody(required = false)
+            CreateGroupDecisionRequest request) {
 
         String currentUsername =
                 org.springframework.security.core.context
@@ -1376,11 +1381,18 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                         .getName();
 
         try {
+            GroupDecisionGovernanceMode governanceMode =
+                    request == null ||
+                            request.governanceMode() == null
+                            ? GroupDecisionGovernanceMode.OWNER_REVIEW
+                            : request.governanceMode();
+
             GroupDecisionEntity decision =
                     groupDecisionService.createDecision(
                             groupId,
                             messageId,
-                            currentUsername
+                            currentUsername,
+                            governanceMode
                     );
 
             return ResponseEntity.ok(
@@ -1396,6 +1408,8 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                             decision.getDecisionTextSnapshot(),
                             "createdBy",
                             decision.getCreatedBy(),
+                            "governanceMode",
+                            decision.getGovernanceMode(),
                             "createdAt",
                             decision.getCreatedAt()
                     )
@@ -1413,7 +1427,7 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                             "You are not a member of this group"
                     ) ||
                             errorMessage.equals(
-                                    "Only the group owner or an admin can create decisions"
+                                    "Only the group owner can select owner-led governance"
                             )
             ) {
                 return ResponseEntity
