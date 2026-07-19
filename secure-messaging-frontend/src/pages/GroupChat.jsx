@@ -24,7 +24,14 @@ export default function GroupChat() {
   const [groupMessageSearch, setGroupMessageSearch] = useState("");
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingMessageText, setEditingMessageText] = useState("");
-  const [openMessageActionsId, setOpenMessageActionsId] = useState(null);
+  const [openMessageActionsId, setOpenMessageActionsId] =
+      useState(null);
+  const [decisionMessage, setDecisionMessage] =
+      useState(null);
+  const [decisionGovernanceMode, setDecisionGovernanceMode] =
+      useState("OWNER_REVIEW");
+  const [creatingDecision, setCreatingDecision] =
+      useState(false);
   const [hoveredMessageActionsId, setHoveredMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
@@ -824,6 +831,90 @@ export default function GroupChat() {
     }
   }
 
+  function openDecisionGovernancePanel(msg) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (!msg?.id) {
+      showNotification("error", "Unable to select this group message");
+      return;
+    }
+
+    if (!msg.message?.trim()) {
+      showNotification(
+          "error",
+          "A blank group message cannot become a decision"
+      );
+      return;
+    }
+
+    setOpenMessageActionsId(null);
+    setDecisionMessage(msg);
+    setDecisionGovernanceMode("OWNER_REVIEW");
+  }
+
+  function closeDecisionGovernancePanel() {
+    if (creatingDecision) {
+      return;
+    }
+
+    setDecisionMessage(null);
+    setDecisionGovernanceMode("OWNER_REVIEW");
+  }
+
+  async function createGroupDecision() {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (!decisionMessage?.id) {
+      showNotification("error", "Please select a group message");
+      return;
+    }
+
+    if (
+        decisionGovernanceMode === "OWNER_LED" &&
+        currentGroupRole !== "OWNER"
+    ) {
+      showNotification(
+          "error",
+          "Only the group owner can select owner-led governance"
+      );
+      return;
+    }
+
+    try {
+      setCreatingDecision(true);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/messages/${decisionMessage.id}/decision`,
+          {
+            governanceMode: decisionGovernanceMode,
+          }
+      );
+
+      setDecisionMessage(null);
+      setDecisionGovernanceMode("OWNER_REVIEW");
+
+      showNotification(
+          "success",
+          response.data?.status || "Group decision created"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to create group decision"
+      );
+    } finally {
+      setCreatingDecision(false);
+    }
+  }
   async function togglePinGroupMessage(msg) {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -927,6 +1018,10 @@ export default function GroupChat() {
       setGroupAttachments([]);
       setMembers([]);
       setGroupMessageSearch("");
+      setDecisionMessage(null);
+      setDecisionGovernanceMode("OWNER_REVIEW");
+      setCreatingDecision(false);
+      setOpenMessageActionsId(null);
       await loadGroups();
     } catch (error) {
       console.error(error);
@@ -1348,6 +1443,12 @@ export default function GroupChat() {
                                       setInviteUsername("");
                                       setInviteEmail("");
                                       setEmailRegistrationLink("");
+                                      setDecisionMessage(null);
+                                      setDecisionGovernanceMode(
+                                          "OWNER_REVIEW"
+                                      );
+                                      setCreatingDecision(false);
+                                      setOpenMessageActionsId(null);
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
@@ -1626,6 +1727,105 @@ export default function GroupChat() {
                 <p style={styles.groupContext}>
                   Group: {selectedGroupName} (#{selectedGroupId})
                 </p>
+                {decisionMessage && (
+                    <section
+                        style={styles.decisionGovernancePanel}
+                        aria-label="Create group decision"
+                    >
+                      <div style={styles.decisionGovernanceHeader}>
+                        <div>
+                          <p style={styles.decisionGovernanceTitle}>
+                            Create Decision
+                          </p>
+
+                          <p style={styles.decisionGovernanceMessage}>
+                            {decisionMessage.sender === currentUsername
+                                ? "Your message"
+                                : `${decisionMessage.sender}'s message`}
+                            : {decisionMessage.message}
+                          </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            style={styles.decisionGovernanceCloseButton}
+                            onClick={closeDecisionGovernancePanel}
+                            disabled={creatingDecision}
+                            aria-label="Close decision panel"
+                        >
+                          Close
+                        </button>
+                      </div>
+
+                      <label style={styles.decisionGovernanceLabel}>
+                        Governance mode
+
+                        <select
+                            value={decisionGovernanceMode}
+                            onChange={(event) =>
+                                setDecisionGovernanceMode(
+                                    event.target.value
+                                )
+                            }
+                            style={styles.decisionGovernanceSelect}
+                            disabled={creatingDecision}
+                        >
+                          <option value="OWNER_REVIEW">
+                            Owner Review
+                          </option>
+
+                          <option value="MEMBER_VOTE">
+                            Member Vote
+                          </option>
+
+                          {currentGroupRole === "OWNER" && (
+                              <option value="OWNER_LED">
+                                Owner Led
+                              </option>
+                          )}
+                        </select>
+                      </label>
+
+                      <p style={styles.decisionGovernanceDescription}>
+                        {decisionGovernanceMode === "OWNER_LED" &&
+                            "The group owner leads and controls this decision."}
+
+                        {decisionGovernanceMode === "OWNER_REVIEW" &&
+                            "A member may propose the decision, and the owner reviews it."}
+
+                        {decisionGovernanceMode === "MEMBER_VOTE" &&
+                            "Eligible group members decide through voting."}
+                      </p>
+
+                      <div style={styles.decisionGovernanceActions}>
+                        <button
+                            type="button"
+                            style={styles.decisionGovernanceCancelButton}
+                            onClick={closeDecisionGovernancePanel}
+                            disabled={creatingDecision}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                            type="button"
+                            style={{
+                              ...styles.decisionGovernanceCreateButton,
+                              ...(creatingDecision
+                                  ? styles.decisionGovernanceButtonDisabled
+                                  : {}),
+                            }}
+                            onClick={createGroupDecision}
+                            disabled={creatingDecision}
+                        >
+                          {creatingDecision
+                              ? "Creating..."
+                              : "Create Decision"}
+                        </button>
+                      </div>
+                    </section>
+                )}
+
                 <h2 style={styles.sectionTitle}>Messages</h2>
 
                 <p style={styles.messageCount}>
@@ -1877,6 +2077,16 @@ export default function GroupChat() {
                                             }}
                                         >
                                           {msg.pinned ? "Unpin" : "Pin"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            style={styles.messageActionMenuButton}
+                                            onClick={() => {
+                                              openDecisionGovernancePanel(msg);
+                                            }}
+                                        >
+                                          Decision
                                         </button>
 
                                         {canModifyMessage && (
@@ -2708,6 +2918,102 @@ messageCard: {
     pointerEvents: "none",
     opacity: 1,
     boxShadow: "0 3px 10px rgba(0, 0, 0, 0.30)",
+  },
+  decisionGovernancePanel: {
+    marginBottom: "12px",
+    padding: "14px",
+    border: "1px solid #475569",
+    borderRadius: "12px",
+    backgroundColor: "#0f172a",
+    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.24)",
+  },
+  decisionGovernanceHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "12px",
+    marginBottom: "12px",
+  },
+  decisionGovernanceTitle: {
+    margin: "0 0 5px 0",
+    color: "#bfdbfe",
+    fontSize: "14px",
+    fontWeight: "800",
+  },
+  decisionGovernanceMessage: {
+    margin: 0,
+    maxWidth: "700px",
+    color: "#d6c6a8",
+    fontSize: "12px",
+    lineHeight: "1.45",
+    overflowWrap: "anywhere",
+  },
+  decisionGovernanceCloseButton: {
+    flexShrink: 0,
+    border: "1px solid #475569",
+    borderRadius: "8px",
+    padding: "5px 10px",
+    backgroundColor: "#020617",
+    color: "#d6c6a8",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+  decisionGovernanceLabel: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    color: "#bfdbfe",
+    fontSize: "12px",
+    fontWeight: "700",
+  },
+  decisionGovernanceSelect: {
+    width: "100%",
+    maxWidth: "340px",
+    boxSizing: "border-box",
+    border: "1px solid #475569",
+    borderRadius: "8px",
+    padding: "9px 10px",
+    backgroundColor: "#020617",
+    color: "#e2e8f0",
+    fontSize: "13px",
+    outline: "none",
+  },
+  decisionGovernanceDescription: {
+    margin: "9px 0 0 0",
+    color: "#94a3b8",
+    fontSize: "12px",
+    lineHeight: "1.45",
+  },
+  decisionGovernanceActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+    marginTop: "12px",
+  },
+  decisionGovernanceCancelButton: {
+    border: "1px solid #475569",
+    borderRadius: "8px",
+    padding: "7px 12px",
+    backgroundColor: "#020617",
+    color: "#d6c6a8",
+    fontSize: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+  decisionGovernanceCreateButton: {
+    border: "1px solid #d6c6a8",
+    borderRadius: "8px",
+    padding: "7px 12px",
+    backgroundColor: "#1e3a5f",
+    color: "#f5ead5",
+    fontSize: "12px",
+    fontWeight: "800",
+    cursor: "pointer",
+  },
+  decisionGovernanceButtonDisabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
   },
   messageActionsMenu: {
     position: "absolute",
