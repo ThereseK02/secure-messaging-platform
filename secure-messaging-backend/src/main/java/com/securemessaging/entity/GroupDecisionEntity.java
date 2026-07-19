@@ -74,6 +74,26 @@ public class GroupDecisionEntity {
             String createdBy,
             LocalDateTime createdAt) {
 
+        this(
+                groupId,
+                sourceMessageId,
+                sourceSender,
+                decisionTextSnapshot,
+                createdBy,
+                GroupDecisionGovernanceMode.OWNER_REVIEW,
+                createdAt
+        );
+    }
+
+    public GroupDecisionEntity(
+            Long groupId,
+            Long sourceMessageId,
+            String sourceSender,
+            String decisionTextSnapshot,
+            String createdBy,
+            GroupDecisionGovernanceMode governanceMode,
+            LocalDateTime createdAt) {
+
         this.groupId = groupId;
         this.sourceMessageId = sourceMessageId;
         this.sourceSender = sourceSender;
@@ -83,7 +103,9 @@ public class GroupDecisionEntity {
         this.category = GroupDecisionCategory.ROUTINE_OPERATION;
         this.threshold = GroupDecisionThreshold.SIMPLE_MAJORITY;
         this.governanceMode =
-                GroupDecisionGovernanceMode.OWNER_REVIEW;
+                governanceMode == null
+                        ? GroupDecisionGovernanceMode.OWNER_REVIEW
+                        : governanceMode;
         this.votingDeadline = null;
         this.tieBreakDeadline = null;
         this.createdAt = createdAt;

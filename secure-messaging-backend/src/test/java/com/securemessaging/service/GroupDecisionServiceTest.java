@@ -199,6 +199,136 @@ class GroupDecisionServiceTest {
     }
 
     @Test
+    void ownerMaySelectOwnerLedGovernance() {
+
+        Long groupId = 12L;
+        Long messageId = 44L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                groupMessageRepository.findById(messageId)
+        ).thenReturn(Optional.empty());
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.createDecision(
+                                groupId,
+                                messageId,
+                                "Tom",
+                                GroupDecisionGovernanceMode.OWNER_LED
+                        )
+                );
+
+        assertEquals(
+                "Group message not found",
+                exception.getMessage()
+        );
+
+        verify(groupMessageRepository)
+                .findById(messageId);
+    }
+
+    @Test
+    void regularMemberCannotSelectOwnerLedGovernance() {
+
+        Long groupId = 12L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.createDecision(
+                                groupId,
+                                44L,
+                                "Kelly",
+                                GroupDecisionGovernanceMode.OWNER_LED
+                        )
+                );
+
+        assertEquals(
+                "Only the group owner can select owner-led governance",
+                exception.getMessage()
+        );
+
+        verify(groupMessageRepository, never())
+                .findById(any());
+    }
+
+    @Test
+    void regularMemberMaySelectMemberVoteGovernance() {
+
+        Long groupId = 12L;
+        Long messageId = 44L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                groupMessageRepository.findById(messageId)
+        ).thenReturn(Optional.empty());
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.createDecision(
+                                groupId,
+                                messageId,
+                                "Kelly",
+                                GroupDecisionGovernanceMode.MEMBER_VOTE
+                        )
+                );
+
+        assertEquals(
+                "Group message not found",
+                exception.getMessage()
+        );
+
+        verify(groupMessageRepository)
+                .findById(messageId);
+    }
+
+    @Test
     void regularMemberPassesProposalAuthorization() {
 
         Long groupId = 12L;

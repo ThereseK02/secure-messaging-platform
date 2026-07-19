@@ -3,7 +3,10 @@ package com.securemessaging.service;
 import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
+import com.securemessaging.entity.GroupDecisionGovernanceMode;
+import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
+import com.securemessaging.entity.GroupRole;
 import com.securemessaging.repository.GroupDecisionEventRepository;
 import com.securemessaging.repository.GroupDecisionRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
@@ -40,6 +43,21 @@ public class GroupDecisionService {
             Long sourceMessageId,
             String actorUsername) {
 
+        return createDecision(
+                groupId,
+                sourceMessageId,
+                actorUsername,
+                GroupDecisionGovernanceMode.OWNER_REVIEW
+        );
+    }
+
+    @Transactional
+    public GroupDecisionEntity createDecision(
+            Long groupId,
+            Long sourceMessageId,
+            String actorUsername,
+            GroupDecisionGovernanceMode requestedGovernanceMode) {
+
         if (groupId == null) {
             throw new RuntimeException("Group ID is required");
         }
@@ -59,7 +77,13 @@ public class GroupDecisionService {
             );
         }
 
-        groupMemberRepository
+        GroupDecisionGovernanceMode governanceMode =
+                requestedGovernanceMode == null
+                        ? GroupDecisionGovernanceMode.OWNER_REVIEW
+                        : requestedGovernanceMode;
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
                         .findByGroupIdAndUsername(
                                 groupId,
                                 normalizedActorUsername
@@ -70,6 +94,15 @@ public class GroupDecisionService {
                                 )
                         );
 
+        if (
+                governanceMode ==
+                        GroupDecisionGovernanceMode.OWNER_LED &&
+                currentMember.getRole() != GroupRole.OWNER
+        ) {
+            throw new RuntimeException(
+                    "Only the group owner can select owner-led governance"
+            );
+        }
 
         GroupMessageEntity sourceMessage =
                 groupMessageRepository
@@ -115,6 +148,7 @@ public class GroupDecisionService {
                         sourceMessage.getSender(),
                         messageText,
                         normalizedActorUsername,
+                        governanceMode,
                         createdAt
                 );
 
