@@ -3,9 +3,7 @@ package com.securemessaging.service;
 import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
-import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
-import com.securemessaging.entity.GroupRole;
 import com.securemessaging.repository.GroupDecisionEventRepository;
 import com.securemessaging.repository.GroupDecisionRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
@@ -61,8 +59,7 @@ public class GroupDecisionService {
             );
         }
 
-        GroupMemberEntity currentMember =
-                groupMemberRepository
+        groupMemberRepository
                         .findByGroupIdAndUsername(
                                 groupId,
                                 normalizedActorUsername
@@ -73,17 +70,6 @@ public class GroupDecisionService {
                                 )
                         );
 
-        boolean isOwner =
-                currentMember.getRole() == GroupRole.OWNER;
-
-        boolean isAdmin =
-                currentMember.getRole() == GroupRole.ADMIN;
-
-        if (!isOwner && !isAdmin) {
-            throw new RuntimeException(
-                    "Only the group owner or an admin can create decisions"
-            );
-        }
 
         GroupMessageEntity sourceMessage =
                 groupMessageRepository

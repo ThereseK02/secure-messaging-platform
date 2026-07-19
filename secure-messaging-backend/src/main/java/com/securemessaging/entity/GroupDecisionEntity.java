@@ -39,6 +39,23 @@ public class GroupDecisionEntity {
     @Column(name = "created_by", nullable = false)
     private String createdBy;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 40)
+    private GroupDecisionStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 40)
+    private GroupDecisionCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "threshold", length = 40)
+    private GroupDecisionThreshold threshold;
+
+    @Column(name = "voting_deadline")
+    private LocalDateTime votingDeadline;
+
+    @Column(name = "tie_break_deadline")
+    private LocalDateTime tieBreakDeadline;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -58,6 +75,11 @@ public class GroupDecisionEntity {
         this.sourceSender = sourceSender;
         this.decisionTextSnapshot = decisionTextSnapshot;
         this.createdBy = createdBy;
+        this.status = GroupDecisionStatus.PROPOSED;
+        this.category = GroupDecisionCategory.ROUTINE_OPERATION;
+        this.threshold = GroupDecisionThreshold.SIMPLE_MAJORITY;
+        this.votingDeadline = null;
+        this.tieBreakDeadline = null;
         this.createdAt = createdAt;
     }
 
@@ -85,6 +107,25 @@ public class GroupDecisionEntity {
         return createdBy;
     }
 
+    public GroupDecisionStatus getStatus() {
+        return status;
+    }
+
+    public GroupDecisionCategory getCategory() {
+        return category;
+    }
+
+    public GroupDecisionThreshold getThreshold() {
+        return threshold;
+    }
+
+    public LocalDateTime getVotingDeadline() {
+        return votingDeadline;
+    }
+
+    public LocalDateTime getTieBreakDeadline() {
+        return tieBreakDeadline;
+    }
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

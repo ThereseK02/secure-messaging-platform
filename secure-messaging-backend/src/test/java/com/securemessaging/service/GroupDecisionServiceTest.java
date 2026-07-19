@@ -1,6 +1,9 @@
 package com.securemessaging.service;
 
+import com.securemessaging.entity.GroupDecisionCategory;
 import com.securemessaging.entity.GroupDecisionEntity;
+import com.securemessaging.entity.GroupDecisionStatus;
+import com.securemessaging.entity.GroupDecisionThreshold;
 import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
@@ -18,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -147,6 +151,20 @@ class GroupDecisionServiceTest {
                 "Tom",
                 capturedDecision.getCreatedBy()
         );
+        assertEquals(
+                GroupDecisionStatus.PROPOSED,
+                capturedDecision.getStatus()
+        );
+        assertEquals(
+                GroupDecisionCategory.ROUTINE_OPERATION,
+                capturedDecision.getCategory()
+        );
+        assertEquals(
+                GroupDecisionThreshold.SIMPLE_MAJORITY,
+                capturedDecision.getThreshold()
+        );
+        assertNull(capturedDecision.getVotingDeadline());
+        assertNull(capturedDecision.getTieBreakDeadline());
 
         ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
                 ArgumentCaptor.forClass(
@@ -176,9 +194,10 @@ class GroupDecisionServiceTest {
     }
 
     @Test
-    void regularMemberCannotCreateDecision() {
+    void regularMemberPassesProposalAuthorization() {
 
         Long groupId = 12L;
+        Long messageId = 44L;
 
         GroupMemberEntity member =
                 new GroupMemberEntity(
@@ -195,23 +214,27 @@ class GroupDecisionServiceTest {
                         )
         ).thenReturn(Optional.of(member));
 
+        when(
+                groupMessageRepository.findById(messageId)
+        ).thenReturn(Optional.empty());
+
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class,
                         () -> groupDecisionService.createDecision(
                                 groupId,
-                                44L,
+                                messageId,
                                 "Kelly"
                         )
                 );
 
         assertEquals(
-                "Only the group owner or an admin can create decisions",
+                "Group message not found",
                 exception.getMessage()
         );
 
-        verify(groupMessageRepository, never())
-                .findById(any());
+        verify(groupMessageRepository)
+                .findById(messageId);
 
         verify(decisionRepository, never())
                 .save(any());
