@@ -1502,6 +1502,26 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                             currentUsername
                     );
 
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_RESOLVED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "governanceMode",
+                            decision.getGovernanceMode().name(),
+                            "decisionStatus",
+                            decision.getStatus().name(),
+                            "resolvedBy",
+                            currentUsername
+                    )
+            );
+
             Map<String, Object> response =
                     new java.util.LinkedHashMap<>();
 
@@ -1556,6 +1576,26 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                             decisionId,
                             currentUsername
                     );
+
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_RESOLVED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "governanceMode",
+                            decision.getGovernanceMode().name(),
+                            "decisionStatus",
+                            decision.getStatus().name(),
+                            "resolvedBy",
+                            currentUsername
+                    )
+            );
 
             Map<String, Object> response =
                     new java.util.LinkedHashMap<>();

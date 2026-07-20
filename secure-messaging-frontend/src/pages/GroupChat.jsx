@@ -1361,6 +1361,43 @@ export default function GroupChat() {
             return;
           }
 
+          if (
+              groupEvent.type ===
+              "GROUP_DECISION_RESOLVED"
+          ) {
+            setGroupDecisions((currentDecisions) =>
+                currentDecisions.map((decision) =>
+                    String(decision.decisionId) ===
+                    String(groupEvent.decisionId)
+                        ? {
+                            ...decision,
+                            status:
+                                groupEvent.decisionStatus,
+                          }
+                        : decision
+                )
+            );
+
+            if (
+                groupEvent.resolvedBy &&
+                groupEvent.resolvedBy !==
+                    currentUsername
+            ) {
+              const resolutionLabel =
+                  groupEvent.decisionStatus ===
+                  "APPROVED"
+                      ? "approved"
+                      : "rejected";
+
+              showNotification(
+                  "success",
+                  `Group decision ${resolutionLabel} by ${groupEvent.resolvedBy}`
+              );
+            }
+
+            return;
+          }
+
           loadMessages(selectedGroupId);
           loadGroupAttachments(selectedGroupId);
           loadMembers(selectedGroupId);
