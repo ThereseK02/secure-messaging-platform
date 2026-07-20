@@ -4,6 +4,11 @@ import com.securemessaging.dto.CreateGroupDecisionRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 
+import com.securemessaging.dto.CastGroupDecisionVoteRequest;
+import com.securemessaging.dto.OpenGroupDecisionVotingRequest;
+import com.securemessaging.entity.GroupDecisionVoteEntity;
+import com.securemessaging.entity.GroupDecisionVoteChoice;
+
 import com.securemessaging.entity.AttachmentEntity;
 import com.securemessaging.entity.EmailGroupInvitationEntity;
 import com.securemessaging.entity.EmailGroupInvitationStatus;
@@ -1993,7 +1998,6 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                             )
                     );
         }
-
         return ResponseEntity
                 .badRequest()
                 .body(
@@ -2003,4 +2007,274 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                         )
                 );
     }
-}
+
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/voting/open"
+    )
+    public ResponseEntity<?> openGroupDecisionVoting(
+                @PathVariable("groupId") Long groupId,
+                @PathVariable("decisionId") Long decisionId,
+                @RequestBody OpenGroupDecisionVotingRequest request) {
+
+            String currentUsername =
+                    org.springframework.security.core.context
+                            .SecurityContextHolder
+                            .getContext()
+                            .getAuthentication()
+                            .getName();
+
+            try {
+                GroupDecisionEntity decision =
+                        groupDecisionService.openVoting(
+                                groupId,
+                                decisionId,
+                                currentUsername,
+                                request == null
+                                        ? null
+                                        : request.votingDeadline()
+                        );
+
+                messagingTemplate.convertAndSend(
+                        "/topic/groups/" + groupId,
+                        Map.of(
+                                "type",
+                                "GROUP_DECISION_VOTING_OPENED",
+                                "groupId",
+                                groupId,
+                                "decisionId",
+                                decision.getId(),
+                                "decisionStatus",
+                                decision.getStatus().name(),
+                                "votingDeadline",
+                                decision.getVotingDeadline().toString(),
+                                "openedBy",
+                                currentUsername
+                        )
+                );
+
+                Map<String, Object> response =
+                        new java.util.LinkedHashMap<>();
+
+                response.put(
+                        "status",
+                        "Group decision voting opened"
+                );
+                response.put(
+                        "decisionId",
+                        decision.getId()
+                );
+                response.put(
+                        "groupId",
+                        decision.getGroupId()
+                );
+                response.put(
+                        "decisionStatus",
+                        decision.getStatus()
+                );
+                response.put(
+                        "votingDeadline",
+                        decision.getVotingDeadline()
+                );
+                response.put(
+                        "openedBy",
+                        currentUsername
+                );
+
+                return ResponseEntity.ok(response);
+
+            } catch (RuntimeException exception) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(
+                                Map.of(
+                                        "error",
+                                        exception.getMessage()
+                                )
+                        );
+            }
+    }
+
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/votes"
+    )
+        public ResponseEntity<?> castGroupDecisionVote (
+                    @PathVariable("groupId") Long groupId,
+                    @PathVariable("decisionId") Long decisionId,
+                    @RequestBody CastGroupDecisionVoteRequest request){
+
+                String currentUsername =
+                        org.springframework.security.core.context
+                                .SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName();
+
+                try {
+                    GroupDecisionVoteChoice voteChoice =
+                            request == null
+                                    ? null
+                                    : request.voteChoice();
+
+                    GroupDecisionVoteEntity vote =
+                            groupDecisionService.castVote(
+                                    groupId,
+                                    decisionId,
+                                    currentUsername,
+                                    voteChoice
+                            );
+
+                    messagingTemplate.convertAndSend(
+                            "/topic/groups/" + groupId,
+                            Map.of(
+                                    "type",
+                                    "GROUP_DECISION_VOTE_UPDATED",
+                                    "groupId",
+                                    groupId,
+                                    "decisionId",
+                                    decisionId,
+                                    "voterUsername",
+                                    vote.getVoterUsername(),
+                                    "voteChoice",
+                                    vote.getVoteChoice().name()
+                            )
+                    );
+
+                    Map<String, Object> response =
+                            new java.util.LinkedHashMap<>();
+
+                    response.put(
+                            "status",
+                            "Group decision vote recorded"
+                    );
+                    response.put(
+                            "voteId",
+                            vote.getId()
+                    );
+                    response.put(
+                            "groupId",
+                            vote.getGroupId()
+                    );
+                    response.put(
+                            "decisionId",
+                            vote.getDecisionId()
+                    );
+                    response.put(
+                            "voterUsername",
+                            vote.getVoterUsername()
+                    );
+                    response.put(
+                            "voteChoice",
+                            vote.getVoteChoice()
+                    );
+                    response.put(
+                            "createdAt",
+                            vote.getCreatedAt()
+                    );
+                    response.put(
+                            "updatedAt",
+                            vote.getUpdatedAt()
+                    );
+
+                    return ResponseEntity.ok(response);
+
+                } catch (RuntimeException exception) {
+                    return ResponseEntity
+                            .badRequest()
+                            .body(
+                                    Map.of(
+                                            "error",
+                                            exception.getMessage()
+                                    )
+                            );
+                }
+            }
+
+            @PostMapping(
+                    "/groups/{groupId}/decisions/{decisionId}/voting/resolve"
+            )
+            public ResponseEntity<?> resolveGroupDecisionVoting(
+                    @PathVariable("groupId") Long groupId,
+                    @PathVariable("decisionId") Long decisionId) {
+
+                String currentUsername =
+                        org.springframework.security.core.context
+                                .SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName();
+
+                try {
+                    GroupDecisionEntity decision =
+                            groupDecisionService.resolveMemberVote(
+                                    groupId,
+                                    decisionId,
+                                    currentUsername
+                            );
+
+                    messagingTemplate.convertAndSend(
+                            "/topic/groups/" + groupId,
+                            Map.of(
+                                    "type",
+                                    "GROUP_DECISION_VOTING_RESOLVED",
+                                    "groupId",
+                                    groupId,
+                                    "decisionId",
+                                    decision.getId(),
+                                    "decisionStatus",
+                                    decision.getStatus().name(),
+                                    "resolvedBy",
+                                    currentUsername
+                            )
+                    );
+
+                    Map<String, Object> response =
+                            new java.util.LinkedHashMap<>();
+
+                    response.put(
+                            "status",
+                            "Group decision voting resolved"
+                    );
+                    response.put(
+                            "decisionId",
+                            decision.getId()
+                    );
+                    response.put(
+                            "groupId",
+                            decision.getGroupId()
+                    );
+                    response.put(
+                            "governanceMode",
+                            decision.getGovernanceMode()
+                    );
+                    response.put(
+                            "decisionStatus",
+                            decision.getStatus()
+                    );
+                    response.put(
+                            "votingDeadline",
+                            decision.getVotingDeadline()
+                    );
+                    response.put(
+                            "tieBreakDeadline",
+                            decision.getTieBreakDeadline()
+                    );
+                    response.put(
+                            "resolvedBy",
+                            currentUsername
+                    );
+
+                    return ResponseEntity.ok(response);
+
+                } catch (RuntimeException exception) {
+                    return ResponseEntity
+                            .badRequest()
+                            .body(
+                                    Map.of(
+                                            "error",
+                                            exception.getMessage()
+                                    )
+                            );
+                }
+            }
+
+        }
