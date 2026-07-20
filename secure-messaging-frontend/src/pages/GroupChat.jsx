@@ -1401,6 +1401,7 @@ export default function GroupChat() {
           loadMessages(selectedGroupId);
           loadGroupAttachments(selectedGroupId);
           loadMembers(selectedGroupId);
+          loadGroupDecisions(selectedGroupId);
         });
       },
       onStompError: () => {
