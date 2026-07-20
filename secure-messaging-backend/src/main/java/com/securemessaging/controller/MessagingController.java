@@ -1482,6 +1482,116 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
     }
 
 
+    @PostMapping("/groups/{groupId}/decisions/{decisionId}/approve")
+    public ResponseEntity<?> approveGroupDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionEntity decision =
+                    groupDecisionService.approveDecision(
+                            groupId,
+                            decisionId,
+                            currentUsername
+                    );
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "status",
+                    "Group decision approved"
+            );
+            response.put(
+                    "decisionId",
+                    decision.getId()
+            );
+            response.put(
+                    "groupId",
+                    decision.getGroupId()
+            );
+            response.put(
+                    "governanceMode",
+                    decision.getGovernanceMode()
+            );
+            response.put(
+                    "decisionStatus",
+                    decision.getStatus()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException exception) {
+            return buildOwnerReviewDecisionErrorResponse(
+                    exception,
+                    "Unable to approve group decision"
+            );
+        }
+    }
+
+
+    @PostMapping("/groups/{groupId}/decisions/{decisionId}/reject")
+    public ResponseEntity<?> rejectGroupDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionEntity decision =
+                    groupDecisionService.rejectDecision(
+                            groupId,
+                            decisionId,
+                            currentUsername
+                    );
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "status",
+                    "Group decision rejected"
+            );
+            response.put(
+                    "decisionId",
+                    decision.getId()
+            );
+            response.put(
+                    "groupId",
+                    decision.getGroupId()
+            );
+            response.put(
+                    "governanceMode",
+                    decision.getGovernanceMode()
+            );
+            response.put(
+                    "decisionStatus",
+                    decision.getStatus()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException exception) {
+            return buildOwnerReviewDecisionErrorResponse(
+                    exception,
+                    "Unable to reject group decision"
+            );
+        }
+    }
+
+
     @PostMapping("/groups/{groupId}/messages/{messageId}/decision")
     public ResponseEntity<?> createGroupDecision(
             @PathVariable("groupId") Long groupId,
@@ -1770,5 +1880,71 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                         "typing", typing
                 )
         );
+    }
+
+    private ResponseEntity<?> buildOwnerReviewDecisionErrorResponse(
+            RuntimeException exception,
+            String fallbackMessage) {
+
+        String errorMessage =
+                exception.getMessage() == null
+                        ? fallbackMessage
+                        : exception.getMessage();
+
+        if (
+                errorMessage.equals(
+                        "You are not a member of this group"
+                ) ||
+                        errorMessage.equals(
+                                "Only the group owner can approve or reject this proposal"
+                        )
+        ) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(
+                            Map.of(
+                                    "error",
+                                    errorMessage
+                            )
+                    );
+        }
+
+        if (errorMessage.equals("Group decision not found")) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(
+                            Map.of(
+                                    "error",
+                                    errorMessage
+                            )
+                    );
+        }
+
+        if (
+                errorMessage.equals(
+                        "Only proposals for owner approval can be approved or rejected"
+                ) ||
+                        errorMessage.equals(
+                                "Only a proposed decision can be approved or rejected"
+                        )
+        ) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(
+                            Map.of(
+                                    "error",
+                                    errorMessage
+                            )
+                    );
+        }
+
+        return ResponseEntity
+                .badRequest()
+                .body(
+                        Map.of(
+                                "error",
+                                errorMessage
+                        )
+                );
     }
 }

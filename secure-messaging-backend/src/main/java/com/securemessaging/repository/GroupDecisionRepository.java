@@ -17,5 +17,10 @@ public interface GroupDecisionRepository
             Long groupId
     );
 
+    Optional<GroupDecisionEntity> findByIdAndGroupId(
+            Long id,
+            Long groupId
+    );
+
     boolean existsBySourceMessageId(Long sourceMessageId);
 }

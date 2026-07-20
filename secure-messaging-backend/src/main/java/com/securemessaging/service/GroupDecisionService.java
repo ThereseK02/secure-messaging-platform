@@ -4,6 +4,7 @@ import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
 import com.securemessaging.entity.GroupDecisionGovernanceMode;
+import com.securemessaging.entity.GroupDecisionStatus;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupRole;
@@ -168,6 +169,132 @@ public class GroupDecisionService {
                 );
 
         decisionEventRepository.save(creationEvent);
+
+        return savedDecision;
+    }
+
+    @Transactional
+    public GroupDecisionEntity approveDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        return resolveOwnerReviewDecision(
+                groupId,
+                decisionId,
+                actorUsername,
+                GroupDecisionStatus.APPROVED
+        );
+    }
+
+    @Transactional
+    public GroupDecisionEntity rejectDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        return resolveOwnerReviewDecision(
+                groupId,
+                decisionId,
+                actorUsername,
+                GroupDecisionStatus.REJECTED
+        );
+    }
+
+    private GroupDecisionEntity resolveOwnerReviewDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername,
+            GroupDecisionStatus targetStatus) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "You are not a member of this group"
+                                )
+                        );
+
+        if (currentMember.getRole() != GroupRole.OWNER) {
+            throw new RuntimeException(
+                    "Only the group owner can approve or reject this proposal"
+            );
+        }
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        try {
+            if (targetStatus == GroupDecisionStatus.APPROVED) {
+                decision.approve();
+            } else if (targetStatus == GroupDecisionStatus.REJECTED) {
+                decision.reject();
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported owner decision status"
+                );
+            }
+        } catch (IllegalStateException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+
+        GroupDecisionEntity savedDecision =
+                decisionRepository.save(decision);
+
+        LocalDateTime eventAt = LocalDateTime.now();
+
+        GroupDecisionEventType eventType =
+                targetStatus == GroupDecisionStatus.APPROVED
+                        ? GroupDecisionEventType.APPROVED
+                        : GroupDecisionEventType.REJECTED;
+
+        String eventDetails =
+                targetStatus == GroupDecisionStatus.APPROVED
+                        ? "Proposal approved by group owner"
+                        : "Proposal rejected by group owner";
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        savedDecision.getId(),
+                        groupId,
+                        eventType,
+                        normalizedActorUsername,
+                        eventAt,
+                        eventDetails
+                )
+        );
 
         return savedDecision;
     }

@@ -161,4 +161,28 @@ public class GroupDecisionEntity {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public void approve() {
+        requireProposedOwnerReviewDecision();
+        this.status = GroupDecisionStatus.APPROVED;
+    }
+
+    public void reject() {
+        requireProposedOwnerReviewDecision();
+        this.status = GroupDecisionStatus.REJECTED;
+    }
+
+    private void requireProposedOwnerReviewDecision() {
+        if (governanceMode != GroupDecisionGovernanceMode.OWNER_REVIEW) {
+            throw new IllegalStateException(
+                    "Only proposals for owner approval can be approved or rejected"
+            );
+        }
+
+        if (status != GroupDecisionStatus.PROPOSED) {
+            throw new IllegalStateException(
+                    "Only a proposed decision can be approved or rejected"
+            );
+        }
+    }
 }
