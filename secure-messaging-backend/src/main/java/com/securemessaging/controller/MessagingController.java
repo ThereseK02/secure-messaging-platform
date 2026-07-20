@@ -1661,6 +1661,22 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                             governanceMode
                     );
 
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_CREATED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "createdBy",
+                            currentUsername
+                    )
+            );
+
             return ResponseEntity.ok(
                     Map.of(
                             "status", "Group decision created",

@@ -1398,6 +1398,14 @@ export default function GroupChat() {
             return;
           }
 
+          if (
+              groupEvent.type ===
+              "GROUP_DECISION_CREATED"
+          ) {
+            loadGroupDecisions(selectedGroupId);
+            return;
+          }
+
           loadMessages(selectedGroupId);
           loadGroupAttachments(selectedGroupId);
           loadMembers(selectedGroupId);
