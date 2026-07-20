@@ -102,6 +102,20 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Pinned messages display a pinned label and identify the user who pinned them.
 - Pinning identifies important messages but does not yet create a formal decision, required acknowledgment, or audit record.
 
+## Group Decision Governance
+- Eligible text group messages can be converted into persisted decision records.
+- The current completed governance workflow is Owner Review.
+- Decision records preserve the source group, source message, source sender, decision-text snapshot, creator, governance mode, status, and creation time.
+- Owner Review decisions begin with the `PROPOSED` status.
+- Only the group owner can approve or reject an Owner Review decision.
+- Approved decisions use the `APPROVED` status.
+- Rejected decisions use the `REJECTED` status.
+- Group members can view the governance mode and current decision status.
+- The group owner sees Approve and Reject controls only for unresolved Owner Review decisions.
+- Decision creation is broadcast through the group WebSocket topic after the decision record has been created.
+- Decision approval and rejection are broadcast through the group WebSocket topic.
+- Decision creation and resolution update connected group members without requiring a browser refresh.
+- Member Vote and Owner Led governance workflows remain the next implementation stages.
 ## Typing Indicators
 - Group members can see when another member is typing.
 - Typing indicators are scoped to the selected group.
@@ -132,7 +146,7 @@ This document summarizes the currently implemented and deployed behavior of the 
 - PostgreSQL runs in the `secure-postgres` container.
 - The frontend is built with Node and served from an Nginx production container.
 - Nginx provides SPA fallback routing and reverse-proxy access to the backend.
-- The latest deployed commit is `e114765 Avoid session expired message on failed login`.
+- The latest deployed commit is `95163f2 Broadcast group decision creation in real time`.
 - The production health endpoint returns HTTP 200.
 - The backend STOMP simple broker starts successfully during application startup.
 
@@ -152,12 +166,15 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Authenticated Change Password is complete.
 - Invalid-login and expired-session responses are handled separately.
 - Phase 5 conversation and member tools are complete for the current planned scope.
+- Persisted group decision records are implemented.
+- Owner Review governance is implemented, deployed, and browser-tested.
+- Real-time decision creation, approval, and rejection are implemented.
 
 ## Planned Next Work
-- Mark eligible group messages as formal decisions
-- Require member acknowledgment for selected decisions
-- Preserve append-only decision and acknowledgment audit records
-- Provide authorized decision-history and acknowledgment-status views
+- Implement Member Vote governance with member eligibility, vote persistence, vote totals, and deterministic resolution rules
+- Complete the Owner Led governance workflow
+- Add explicit member acknowledgment for selected finalized decisions
+- Expand append-only decision audit history and authorized governance-history views
 - Password reset and secure reset-token invalidation
 - Multi-Factor Authentication, recovery codes, and passkey support
 
@@ -170,4 +187,4 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Login throttling is currently keyed only by normalized username and is not yet distributed across multiple backend instances.
 - Legacy SHA-256 support remains temporarily available until active accounts have migrated to BCrypt.
 - Password recovery, token revocation, Multi-Factor Authentication, recovery codes, and passkeys are not yet implemented.
-- Pinned messages do not yet support formal decisions, required acknowledgments, or append-only audit records.
+- Formal decisions are currently created from eligible text messages; attachment-based decisions, required acknowledgments, Member Vote, and full append-only audit-history views remain incomplete.

@@ -54,6 +54,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
     - [Group Message Actions](#group-message-actions)
     - [Seen Status and Message Metadata](#seen-status-and-message-metadata)
     - [Real-Time Group Updates](#real-time-group-updates)
+    - [Group Decision Governance](#group-decision-governance)
     - [Group Messaging Screenshots](#group-messaging-screenshots)
 - [Deployment Architecture](#deployment-architecture)
 - [Monitoring and Logging](#monitoring-and-logging)
@@ -62,7 +63,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 - [Key Contributions](#key-contributions)
 - [Future Improvements](#future-improvements)
     - [Group Conversation Awareness](#group-conversation-awareness)
-    - [Secure Decisions and Acknowledgments](#secure-decisions-and-acknowledgments)
+    - [Decision Governance and Acknowledgments](#decision-governance-and-acknowledgments)
     - [Password and Authentication Management](#password-and-authentication-management)
     - [Messaging and Notification Improvements](#messaging-and-notification-improvements)
     - [User Experience Improvements](#user-experience-improvements)
@@ -534,7 +535,7 @@ Shows a received direct message with attachment metadata, unread status, and a s
 
 ## Group Messaging
 
-The Secure Messaging Platform includes private group conversations for authenticated users. The group workflow supports invitation-based membership, role-based administration, encrypted attachments, searchable message history, message actions, seen counts, and real-time conversation updates.
+The Secure Messaging Platform includes private group conversations for authenticated users. The group workflow supports invitation-based membership, role-based administration, encrypted attachments, searchable message history, message actions, seen counts, persisted decision governance, and real-time conversation updates.
 
 ### Group Creation and Private Membership
 
@@ -695,6 +696,8 @@ Real-time notifications support events such as:
 - Pinned or unpinned messages
 - Membership changes
 - Group changes
+- Group decision creation
+- Group decision approval and rejection
 - Group-scoped typing activity
 
 Group members can see when another member is typing in the selected group. The indicator disappears after typing stops, the draft is cleared, the message is sent, or the user leaves the conversation.
@@ -703,6 +706,24 @@ Authenticated users send an application-wide presence heartbeat every 10 seconds
 
 Periodic REST polling remains available as a fallback when the WebSocket connection is unavailable.
 
+### Group Decision Governance
+
+Eligible text group messages can be converted into persisted decision records. A decision preserves the source group, source message, source sender, decision-text snapshot, creator, governance mode, current status, and creation time.
+
+The currently completed workflow is **Owner Review**:
+
+- Any eligible group member can propose an Owner Review decision from a text message.
+- A new decision begins with the `PROPOSED` status.
+- Only the group owner can approve or reject the proposal.
+- Approval changes the status to `APPROVED`.
+- Rejection changes the status to `REJECTED`.
+- Approve and Reject controls appear only to the owner while the proposal remains unresolved.
+- All group members can see the governance mode and current decision status.
+- Approved and rejected statuses remain persisted after page refresh.
+
+Decision creation and resolution are synchronized through dedicated group WebSocket events. The backend publishes the creation event only after the decision record exists, preventing the owner interface from loading the proposal too early. Connected members receive proposal controls and final status changes without refreshing the browser.
+
+The persisted governance model also recognizes **Member Vote** and **Owner Led** modes. Their complete resolution workflows remain the next governance implementation stages.
 ### Responsive Layout
 
 The Group Chat interface is designed for laptop and monitor screens.
@@ -728,6 +749,7 @@ The group messaging workflow uses stored records for:
 - Email invitations
 - Group messages
 - Group message read records
+- Persisted group decision records
 - Attachments
 - Group attachment encryption keys
 
@@ -1260,17 +1282,21 @@ Future refinements may include:
 - More detailed availability states
 - Optional user-controlled presence preferences
 
-#### Secure Decisions and Acknowledgments
+#### Decision Governance and Acknowledgments
 
-- Convert an eligible group message into a structured decision record
-- Require acknowledgment from selected group members or all group members
-- Display pending and completed acknowledgment counts
-- Record the username and timestamp for each acknowledgment
-- Preserve the original decision text and subsequent status changes
-- Allow decisions to be marked as active, completed, superseded, or withdrawn
-- Maintain an auditable decision history
-- Restrict decision-management actions through group roles and permissions
-- Export or review decision and acknowledgment records for administrative purposes
+Owner Review decision creation, persistence, owner approval or rejection, and real-time synchronization are implemented.
+
+Remaining governance improvements include:
+
+- Implement Member Vote eligibility and vote persistence
+- Display vote totals and individual voting state
+- Define deterministic approval, rejection, quorum, and tie rules
+- Complete the Owner Led governance lifecycle
+- Require acknowledgment from selected members or all members
+- Record acknowledgment usernames and timestamps
+- Expand append-only decision history and governance audit views
+- Support completed, superseded, withdrawn, or archived decision states
+- Provide authorized export and administrative review tools
 
 #### Password and Authentication Management
 

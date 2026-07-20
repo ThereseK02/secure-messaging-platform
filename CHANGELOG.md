@@ -22,6 +22,12 @@
 - Online and offline indicators for group members
 - Application-wide presence heartbeat and automatic offline timeout
 - Real-time group updates through STOMP and SockJS
+- Persisted group decision records created from eligible text messages
+- Owner Review governance mode
+- Proposed, Approved, and Rejected decision states
+- Owner-only Approve and Reject controls for unresolved Owner Review decisions
+- Real-time group decision creation events
+- Real-time group decision approval and rejection events
 - Authenticated Change Password workflow
 - Dashboard navigation to the protected Change Password page
 
@@ -117,7 +123,14 @@
 - Verified failed login displays only the generic login error
 - Verified successful login still reaches the authenticated dashboard
 - Verified the production deployment and health endpoint after the latest changes
-- Verified all 37 backend tests pass
+- Added seven automated backend tests for group-decision creation and Owner Review resolution
+- Verified all 44 backend tests pass
+- Verified members can create Owner Review proposals
+- Verified only the group owner can approve or reject Owner Review decisions
+- Verified Approved and Rejected states persist after refresh
+- Verified proposal controls appear for the owner without refreshing
+- Verified decision approval and rejection update all connected members without refreshing
+- Verified the production deployment and health endpoint after the governance changes
 
 ### Known Limitations
 - Messages with attachments cannot yet be edited
@@ -125,4 +138,4 @@
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
 - Password recovery, token revocation, Multi-Factor Authentication, recovery codes, distributed login throttling, and passkeys are not yet implemented
-- Formal decision, required acknowledgment, and append-only audit-record workflows are not yet implemented
+- Owner Review decisions are implemented; Member Vote, complete Owner Led behavior, required acknowledgments, and expanded append-only audit-history views remain incomplete
