@@ -5,6 +5,8 @@ import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
 import com.securemessaging.entity.GroupDecisionGovernanceMode;
 import com.securemessaging.entity.GroupDecisionStatus;
+import com.securemessaging.entity.GroupDecisionVoteChoice;
+import com.securemessaging.entity.GroupDecisionVoteEntity;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupRole;
@@ -389,6 +391,119 @@ public class GroupDecisionService {
         );
 
         return savedDecision;
+    }
+
+    @Transactional
+    public GroupDecisionVoteEntity castVote(
+            Long groupId,
+            Long decisionId,
+            String actorUsername,
+            GroupDecisionVoteChoice voteChoice) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        if (voteChoice == null) {
+            throw new RuntimeException("Vote choice is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        groupMemberRepository
+                .findByGroupIdAndUsername(
+                        groupId,
+                        normalizedActorUsername
+                )
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "You are not a member of this group"
+                        )
+                );
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        LocalDateTime voteTime =
+                LocalDateTime.now();
+
+        if (!decision.isVotingOpenAt(voteTime)) {
+            throw new RuntimeException(
+                    "Voting is not open for this decision"
+            );
+        }
+
+        GroupDecisionEventType eventType;
+
+        GroupDecisionVoteEntity vote =
+                decisionVoteRepository
+                        .findByDecisionIdAndVoterUsername(
+                                decisionId,
+                                normalizedActorUsername
+                        )
+                        .map(existingVote -> {
+                            existingVote.changeVote(
+                                    voteChoice,
+                                    voteTime
+                            );
+
+                            return existingVote;
+                        })
+                        .orElseGet(
+                                () -> new GroupDecisionVoteEntity(
+                                        groupId,
+                                        decisionId,
+                                        normalizedActorUsername,
+                                        voteChoice,
+                                        voteTime
+                                )
+                        );
+
+        if (vote.getId() == null) {
+            eventType = GroupDecisionEventType.VOTE_CAST;
+        } else {
+            eventType = GroupDecisionEventType.VOTE_CHANGED;
+        }
+
+        GroupDecisionVoteEntity savedVote =
+                decisionVoteRepository.save(vote);
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        decisionId,
+                        groupId,
+                        eventType,
+                        normalizedActorUsername,
+                        voteTime,
+                        eventType == GroupDecisionEventType.VOTE_CAST
+                                ? "Vote cast: " + voteChoice
+                                : "Vote changed to: " + voteChoice
+                )
+        );
+
+        return savedVote;
     }
 
     @Transactional(readOnly = true)

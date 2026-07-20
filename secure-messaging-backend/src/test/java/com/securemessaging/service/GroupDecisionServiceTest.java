@@ -5,6 +5,8 @@ import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionGovernanceMode;
 import com.securemessaging.entity.GroupDecisionStatus;
 import com.securemessaging.entity.GroupDecisionThreshold;
+import com.securemessaging.entity.GroupDecisionVoteChoice;
+import com.securemessaging.entity.GroupDecisionVoteEntity;
 import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
 import com.securemessaging.entity.GroupMemberEntity;
@@ -649,6 +651,281 @@ class GroupDecisionServiceTest {
                 );
 
         verify(decisionRepository, never())
+                .save(any());
+
+        verify(decisionEventRepository, never())
+                .save(any());
+    }
+    private void setVoteEntityId(
+            GroupDecisionVoteEntity entity,
+            Long id) {
+
+        try {
+            var idField =
+                    GroupDecisionVoteEntity.class
+                            .getDeclaredField("id");
+
+            idField.setAccessible(true);
+            idField.set(entity, id);
+
+        } catch (ReflectiveOperationException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @Test
+    void memberCastsVoteAndCreatesEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        decision.openVoting(
+                LocalDateTime.now().plusDays(2)
+        );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(
+                decisionVoteRepository
+                        .findByDecisionIdAndVoterUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.empty());
+
+        when(
+                decisionVoteRepository.save(
+                        any(GroupDecisionVoteEntity.class)
+                )
+        ).thenAnswer(invocation -> invocation.getArgument(0));
+
+        GroupDecisionVoteEntity result =
+                groupDecisionService.castVote(
+                        groupId,
+                        decisionId,
+                        " Kelly ",
+                        GroupDecisionVoteChoice.APPROVE
+                );
+
+        assertEquals(
+                groupId,
+                result.getGroupId()
+        );
+
+        assertEquals(
+                decisionId,
+                result.getDecisionId()
+        );
+
+        assertEquals(
+                "Kelly",
+                result.getVoterUsername()
+        );
+
+        assertEquals(
+                GroupDecisionVoteChoice.APPROVE,
+                result.getVoteChoice()
+        );
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        assertEquals(
+                GroupDecisionEventType.VOTE_CAST,
+                eventCaptor.getValue().getEventType()
+        );
+    }
+
+    @Test
+    void memberChangesExistingVoteAndCreatesEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        decision.openVoting(
+                LocalDateTime.now().plusDays(2)
+        );
+
+        GroupDecisionVoteEntity existingVote =
+                new GroupDecisionVoteEntity(
+                        groupId,
+                        decisionId,
+                        "Kelly",
+                        GroupDecisionVoteChoice.APPROVE,
+                        LocalDateTime.now()
+                );
+
+        setVoteEntityId(existingVote, 301L);
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(
+                decisionVoteRepository
+                        .findByDecisionIdAndVoterUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(existingVote));
+
+        when(decisionVoteRepository.save(existingVote))
+                .thenReturn(existingVote);
+
+        GroupDecisionVoteEntity result =
+                groupDecisionService.castVote(
+                        groupId,
+                        decisionId,
+                        "Kelly",
+                        GroupDecisionVoteChoice.REJECT
+                );
+
+        assertEquals(
+                GroupDecisionVoteChoice.REJECT,
+                result.getVoteChoice()
+        );
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        assertEquals(
+                GroupDecisionEventType.VOTE_CHANGED,
+                eventCaptor.getValue().getEventType()
+        );
+    }
+
+    @Test
+    void memberCannotVoteBeforeVotingIsOpened() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.castVote(
+                                groupId,
+                                decisionId,
+                                "Kelly",
+                                GroupDecisionVoteChoice.APPROVE
+                        )
+                );
+
+        assertEquals(
+                "Voting is not open for this decision",
+                exception.getMessage()
+        );
+
+        verify(decisionVoteRepository, never())
                 .save(any());
 
         verify(decisionEventRepository, never())
