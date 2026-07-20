@@ -1366,6 +1366,122 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                 ));
     }
 
+    @GetMapping("/groups/{groupId}/decisions")
+    public ResponseEntity<?> getGroupDecisions(
+            @PathVariable("groupId") Long groupId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            List<Map<String, Object>> decisions =
+                    groupDecisionService
+                            .getGroupDecisions(
+                                    groupId,
+                                    currentUsername
+                            )
+                            .stream()
+                            .map(decision -> {
+                                Map<String, Object> item =
+                                        new java.util.LinkedHashMap<>();
+
+                                item.put(
+                                        "decisionId",
+                                        decision.getId()
+                                );
+                                item.put(
+                                        "groupId",
+                                        decision.getGroupId()
+                                );
+                                item.put(
+                                        "sourceMessageId",
+                                        decision.getSourceMessageId()
+                                );
+                                item.put(
+                                        "sourceSender",
+                                        decision.getSourceSender()
+                                );
+                                item.put(
+                                        "decisionText",
+                                        decision.getDecisionTextSnapshot()
+                                );
+                                item.put(
+                                        "createdBy",
+                                        decision.getCreatedBy()
+                                );
+                                item.put(
+                                        "governanceMode",
+                                        decision.getGovernanceMode()
+                                );
+                                item.put(
+                                        "status",
+                                        decision.getStatus()
+                                );
+                                item.put(
+                                        "category",
+                                        decision.getCategory()
+                                );
+                                item.put(
+                                        "threshold",
+                                        decision.getThreshold()
+                                );
+                                item.put(
+                                        "votingDeadline",
+                                        decision.getVotingDeadline()
+                                );
+                                item.put(
+                                        "tieBreakDeadline",
+                                        decision.getTieBreakDeadline()
+                                );
+                                item.put(
+                                        "createdAt",
+                                        decision.getCreatedAt()
+                                );
+
+                                return item;
+                            })
+                            .toList();
+
+            return ResponseEntity.ok(decisions);
+
+        } catch (RuntimeException exception) {
+
+            String errorMessage =
+                    exception.getMessage() == null
+                            ? "Unable to load group decisions"
+                            : exception.getMessage();
+
+            if (
+                    errorMessage.equals(
+                            "You are not a member of this group"
+                    )
+            ) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(
+                                Map.of(
+                                        "error",
+                                        errorMessage
+                                )
+                        );
+            }
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            Map.of(
+                                    "error",
+                                    errorMessage
+                            )
+                    );
+        }
+    }
+
+
     @PostMapping("/groups/{groupId}/messages/{messageId}/decision")
     public ResponseEntity<?> createGroupDecision(
             @PathVariable("groupId") Long groupId,

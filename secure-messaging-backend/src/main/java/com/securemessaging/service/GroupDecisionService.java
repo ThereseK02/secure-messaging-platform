@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class GroupDecisionService {
@@ -169,5 +170,42 @@ public class GroupDecisionService {
         decisionEventRepository.save(creationEvent);
 
         return savedDecision;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupDecisionEntity> getGroupDecisions(
+            Long groupId,
+            String actorUsername) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        if (
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .isEmpty()
+        ) {
+            throw new RuntimeException(
+                    "You are not a member of this group"
+            );
+        }
+
+        return decisionRepository
+                .findByGroupIdOrderByCreatedAtDesc(groupId);
     }
 }
