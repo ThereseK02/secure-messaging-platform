@@ -2299,8 +2299,8 @@ const styles = {
   },
   title: {
     color: "#38bdf8",
-    fontSize: "clamp(32px, 3.6vw, 46px)",
-    marginBottom: "8px",
+    fontSize: "clamp(28px, 3vw, 40px)",
+    marginBottom: "4px",
   },
 
   sectionTitleButton: {
