@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -667,6 +668,412 @@ class GroupDecisionServiceTest {
 
             idField.setAccessible(true);
             idField.set(entity, id);
+
+        } catch (ReflectiveOperationException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @Test
+    void ownerResolvesApprovedMemberVote() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        decision.openVoting(
+                LocalDateTime.now().plusDays(1)
+        );
+
+        setVotingDeadline(
+                decision,
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(groupMemberRepository.findByGroupId(groupId))
+                .thenReturn(
+                        List.of(
+                                owner,
+                                new GroupMemberEntity(
+                                        groupId,
+                                        "Kelly",
+                                        GroupRole.MEMBER
+                                ),
+                                new GroupMemberEntity(
+                                        groupId,
+                                        "Gombo",
+                                        GroupRole.MEMBER
+                                )
+                        )
+                );
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionId(decisionId)
+        ).thenReturn(2L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.APPROVE
+                        )
+        ).thenReturn(2L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.REJECT
+                        )
+        ).thenReturn(0L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.ABSTAIN
+                        )
+        ).thenReturn(0L);
+
+        when(decisionRepository.save(decision))
+                .thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.resolveMemberVote(
+                        groupId,
+                        decisionId,
+                        " Tom "
+                );
+
+        assertEquals(
+                GroupDecisionStatus.APPROVED,
+                result.getStatus()
+        );
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        assertEquals(
+                GroupDecisionEventType.APPROVED,
+                eventCaptor.getValue().getEventType()
+        );
+
+        assertTrue(
+                eventCaptor
+                        .getValue()
+                        .getEventDetails()
+                        .contains("approve=2")
+        );
+    }
+
+    @Test
+    void ownerResolutionDetectsVotingTie() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        decision.openVoting(
+                LocalDateTime.now().plusDays(1)
+        );
+
+        setVotingDeadline(
+                decision,
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(groupMemberRepository.findByGroupId(groupId))
+                .thenReturn(
+                        List.of(
+                                owner,
+                                new GroupMemberEntity(
+                                        groupId,
+                                        "Kelly",
+                                        GroupRole.MEMBER
+                                )
+                        )
+                );
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionId(decisionId)
+        ).thenReturn(2L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.APPROVE
+                        )
+        ).thenReturn(1L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.REJECT
+                        )
+        ).thenReturn(1L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.ABSTAIN
+                        )
+        ).thenReturn(0L);
+
+        when(decisionRepository.save(decision))
+                .thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.resolveMemberVote(
+                        groupId,
+                        decisionId,
+                        "Tom"
+                );
+
+        assertEquals(
+                GroupDecisionStatus.WAITING_FOR_TIE_BREAK,
+                result.getStatus()
+        );
+
+        assertTrue(
+                result.getTieBreakDeadline() != null
+        );
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        assertEquals(
+                GroupDecisionEventType.TIE_BREAK_REQUIRED,
+                eventCaptor.getValue().getEventType()
+        );
+    }
+
+    @Test
+    void ownerResolutionDetectsMissingQuorum() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        decision.openVoting(
+                LocalDateTime.now().plusDays(1)
+        );
+
+        setVotingDeadline(
+                decision,
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(groupMemberRepository.findByGroupId(groupId))
+                .thenReturn(
+                        List.of(
+                                owner,
+                                new GroupMemberEntity(
+                                        groupId,
+                                        "Kelly",
+                                        GroupRole.MEMBER
+                                ),
+                                new GroupMemberEntity(
+                                        groupId,
+                                        "Gombo",
+                                        GroupRole.MEMBER
+                                ),
+                                new GroupMemberEntity(
+                                        groupId,
+                                        "Alice",
+                                        GroupRole.MEMBER
+                                )
+                        )
+                );
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionId(decisionId)
+        ).thenReturn(1L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.APPROVE
+                        )
+        ).thenReturn(1L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.REJECT
+                        )
+        ).thenReturn(0L);
+
+        when(
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.ABSTAIN
+                        )
+        ).thenReturn(0L);
+
+        when(decisionRepository.save(decision))
+                .thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.resolveMemberVote(
+                        groupId,
+                        decisionId,
+                        "Tom"
+                );
+
+        assertEquals(
+                GroupDecisionStatus.EXPIRED_WITHOUT_QUORUM,
+                result.getStatus()
+        );
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        assertEquals(
+                GroupDecisionEventType.QUORUM_NOT_MET,
+                eventCaptor.getValue().getEventType()
+        );
+    }
+
+    private void setVotingDeadline(
+            GroupDecisionEntity entity,
+            LocalDateTime votingDeadline) {
+
+        try {
+            var deadlineField =
+                    GroupDecisionEntity.class
+                            .getDeclaredField("votingDeadline");
+
+            deadlineField.setAccessible(true);
+            deadlineField.set(
+                    entity,
+                    votingDeadline
+            );
 
         } catch (ReflectiveOperationException exception) {
             throw new RuntimeException(exception);

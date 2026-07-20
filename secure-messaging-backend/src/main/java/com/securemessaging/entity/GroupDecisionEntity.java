@@ -215,6 +215,63 @@ public class GroupDecisionEntity {
                 && currentTime.isBefore(votingDeadline);
     }
 
+    public void resolveMemberVote(
+            GroupDecisionStatus outcomeStatus,
+            LocalDateTime resolvedAt) {
+
+        if (governanceMode != GroupDecisionGovernanceMode.MEMBER_VOTE) {
+            throw new IllegalStateException(
+                    "Only member-vote decisions can be resolved by voting"
+            );
+        }
+
+        if (status != GroupDecisionStatus.VOTING_OPEN) {
+            throw new IllegalStateException(
+                    "Only an open vote can be resolved"
+            );
+        }
+
+        if (resolvedAt == null) {
+            throw new IllegalArgumentException(
+                    "Vote resolution time is required"
+            );
+        }
+
+        if (
+                votingDeadline == null ||
+                        resolvedAt.isBefore(votingDeadline)
+        ) {
+            throw new IllegalStateException(
+                    "Voting cannot be resolved before the deadline"
+            );
+        }
+
+        if (
+                outcomeStatus != GroupDecisionStatus.APPROVED &&
+                        outcomeStatus != GroupDecisionStatus.REJECTED &&
+                        outcomeStatus !=
+                                GroupDecisionStatus.WAITING_FOR_TIE_BREAK &&
+                        outcomeStatus !=
+                                GroupDecisionStatus.EXPIRED_WITHOUT_QUORUM
+        ) {
+            throw new IllegalArgumentException(
+                    "Unsupported member-vote outcome"
+            );
+        }
+
+        this.status = outcomeStatus;
+
+        if (
+                outcomeStatus ==
+                        GroupDecisionStatus.WAITING_FOR_TIE_BREAK
+        ) {
+            this.tieBreakDeadline =
+                    resolvedAt.plusDays(1);
+        } else {
+            this.tieBreakDeadline = null;
+        }
+    }
+
     private void requireProposedOwnerReviewDecision() {
         if (governanceMode != GroupDecisionGovernanceMode.OWNER_REVIEW) {
             throw new IllegalStateException(

@@ -5,6 +5,8 @@ public enum GroupDecisionEventType {
     VOTING_OPENED,
     VOTE_CAST,
     VOTE_CHANGED,
+    TIE_BREAK_REQUIRED,
+    QUORUM_NOT_MET,
     APPROVED,
     REJECTED
 }

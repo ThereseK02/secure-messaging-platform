@@ -5,6 +5,7 @@ import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
 import com.securemessaging.entity.GroupDecisionGovernanceMode;
 import com.securemessaging.entity.GroupDecisionStatus;
+import com.securemessaging.entity.GroupDecisionThreshold;
 import com.securemessaging.entity.GroupDecisionVoteChoice;
 import com.securemessaging.entity.GroupDecisionVoteEntity;
 import com.securemessaging.entity.GroupMemberEntity;
@@ -504,6 +505,182 @@ public class GroupDecisionService {
         );
 
         return savedVote;
+    }
+
+    @Transactional
+    public GroupDecisionEntity resolveMemberVote(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "You are not a member of this group"
+                                )
+                        );
+
+        if (
+                currentMember.getRole() != GroupRole.OWNER &&
+                        currentMember.getRole() != GroupRole.ADMIN
+        ) {
+            throw new RuntimeException(
+                    "Only the group owner or an admin can resolve voting"
+            );
+        }
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        if (
+                decision.getThreshold() !=
+                        GroupDecisionThreshold.SIMPLE_MAJORITY
+        ) {
+            throw new RuntimeException(
+                    "Only simple-majority resolution is currently supported"
+            );
+        }
+
+        LocalDateTime resolvedAt =
+                LocalDateTime.now();
+
+        long totalMembers =
+                groupMemberRepository
+                        .findByGroupId(groupId)
+                        .size();
+
+        long totalVotes =
+                decisionVoteRepository
+                        .countByDecisionId(decisionId);
+
+        long approveVotes =
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.APPROVE
+                        );
+
+        long rejectVotes =
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.REJECT
+                        );
+
+        long abstainVotes =
+                decisionVoteRepository
+                        .countByDecisionIdAndVoteChoice(
+                                decisionId,
+                                GroupDecisionVoteChoice.ABSTAIN
+                        );
+
+        long quorumRequired =
+                (totalMembers / 2) + 1;
+
+        GroupDecisionStatus outcomeStatus;
+
+        if (totalVotes < quorumRequired) {
+            outcomeStatus =
+                    GroupDecisionStatus.EXPIRED_WITHOUT_QUORUM;
+        } else if (approveVotes > rejectVotes) {
+            outcomeStatus =
+                    GroupDecisionStatus.APPROVED;
+        } else if (rejectVotes > approveVotes) {
+            outcomeStatus =
+                    GroupDecisionStatus.REJECTED;
+        } else {
+            outcomeStatus =
+                    GroupDecisionStatus.WAITING_FOR_TIE_BREAK;
+        }
+
+        try {
+            decision.resolveMemberVote(
+                    outcomeStatus,
+                    resolvedAt
+            );
+        } catch (
+                IllegalStateException |
+                IllegalArgumentException exception
+        ) {
+            throw new RuntimeException(exception.getMessage());
+        }
+
+        GroupDecisionEntity savedDecision =
+                decisionRepository.save(decision);
+
+        GroupDecisionEventType eventType;
+
+        if (outcomeStatus == GroupDecisionStatus.APPROVED) {
+            eventType = GroupDecisionEventType.APPROVED;
+        } else if (
+                outcomeStatus == GroupDecisionStatus.REJECTED
+        ) {
+            eventType = GroupDecisionEventType.REJECTED;
+        } else if (
+                outcomeStatus ==
+                        GroupDecisionStatus.WAITING_FOR_TIE_BREAK
+        ) {
+            eventType =
+                    GroupDecisionEventType.TIE_BREAK_REQUIRED;
+        } else {
+            eventType =
+                    GroupDecisionEventType.QUORUM_NOT_MET;
+        }
+
+        String eventDetails =
+                "Voting resolved: members=" + totalMembers +
+                        ", quorumRequired=" + quorumRequired +
+                        ", totalVotes=" + totalVotes +
+                        ", approve=" + approveVotes +
+                        ", reject=" + rejectVotes +
+                        ", abstain=" + abstainVotes +
+                        ", outcome=" + outcomeStatus;
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        decisionId,
+                        groupId,
+                        eventType,
+                        normalizedActorUsername,
+                        resolvedAt,
+                        eventDetails
+                )
+        );
+
+        return savedDecision;
     }
 
     @Transactional(readOnly = true)
