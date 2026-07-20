@@ -2299,11 +2299,10 @@ const styles = {
   },
   title: {
     color: "#38bdf8",
-    fontSize: "clamp(28px, 3vw, 40px)",
+    fontSize: "clamp(26px, 2.5vw, 34px)",
     marginBottom: "4px",
   },
-
-  sectionTitleButton: {
+    sectionTitleButton: {
     background: "transparent",
     border: "none",
     color: "#38bdf8",
