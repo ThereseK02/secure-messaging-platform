@@ -172,6 +172,49 @@ public class GroupDecisionEntity {
         this.status = GroupDecisionStatus.REJECTED;
     }
 
+    public void openVoting(LocalDateTime votingDeadline) {
+        if (governanceMode != GroupDecisionGovernanceMode.MEMBER_VOTE) {
+            throw new IllegalStateException(
+                    "Only member-vote decisions can open voting"
+            );
+        }
+
+        if (status != GroupDecisionStatus.PROPOSED) {
+            throw new IllegalStateException(
+                    "Only a proposed decision can open voting"
+            );
+        }
+
+        if (votingDeadline == null) {
+            throw new IllegalArgumentException(
+                    "Voting deadline is required"
+            );
+        }
+
+        if (!votingDeadline.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException(
+                    "Voting deadline must be in the future"
+            );
+        }
+
+        this.status = GroupDecisionStatus.VOTING_OPEN;
+        this.votingDeadline = votingDeadline;
+        this.tieBreakDeadline = null;
+    }
+
+    public boolean isVotingOpenAt(LocalDateTime currentTime) {
+        if (currentTime == null) {
+            throw new IllegalArgumentException(
+                    "Current time is required"
+            );
+        }
+
+        return governanceMode == GroupDecisionGovernanceMode.MEMBER_VOTE
+                && status == GroupDecisionStatus.VOTING_OPEN
+                && votingDeadline != null
+                && currentTime.isBefore(votingDeadline);
+    }
+
     private void requireProposedOwnerReviewDecision() {
         if (governanceMode != GroupDecisionGovernanceMode.OWNER_REVIEW) {
             throw new IllegalStateException(

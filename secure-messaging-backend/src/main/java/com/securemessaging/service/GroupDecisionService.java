@@ -12,6 +12,7 @@ import com.securemessaging.repository.GroupDecisionEventRepository;
 import com.securemessaging.repository.GroupDecisionRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
+import com.securemessaging.repository.GroupDecisionVoteRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +25,20 @@ public class GroupDecisionService {
 
     private final GroupDecisionRepository decisionRepository;
     private final GroupDecisionEventRepository decisionEventRepository;
+    private final GroupDecisionVoteRepository decisionVoteRepository;
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
 
     public GroupDecisionService(
             GroupDecisionRepository decisionRepository,
             GroupDecisionEventRepository decisionEventRepository,
+            GroupDecisionVoteRepository decisionVoteRepository,
             GroupMemberEntityRepository groupMemberRepository,
             GroupMessageEntityRepository groupMessageRepository) {
 
         this.decisionRepository = decisionRepository;
         this.decisionEventRepository = decisionEventRepository;
+        this.decisionVoteRepository = decisionVoteRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMessageRepository = groupMessageRepository;
     }

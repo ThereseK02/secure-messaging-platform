@@ -13,6 +13,7 @@ import com.securemessaging.repository.GroupDecisionEventRepository;
 import com.securemessaging.repository.GroupDecisionRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
+import com.securemessaging.repository.GroupDecisionVoteRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class GroupDecisionServiceTest {
 
     private GroupDecisionRepository decisionRepository;
     private GroupDecisionEventRepository decisionEventRepository;
+    private GroupDecisionVoteRepository decisionVoteRepository;
     private GroupMemberEntityRepository groupMemberRepository;
     private GroupMessageEntityRepository groupMessageRepository;
     private GroupDecisionService groupDecisionService;
@@ -47,6 +49,8 @@ class GroupDecisionServiceTest {
 
         decisionEventRepository =
                 mock(GroupDecisionEventRepository.class);
+        decisionVoteRepository =
+                mock(GroupDecisionVoteRepository.class);
 
         groupMemberRepository =
                 mock(GroupMemberEntityRepository.class);
@@ -58,6 +62,7 @@ class GroupDecisionServiceTest {
                 new GroupDecisionService(
                         decisionRepository,
                         decisionEventRepository,
+                        decisionVoteRepository,
                         groupMemberRepository,
                         groupMessageRepository
                 );
