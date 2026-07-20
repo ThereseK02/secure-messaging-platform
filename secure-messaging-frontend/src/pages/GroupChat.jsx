@@ -34,6 +34,8 @@ export default function GroupChat() {
       useState(false);
   const [groupDecisions, setGroupDecisions] =
       useState([]);
+  const [resolvingDecisionId, setResolvingDecisionId] =
+      useState(null);
   const [hoveredMessageActionsId, setHoveredMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
@@ -283,6 +285,88 @@ export default function GroupChat() {
       );
     }
   }
+  async function resolveOwnerReviewDecision(
+      decision,
+      action
+  ) {
+    if (!selectedGroupId) {
+      showNotification(
+          "error",
+          "Please select a group first"
+      );
+      return;
+    }
+
+    if (!decision?.decisionId) {
+      showNotification(
+          "error",
+          "Group decision information is unavailable"
+      );
+      return;
+    }
+
+    if (currentGroupRole !== "OWNER") {
+      showNotification(
+          "error",
+          "Only the group owner can approve or reject this proposal"
+      );
+      return;
+    }
+
+    if (
+        decision.governanceMode !== "OWNER_REVIEW" ||
+        decision.status !== "PROPOSED"
+    ) {
+      showNotification(
+          "error",
+          "Only a proposed Owner Review decision can be resolved"
+      );
+      return;
+    }
+
+    if (action !== "approve" && action !== "reject") {
+      showNotification(
+          "error",
+          "Unsupported decision action"
+      );
+      return;
+    }
+
+    try {
+      setResolvingDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/${action}`
+      );
+
+      await loadGroupDecisions(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+              (
+                  action === "approve"
+                      ? "Group decision approved"
+                      : "Group decision rejected"
+              )
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+              (
+                  action === "approve"
+                      ? "Failed to approve group decision"
+                      : "Failed to reject group decision"
+              )
+      );
+    } finally {
+      setResolvingDecisionId(null);
+    }
+  }
+
 
   async function loadGroupAttachments(groupId = selectedGroupId) {
     if (!groupId) return;
@@ -2141,20 +2225,77 @@ export default function GroupChat() {
                                               {msg.message}
                                             </p>
                                         )}
-
                                         {messageDecision && (
-                                            <div style={styles.messageDecisionSummary}>
-                                              <span style={styles.messageDecisionBadge}>
-                                                {formatDecisionGovernanceMode(
-                                                    messageDecision.governanceMode
-                                                )}
-                                              </span>
+                                            <div style={styles.messageDecisionContainer}>
+                                              <div style={styles.messageDecisionSummary}>
+                                                <span style={styles.messageDecisionBadge}>
+                                                  {formatDecisionGovernanceMode(
+                                                      messageDecision.governanceMode
+                                                  )}
+                                                </span>
 
-                                              <span style={styles.messageDecisionStatus}>
-                                                {formatDecisionStatus(
-                                                    messageDecision.status
-                                                )}
-                                              </span>
+                                                <span style={styles.messageDecisionStatus}>
+                                                  {formatDecisionStatus(
+                                                      messageDecision.status
+                                                  )}
+                                                </span>
+                                              </div>
+
+                                              {currentGroupRole === "OWNER" &&
+                                                  messageDecision.governanceMode ===
+                                                      "OWNER_REVIEW" &&
+                                                  messageDecision.status ===
+                                                      "PROPOSED" && (
+                                                      <div
+                                                          style={
+                                                            styles.messageDecisionActions
+                                                          }
+                                                      >
+                                                        <button
+                                                            type="button"
+                                                            style={
+                                                              styles.approveDecisionButton
+                                                            }
+                                                            onClick={() =>
+                                                              resolveOwnerReviewDecision(
+                                                                  messageDecision,
+                                                                  "approve"
+                                                              )
+                                                            }
+                                                            disabled={
+                                                              resolvingDecisionId ===
+                                                              messageDecision.decisionId
+                                                            }
+                                                        >
+                                                          {resolvingDecisionId ===
+                                                          messageDecision.decisionId
+                                                              ? "Processing..."
+                                                              : "Approve"}
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            style={
+                                                              styles.rejectDecisionButton
+                                                            }
+                                                            onClick={() =>
+                                                              resolveOwnerReviewDecision(
+                                                                  messageDecision,
+                                                                  "reject"
+                                                              )
+                                                            }
+                                                            disabled={
+                                                              resolvingDecisionId ===
+                                                              messageDecision.decisionId
+                                                            }
+                                                        >
+                                                          {resolvingDecisionId ===
+                                                          messageDecision.decisionId
+                                                              ? "Processing..."
+                                                              : "Reject"}
+                                                        </button>
+                                                      </div>
+                                                  )}
                                             </div>
                                         )}
                                       </>
@@ -3032,12 +3173,14 @@ messageCard: {
     margin: 0,
     lineHeight: "1.35"
   },
+  messageDecisionContainer: {
+    marginTop: "7px",
+  },
   messageDecisionSummary: {
     display: "flex",
     alignItems: "center",
     flexWrap: "wrap",
     gap: "6px",
-    marginTop: "7px",
   },
   messageDecisionBadge: {
     display: "inline-flex",
@@ -3054,6 +3197,33 @@ messageCard: {
     color: "#bfdbfe",
     fontSize: "11px",
     fontWeight: "700",
+  },
+  messageDecisionActions: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "8px",
+    marginTop: "8px",
+  },
+  approveDecisionButton: {
+    border: "1px solid #60a5fa",
+    borderRadius: "8px",
+    padding: "6px 12px",
+    backgroundColor: "#1e3a5f",
+    color: "#dbeafe",
+    fontSize: "12px",
+    fontWeight: "800",
+    cursor: "pointer",
+  },
+  rejectDecisionButton: {
+    border: "1px solid #d6c6a8",
+    borderRadius: "8px",
+    padding: "6px 12px",
+    backgroundColor: "#0f172a",
+    color: "#d6c6a8",
+    fontSize: "12px",
+    fontWeight: "800",
+    cursor: "pointer",
   },
   messageActionsHint: {
     flexShrink: 0,
