@@ -32,6 +32,8 @@ export default function GroupChat() {
       useState("OWNER_REVIEW");
   const [creatingDecision, setCreatingDecision] =
       useState(false);
+  const [groupDecisions, setGroupDecisions] =
+      useState([]);
   const [hoveredMessageActionsId, setHoveredMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
@@ -252,6 +254,36 @@ export default function GroupChat() {
       showNotification("error", "Failed to load group messages");
     }
   }
+  async function loadGroupDecisions(
+      groupId = selectedGroupId
+  ) {
+    if (!groupId) {
+      setGroupDecisions([]);
+      return;
+    }
+
+    try {
+      const response = await api.get(
+          `/api/groups/${groupId}/decisions`
+      );
+
+      setGroupDecisions(
+          Array.isArray(response.data)
+              ? response.data
+              : []
+      );
+    } catch (error) {
+      console.error(error);
+      setGroupDecisions([]);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+              "Failed to load group decisions"
+      );
+    }
+  }
+
   async function loadGroupAttachments(groupId = selectedGroupId) {
     if (!groupId) return;
 
@@ -623,6 +655,70 @@ export default function GroupChat() {
     return searchableText.includes(normalizedGroupMessageSearch);
   });
 
+  function getDecisionForMessage(messageId) {
+    return groupDecisions.find(
+        (decision) =>
+            String(decision.sourceMessageId) ===
+            String(messageId)
+    );
+  }
+
+  function formatDecisionGovernanceMode(mode) {
+    if (mode === "OWNER_LED") {
+      return "Owner Led";
+    }
+
+    if (mode === "OWNER_REVIEW") {
+      return "Owner Review";
+    }
+
+    if (mode === "MEMBER_VOTE") {
+      return "Member Vote";
+    }
+
+    return mode || "Decision";
+  }
+
+  function formatDecisionStatus(status) {
+    if (status === "PROPOSED") {
+      return "Proposed";
+    }
+
+    if (status === "DISCUSSION_OPEN") {
+      return "Discussion Open";
+    }
+
+    if (status === "VOTING_OPEN") {
+      return "Voting Open";
+    }
+
+    if (status === "WAITING_FOR_TIE_BREAK") {
+      return "Waiting for Tie-Break";
+    }
+
+    if (status === "APPROVED") {
+      return "Approved";
+    }
+
+    if (status === "REJECTED") {
+      return "Rejected";
+    }
+
+    if (status === "WITHDRAWN") {
+      return "Withdrawn";
+    }
+
+    if (status === "EXPIRED_WITHOUT_QUORUM") {
+      return "Expired Without Quorum";
+    }
+
+    if (status === "EXPIRED_WITHOUT_DECISION") {
+      return "Expired Without Decision";
+    }
+
+    return status || "Unknown";
+  }
+
   function formatFileSize(sizeInBytes) {
     if (!sizeInBytes && sizeInBytes !== 0) {
       return "";
@@ -899,6 +995,8 @@ export default function GroupChat() {
       setDecisionMessage(null);
       setDecisionGovernanceMode("OWNER_REVIEW");
 
+      await loadGroupDecisions(selectedGroupId);
+
       showNotification(
           "success",
           response.data?.status || "Group decision created"
@@ -1015,6 +1113,7 @@ export default function GroupChat() {
       setSelectedGroupName("");
       setSelectedGroupAdmin("");
       setMessages([]);
+      setGroupDecisions([]);
       setGroupAttachments([]);
       setMembers([]);
       setGroupMessageSearch("");
@@ -1452,6 +1551,7 @@ export default function GroupChat() {
                                       setShowConversation(true);
                                       window.scrollTo({ top: 0, behavior: "auto" });
                                       loadMessages(group.id);
+                                      loadGroupDecisions(group.id);
                                       loadGroupAttachments(group.id);
                                       loadMembers(group.id);
                                     }}
@@ -1487,6 +1587,7 @@ export default function GroupChat() {
                     onClick={() => {
                       setShowConversation(false);
                       setMessages([]);
+                      setGroupDecisions([]);
                       setGroupAttachments([]);
                       setMembers([]);
                       setSelectedGroupAdmin("");
@@ -1913,6 +2014,9 @@ export default function GroupChat() {
                             (attachment) => String(attachment.groupMessageId) === String(msg.id)
                         );
 
+                        const messageDecision =
+                            getDecisionForMessage(msg.id);
+
                         const canModifyMessage =
                             msg.sender === currentUsername && messageAttachments.length === 0;
 
@@ -2028,10 +2132,32 @@ export default function GroupChat() {
                                         </div>
                                       </div>
                                   ) : (
-                                      !(
-                                          messageAttachments.length > 0 &&
-                                          msg.message?.startsWith("Attachment:")
-                                      ) && <p style={styles.messageText}>{msg.message}</p>
+                                      <>
+                                        {!(
+                                            messageAttachments.length > 0 &&
+                                            msg.message?.startsWith("Attachment:")
+                                        ) && (
+                                            <p style={styles.messageText}>
+                                              {msg.message}
+                                            </p>
+                                        )}
+
+                                        {messageDecision && (
+                                            <div style={styles.messageDecisionSummary}>
+                                              <span style={styles.messageDecisionBadge}>
+                                                {formatDecisionGovernanceMode(
+                                                    messageDecision.governanceMode
+                                                )}
+                                              </span>
+
+                                              <span style={styles.messageDecisionStatus}>
+                                                {formatDecisionStatus(
+                                                    messageDecision.status
+                                                )}
+                                              </span>
+                                            </div>
+                                        )}
+                                      </>
                                   )}
 
                                   {messageAttachments.map((attachment) => (
@@ -2079,15 +2205,17 @@ export default function GroupChat() {
                                           {msg.pinned ? "Unpin" : "Pin"}
                                         </button>
 
-                                        <button
-                                            type="button"
-                                            style={styles.messageActionMenuButton}
-                                            onClick={() => {
-                                              openDecisionGovernancePanel(msg);
-                                            }}
-                                        >
-                                          Decision
-                                        </button>
+                                        {!messageDecision && (
+                                            <button
+                                                type="button"
+                                                style={styles.messageActionMenuButton}
+                                                onClick={() => {
+                                                  openDecisionGovernancePanel(msg);
+                                                }}
+                                            >
+                                              Decision
+                                            </button>
+                                        )}
 
                                         {canModifyMessage && (
                                             <>
@@ -2903,6 +3031,29 @@ messageCard: {
     fontSize: "15px",
     margin: 0,
     lineHeight: "1.35"
+  },
+  messageDecisionSummary: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "6px",
+    marginTop: "7px",
+  },
+  messageDecisionBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    border: "1px solid #475569",
+    borderRadius: "999px",
+    padding: "3px 8px",
+    backgroundColor: "#0f172a",
+    color: "#d6c6a8",
+    fontSize: "11px",
+    fontWeight: "800",
+  },
+  messageDecisionStatus: {
+    color: "#bfdbfe",
+    fontSize: "11px",
+    fontWeight: "700",
   },
   messageActionsHint: {
     flexShrink: 0,
