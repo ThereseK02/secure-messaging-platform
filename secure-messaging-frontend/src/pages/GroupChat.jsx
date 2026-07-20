@@ -665,15 +665,15 @@ export default function GroupChat() {
 
   function formatDecisionGovernanceMode(mode) {
     if (mode === "OWNER_LED") {
-      return "Owner Led";
+      return "Owner Initiative";
     }
 
     if (mode === "OWNER_REVIEW") {
-      return "Owner Review";
+      return "Proposal for Owner Approval";
     }
 
     if (mode === "MEMBER_VOTE") {
-      return "Member Vote";
+      return "Group Vote";
     }
 
     return mode || "Decision";
@@ -977,7 +977,7 @@ export default function GroupChat() {
     ) {
       showNotification(
           "error",
-          "Only the group owner can select owner-led governance"
+          "Only the group owner can select Owner Initiative"
       );
       return;
     }
@@ -1872,16 +1872,16 @@ export default function GroupChat() {
                             disabled={creatingDecision}
                         >
                           <option value="OWNER_REVIEW">
-                            Owner Review
+                            Proposal for Owner Approval
                           </option>
 
                           <option value="MEMBER_VOTE">
-                            Member Vote
+                            Group Vote
                           </option>
 
                           {currentGroupRole === "OWNER" && (
                               <option value="OWNER_LED">
-                                Owner Led
+                                Owner Initiative
                               </option>
                           )}
                         </select>
@@ -1889,13 +1889,13 @@ export default function GroupChat() {
 
                       <p style={styles.decisionGovernanceDescription}>
                         {decisionGovernanceMode === "OWNER_LED" &&
-                            "The group owner leads and controls this decision."}
+                            "The group owner initiates and makes the decision directly."}
 
                         {decisionGovernanceMode === "OWNER_REVIEW" &&
-                            "A member may propose the decision, and the owner reviews it."}
+                            "A member submits a proposal for the group owner to approve or reject."}
 
                         {decisionGovernanceMode === "MEMBER_VOTE" &&
-                            "Eligible group members decide through voting."}
+                            "Eligible group members vote on the proposed decision."}
                       </p>
 
                       <div style={styles.decisionGovernanceActions}>
