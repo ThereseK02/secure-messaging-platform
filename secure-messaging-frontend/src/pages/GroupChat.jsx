@@ -665,15 +665,15 @@ export default function GroupChat() {
 
   function formatDecisionGovernanceMode(mode) {
     if (mode === "OWNER_LED") {
-      return "Owner Initiative";
+      return "Owner Led";
     }
 
     if (mode === "OWNER_REVIEW") {
-      return "Proposal for Owner Approval";
+      return "Owner Review";
     }
 
     if (mode === "MEMBER_VOTE") {
-      return "Group Vote";
+      return "Member Vote";
     }
 
     return mode || "Decision";
@@ -977,7 +977,7 @@ export default function GroupChat() {
     ) {
       showNotification(
           "error",
-          "Only the group owner can select Owner Initiative"
+          "Only the group owner can select Owner Led"
       );
       return;
     }
@@ -1872,16 +1872,16 @@ export default function GroupChat() {
                             disabled={creatingDecision}
                         >
                           <option value="OWNER_REVIEW">
-                            Proposal for Owner Approval
+                            Owner Review
                           </option>
 
                           <option value="MEMBER_VOTE">
-                            Group Vote
+                            Member Vote
                           </option>
 
                           {currentGroupRole === "OWNER" && (
                               <option value="OWNER_LED">
-                                Owner Initiative
+                                Owner Led
                               </option>
                           )}
                         </select>
