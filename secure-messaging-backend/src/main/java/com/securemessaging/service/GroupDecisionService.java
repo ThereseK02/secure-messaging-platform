@@ -303,6 +303,94 @@ public class GroupDecisionService {
         return savedDecision;
     }
 
+    @Transactional
+    public GroupDecisionEntity openVoting(
+            Long groupId,
+            Long decisionId,
+            String actorUsername,
+            LocalDateTime votingDeadline) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "You are not a member of this group"
+                                )
+                        );
+
+        if (
+                currentMember.getRole() != GroupRole.OWNER &&
+                        currentMember.getRole() != GroupRole.ADMIN
+        ) {
+            throw new RuntimeException(
+                    "Only the group owner or an admin can open voting"
+            );
+        }
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        try {
+            decision.openVoting(votingDeadline);
+        } catch (
+                IllegalStateException |
+                IllegalArgumentException exception
+        ) {
+            throw new RuntimeException(exception.getMessage());
+        }
+
+        GroupDecisionEntity savedDecision =
+                decisionRepository.save(decision);
+
+        LocalDateTime eventAt =
+                LocalDateTime.now();
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        savedDecision.getId(),
+                        groupId,
+                        GroupDecisionEventType.VOTING_OPENED,
+                        normalizedActorUsername,
+                        eventAt,
+                        "Voting opened until " + votingDeadline
+                )
+        );
+
+        return savedDecision;
+    }
+
     @Transactional(readOnly = true)
     public List<GroupDecisionEntity> getGroupDecisions(
             Long groupId,
