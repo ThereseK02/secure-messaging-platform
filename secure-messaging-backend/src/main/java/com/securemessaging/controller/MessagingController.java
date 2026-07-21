@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 
 import com.securemessaging.dto.CastGroupDecisionVoteRequest;
+import com.securemessaging.dto.ResolveGroupDecisionTieBreakRequest;
 import com.securemessaging.dto.OpenGroupDecisionVotingRequest;
 import com.securemessaging.entity.GroupDecisionVoteEntity;
 import com.securemessaging.entity.GroupDecisionVoteChoice;
@@ -2152,6 +2153,109 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             response.put(
                     "hasVoted",
                     true
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException exception) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            Map.of(
+                                    "error",
+                                    exception.getMessage()
+                            )
+                    );
+        }
+    }
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/tie-break"
+    )
+    public ResponseEntity<?> resolveGroupDecisionTieBreak(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId,
+            @RequestBody ResolveGroupDecisionTieBreakRequest request) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            String rawTieBreakChoice =
+                    request == null
+                            ? null
+                            : request.getTieBreakChoice();
+
+            GroupDecisionVoteChoice tieBreakChoice;
+
+            try {
+                tieBreakChoice =
+                        rawTieBreakChoice == null
+                                ? null
+                                : GroupDecisionVoteChoice.valueOf(
+                                        rawTieBreakChoice
+                                                .trim()
+                                                .toUpperCase()
+                                );
+            } catch (IllegalArgumentException exception) {
+                throw new RuntimeException(
+                        "Tie-break choice must be APPROVE or REJECT"
+                );
+            }
+
+            GroupDecisionEntity decision =
+                    groupDecisionService.resolveTieBreak(
+                            groupId,
+                            decisionId,
+                            currentUsername,
+                            tieBreakChoice
+                    );
+
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_TIE_BREAK_RESOLVED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "decisionStatus",
+                            decision.getStatus().name(),
+                            "resolvedBy",
+                            currentUsername
+                    )
+            );
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "status",
+                    "Group decision tie-break resolved"
+            );
+            response.put(
+                    "groupId",
+                    decision.getGroupId()
+            );
+            response.put(
+                    "decisionId",
+                    decision.getId()
+            );
+            response.put(
+                    "governanceMode",
+                    decision.getGovernanceMode()
+            );
+            response.put(
+                    "decisionStatus",
+                    decision.getStatus()
+            );
+            response.put(
+                    "resolvedBy",
+                    currentUsername
             );
 
             return ResponseEntity.ok(response);

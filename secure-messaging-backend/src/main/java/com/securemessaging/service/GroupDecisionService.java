@@ -683,6 +683,121 @@ public class GroupDecisionService {
         return savedDecision;
     }
 
+    @Transactional
+    public GroupDecisionEntity resolveTieBreak(
+            Long groupId,
+            Long decisionId,
+            String actorUsername,
+            GroupDecisionVoteChoice tieBreakChoice) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "You are not a member of this group"
+                                )
+                        );
+
+        if (currentMember.getRole() != GroupRole.OWNER) {
+            throw new RuntimeException(
+                    "Only the group owner can resolve a tie"
+            );
+        }
+
+        if (tieBreakChoice == null) {
+            throw new RuntimeException(
+                    "Tie-break choice is required"
+            );
+        }
+
+        if (
+                tieBreakChoice !=
+                        GroupDecisionVoteChoice.APPROVE &&
+                        tieBreakChoice !=
+                                GroupDecisionVoteChoice.REJECT
+        ) {
+            throw new RuntimeException(
+                    "Tie-break choice must be APPROVE or REJECT"
+            );
+        }
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        LocalDateTime resolvedAt = LocalDateTime.now();
+
+        GroupDecisionStatus finalStatus =
+                tieBreakChoice ==
+                        GroupDecisionVoteChoice.APPROVE
+                        ? GroupDecisionStatus.APPROVED
+                        : GroupDecisionStatus.REJECTED;
+
+        try {
+            decision.resolveTieBreak(
+                    finalStatus,
+                    resolvedAt
+            );
+        } catch (
+                IllegalStateException |
+                IllegalArgumentException exception
+        ) {
+            throw new RuntimeException(exception.getMessage());
+        }
+
+        GroupDecisionEntity savedDecision =
+                decisionRepository.save(decision);
+
+        GroupDecisionEventType eventType =
+                finalStatus == GroupDecisionStatus.APPROVED
+                        ? GroupDecisionEventType.APPROVED
+                        : GroupDecisionEventType.REJECTED;
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        decisionId,
+                        groupId,
+                        eventType,
+                        normalizedActorUsername,
+                        resolvedAt,
+                        "Tie-break resolved: outcome=" + finalStatus
+                )
+        );
+
+        return savedDecision;
+    }
+
     @Transactional(readOnly = true)
     public List<GroupDecisionEntity> getGroupDecisions(
             Long groupId,

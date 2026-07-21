@@ -272,6 +272,59 @@ public class GroupDecisionEntity {
         }
     }
 
+    public void resolveTieBreak(
+            GroupDecisionStatus finalStatus,
+            LocalDateTime resolvedAt) {
+
+        if (
+                governanceMode !=
+                        GroupDecisionGovernanceMode.MEMBER_VOTE
+        ) {
+            throw new IllegalStateException(
+                    "Only member-vote decisions can use a tie-break"
+            );
+        }
+
+        if (
+                status !=
+                        GroupDecisionStatus.WAITING_FOR_TIE_BREAK
+        ) {
+            throw new IllegalStateException(
+                    "Decision is not waiting for a tie-break"
+            );
+        }
+
+        if (resolvedAt == null) {
+            throw new IllegalArgumentException(
+                    "Tie-break resolution time is required"
+            );
+        }
+
+        if (tieBreakDeadline == null) {
+            throw new IllegalStateException(
+                    "Tie-break deadline is not available"
+            );
+        }
+
+        if (resolvedAt.isAfter(tieBreakDeadline)) {
+            throw new IllegalStateException(
+                    "Tie-break deadline has passed"
+            );
+        }
+
+        if (
+                finalStatus != GroupDecisionStatus.APPROVED &&
+                        finalStatus != GroupDecisionStatus.REJECTED
+        ) {
+            throw new IllegalArgumentException(
+                    "Tie-break outcome must be APPROVED or REJECTED"
+            );
+        }
+
+        this.status = finalStatus;
+        this.tieBreakDeadline = null;
+    }
+
     private void requireProposedOwnerReviewDecision() {
         if (governanceMode != GroupDecisionGovernanceMode.OWNER_REVIEW) {
             throw new IllegalStateException(

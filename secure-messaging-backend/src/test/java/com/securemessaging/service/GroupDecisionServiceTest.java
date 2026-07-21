@@ -1339,6 +1339,420 @@ class GroupDecisionServiceTest {
                 .save(any());
     }
 
+    @Test
+    void ownerApprovesTieAndCreatesApprovedEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                createWaitingForTieBreakDecision(
+                        groupId,
+                        decisionId
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(decisionRepository.save(decision))
+                .thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.resolveTieBreak(
+                        groupId,
+                        decisionId,
+                        " Tom ",
+                        GroupDecisionVoteChoice.APPROVE
+                );
+
+        assertEquals(
+                GroupDecisionStatus.APPROVED,
+                result.getStatus()
+        );
+
+        assertNull(result.getTieBreakDeadline());
+
+        verify(decisionRepository)
+                .save(decision);
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        GroupDecisionEventEntity event =
+                eventCaptor.getValue();
+
+        assertEquals(
+                GroupDecisionEventType.APPROVED,
+                event.getEventType()
+        );
+
+        assertEquals("Tom", event.getActorUsername());
+
+        assertTrue(
+                event.getEventDetails()
+                        .contains("outcome=APPROVED")
+        );
+    }
+
+    @Test
+    void ownerRejectsTieAndCreatesRejectedEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                createWaitingForTieBreakDecision(
+                        groupId,
+                        decisionId
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(decisionRepository.save(decision))
+                .thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.resolveTieBreak(
+                        groupId,
+                        decisionId,
+                        "Tom",
+                        GroupDecisionVoteChoice.REJECT
+                );
+
+        assertEquals(
+                GroupDecisionStatus.REJECTED,
+                result.getStatus()
+        );
+
+        assertNull(result.getTieBreakDeadline());
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        GroupDecisionEventEntity event =
+                eventCaptor.getValue();
+
+        assertEquals(
+                GroupDecisionEventType.REJECTED,
+                event.getEventType()
+        );
+
+        assertEquals("Tom", event.getActorUsername());
+
+        assertTrue(
+                event.getEventDetails()
+                        .contains("outcome=REJECTED")
+        );
+    }
+
+    @Test
+    void adminCannotResolveTie() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity admin =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.ADMIN
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(admin));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.resolveTieBreak(
+                                groupId,
+                                decisionId,
+                                "Kelly",
+                                GroupDecisionVoteChoice.APPROVE
+                        )
+                );
+
+        assertEquals(
+                "Only the group owner can resolve a tie",
+                exception.getMessage()
+        );
+
+        verify(decisionRepository, never())
+                .save(any());
+
+        verify(decisionEventRepository, never())
+                .save(any());
+    }
+
+    @Test
+    void regularMemberCannotResolveTie() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Gombo",
+                        GroupRole.MEMBER
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Gombo"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.resolveTieBreak(
+                                groupId,
+                                decisionId,
+                                "Gombo",
+                                GroupDecisionVoteChoice.REJECT
+                        )
+                );
+
+        assertEquals(
+                "Only the group owner can resolve a tie",
+                exception.getMessage()
+        );
+
+        verify(decisionRepository, never())
+                .save(any());
+
+        verify(decisionEventRepository, never())
+                .save(any());
+    }
+
+    @Test
+    void ownerCannotAbstainFromTieBreak() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.resolveTieBreak(
+                                groupId,
+                                decisionId,
+                                "Tom",
+                                GroupDecisionVoteChoice.ABSTAIN
+                        )
+                );
+
+        assertEquals(
+                "Tie-break choice must be APPROVE or REJECT",
+                exception.getMessage()
+        );
+
+        verify(decisionRepository, never())
+                .save(any());
+
+        verify(decisionEventRepository, never())
+                .save(any());
+    }
+
+    @Test
+    void ownerCannotResolveTieAfterDeadline() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                createWaitingForTieBreakDecision(
+                        groupId,
+                        decisionId
+                );
+
+        setTieBreakDeadline(
+                decision,
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService.resolveTieBreak(
+                                groupId,
+                                decisionId,
+                                "Tom",
+                                GroupDecisionVoteChoice.APPROVE
+                        )
+                );
+
+        assertEquals(
+                "Tie-break deadline has passed",
+                exception.getMessage()
+        );
+
+        assertEquals(
+                GroupDecisionStatus.WAITING_FOR_TIE_BREAK,
+                decision.getStatus()
+        );
+
+        verify(decisionRepository, never())
+                .save(any());
+
+        verify(decisionEventRepository, never())
+                .save(any());
+    }
+
+    private GroupDecisionEntity createWaitingForTieBreakDecision(
+            Long groupId,
+            Long decisionId) {
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Deploy the release Friday.",
+                        "Gombo",
+                        GroupDecisionGovernanceMode.MEMBER_VOTE,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        decision.openVoting(
+                LocalDateTime.now().plusDays(1)
+        );
+
+        LocalDateTime votingDeadline =
+                LocalDateTime.now().minusMinutes(1);
+
+        setVotingDeadline(
+                decision,
+                votingDeadline
+        );
+
+        decision.resolveMemberVote(
+                GroupDecisionStatus.WAITING_FOR_TIE_BREAK,
+                LocalDateTime.now()
+        );
+
+        return decision;
+    }
+
+    private void setTieBreakDeadline(
+            GroupDecisionEntity entity,
+            LocalDateTime tieBreakDeadline) {
+
+        try {
+            var deadlineField =
+                    GroupDecisionEntity.class
+                            .getDeclaredField(
+                                    "tieBreakDeadline"
+                            );
+
+            deadlineField.setAccessible(true);
+
+            deadlineField.set(
+                    entity,
+                    tieBreakDeadline
+            );
+
+        } catch (ReflectiveOperationException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
     private void setEntityId(
             GroupDecisionEntity entity,
             Long id) {
