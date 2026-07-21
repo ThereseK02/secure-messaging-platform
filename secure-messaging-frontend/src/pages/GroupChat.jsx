@@ -2687,69 +2687,113 @@ export default function GroupChat() {
                                                   messageDecision.status ===
                                                       "PROPOSED" && (
                                                       <div
-                                                          style={
-                                                            styles.memberVotingOpenPanel
-                                                          }
+                                                          style={{
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            alignItems: "flex-end",
+                                                            gap: "6px",
+                                                            marginTop: "8px",
+                                                          }}
                                                       >
-                                                        <label
-                                                            style={
-                                                              styles.memberVotingDeadlineLabel
-                                                            }
-                                                        >
-                                                          Voting deadline
-
-                                                          <input
-                                                              type="datetime-local"
-                                                              value={
-                                                                votingDeadlineInputs[
-                                                                    messageDecision.decisionId
-                                                                ] || ""
-                                                              }
-                                                              onChange={(event) =>
-                                                                setVotingDeadlineInputs(
-                                                                    (
-                                                                        currentInputs
-                                                                    ) => ({
-                                                                      ...currentInputs,
-                                                                      [messageDecision.decisionId]:
-                                                                          event.target.value,
-                                                                    })
-                                                                )
-                                                              }
-                                                              style={
-                                                                styles.memberVotingDeadlineInput
-                                                              }
-                                                              disabled={
-                                                                openingVotingDecisionId ===
-                                                                messageDecision.decisionId
-                                                              }
-                                                          />
-                                                        </label>
-
                                                         <button
                                                             type="button"
+                                                            aria-label="Toggle member voting actions"
+                                                            aria-expanded={
+                                                              openDecisionActionsId ===
+                                                              messageDecision.decisionId
+                                                            }
                                                             style={{
-                                                              ...styles.openVotingButton,
-                                                              ...(openingVotingDecisionId ===
-                                                              messageDecision.decisionId
-                                                                  ? styles.decisionGovernanceButtonDisabled
-                                                                  : {}),
+                                                              ...styles.messageActionMenuButton,
+                                                              padding: "4px 9px",
                                                             }}
-                                                            onClick={() =>
-                                                              openMemberVoting(
-                                                                  messageDecision
-                                                              )
-                                                            }
-                                                            disabled={
-                                                              openingVotingDecisionId ===
-                                                              messageDecision.decisionId
-                                                            }
+                                                            onClick={(event) => {
+                                                              event.stopPropagation();
+                                                              setOpenMessageActionsId(null);
+
+                                                              setOpenDecisionActionsId(
+                                                                  openDecisionActionsId ===
+                                                                  messageDecision.decisionId
+                                                                      ? null
+                                                                      : messageDecision.decisionId
+                                                              );
+                                                            }}
                                                         >
-                                                          {openingVotingDecisionId ===
-                                                          messageDecision.decisionId
-                                                              ? "Opening..."
-                                                              : "Open Voting"}
+                                                          Decision actions
                                                         </button>
+
+                                                        {openDecisionActionsId ===
+                                                            messageDecision.decisionId && (
+                                                            <div
+                                                                style={
+                                                                  styles.memberVotingOpenPanel
+                                                                }
+                                                                onClick={(event) =>
+                                                                  event.stopPropagation()
+                                                                }
+                                                            >
+                                                              <label
+                                                                  style={
+                                                                    styles.memberVotingDeadlineLabel
+                                                                  }
+                                                              >
+                                                                Voting deadline
+
+                                                                <input
+                                                                    type="datetime-local"
+                                                                    value={
+                                                                      votingDeadlineInputs[
+                                                                          messageDecision.decisionId
+                                                                      ] || ""
+                                                                    }
+                                                                    onChange={(event) =>
+                                                                      setVotingDeadlineInputs(
+                                                                          (
+                                                                              currentInputs
+                                                                          ) => ({
+                                                                            ...currentInputs,
+                                                                            [messageDecision.decisionId]:
+                                                                                event.target.value,
+                                                                          })
+                                                                      )
+                                                                    }
+                                                                    style={
+                                                                      styles.memberVotingDeadlineInput
+                                                                    }
+                                                                    disabled={
+                                                                      openingVotingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                    }
+                                                                />
+                                                              </label>
+
+                                                              <button
+                                                                  type="button"
+                                                                  style={{
+                                                                    ...styles.openVotingButton,
+                                                                    ...(openingVotingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                        ? styles.decisionGovernanceButtonDisabled
+                                                                        : {}),
+                                                                  }}
+                                                                  onClick={(event) => {
+                                                                    event.stopPropagation();
+
+                                                                    openMemberVoting(
+                                                                        messageDecision
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    openingVotingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                  }
+                                                              >
+                                                                {openingVotingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? "Opening..."
+                                                                    : "Open Voting"}
+                                                              </button>
+                                                            </div>
+                                                        )}
                                                       </div>
                                                   )}
                                               {messageDecision.governanceMode ===
@@ -2850,34 +2894,79 @@ export default function GroupChat() {
                                                   messageDecision.status ===
                                                       "VOTING_OPEN" && (
                                                       <div
-                                                          style={
-                                                            styles.memberVotingBallotActions
-                                                          }
+                                                          style={{
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            alignItems: "flex-end",
+                                                            gap: "6px",
+                                                            marginTop: "8px",
+                                                          }}
                                                       >
                                                         <button
                                                             type="button"
+                                                            aria-label="Toggle voting resolution actions"
+                                                            aria-expanded={
+                                                              openDecisionActionsId ===
+                                                              messageDecision.decisionId
+                                                            }
                                                             style={{
-                                                              ...styles.openVotingButton,
-                                                              ...(resolvingDecisionId ===
-                                                              messageDecision.decisionId
-                                                                  ? styles.decisionGovernanceButtonDisabled
-                                                                  : {}),
+                                                              ...styles.messageActionMenuButton,
+                                                              padding: "4px 9px",
                                                             }}
-                                                            onClick={() =>
-                                                              resolveMemberVoting(
-                                                                  messageDecision
-                                                              )
-                                                            }
-                                                            disabled={
-                                                              resolvingDecisionId ===
-                                                              messageDecision.decisionId
-                                                            }
+                                                            onClick={(event) => {
+                                                              event.stopPropagation();
+                                                              setOpenMessageActionsId(null);
+
+                                                              setOpenDecisionActionsId(
+                                                                  openDecisionActionsId ===
+                                                                  messageDecision.decisionId
+                                                                      ? null
+                                                                      : messageDecision.decisionId
+                                                              );
+                                                            }}
                                                         >
-                                                          {resolvingDecisionId ===
-                                                          messageDecision.decisionId
-                                                              ? "Resolving..."
-                                                              : "Resolve Voting"}
+                                                          Decision actions
                                                         </button>
+
+                                                        {openDecisionActionsId ===
+                                                            messageDecision.decisionId && (
+                                                            <div
+                                                                style={
+                                                                  styles.memberVotingBallotActions
+                                                                }
+                                                                onClick={(event) =>
+                                                                  event.stopPropagation()
+                                                                }
+                                                            >
+                                                              <button
+                                                                  type="button"
+                                                                  style={{
+                                                                    ...styles.openVotingButton,
+                                                                    ...(resolvingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                        ? styles.decisionGovernanceButtonDisabled
+                                                                        : {}),
+                                                                  }}
+                                                                  onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setOpenDecisionActionsId(null);
+
+                                                                    resolveMemberVoting(
+                                                                        messageDecision
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    resolvingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                  }
+                                                              >
+                                                                {resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? "Resolving..."
+                                                                    : "Resolve Voting"}
+                                                              </button>
+                                                            </div>
+                                                        )}
                                                       </div>
                                                   )}
 
@@ -2907,61 +2996,108 @@ export default function GroupChat() {
                                                         </div>
 
                                                         <div
-                                                            style={
-                                                              styles.memberVotingBallotActions
-                                                            }
+                                                            style={{
+                                                              display: "flex",
+                                                              flexDirection: "column",
+                                                              alignItems: "flex-end",
+                                                              gap: "6px",
+                                                            }}
                                                         >
                                                           <button
                                                               type="button"
+                                                              aria-label="Toggle owner tie-break actions"
+                                                              aria-expanded={
+                                                                openDecisionActionsId ===
+                                                                messageDecision.decisionId
+                                                              }
                                                               style={{
-                                                                ...styles.memberVotingChoiceButton,
-                                                                ...(resolvingDecisionId ===
-                                                                messageDecision.decisionId
-                                                                    ? styles.decisionGovernanceButtonDisabled
-                                                                    : {}),
+                                                                ...styles.messageActionMenuButton,
+                                                                padding: "4px 9px",
                                                               }}
-                                                              onClick={() =>
-                                                                resolveMemberVoteTieBreak(
-                                                                    messageDecision,
-                                                                    "APPROVE"
-                                                                )
-                                                              }
-                                                              disabled={
-                                                                resolvingDecisionId ===
-                                                                messageDecision.decisionId
-                                                              }
+                                                              onClick={(event) => {
+                                                                event.stopPropagation();
+                                                                setOpenMessageActionsId(null);
+
+                                                                setOpenDecisionActionsId(
+                                                                    openDecisionActionsId ===
+                                                                    messageDecision.decisionId
+                                                                        ? null
+                                                                        : messageDecision.decisionId
+                                                                );
+                                                              }}
                                                           >
-                                                            {resolvingDecisionId ===
-                                                            messageDecision.decisionId
-                                                                ? "Resolving..."
-                                                                : "Tie-Break Approve"}
+                                                            Decision actions
                                                           </button>
 
-                                                          <button
-                                                              type="button"
-                                                              style={{
-                                                                ...styles.memberVotingChoiceButton,
-                                                                ...(resolvingDecisionId ===
-                                                                messageDecision.decisionId
-                                                                    ? styles.decisionGovernanceButtonDisabled
-                                                                    : {}),
-                                                              }}
-                                                              onClick={() =>
-                                                                resolveMemberVoteTieBreak(
-                                                                    messageDecision,
-                                                                    "REJECT"
-                                                                )
-                                                              }
-                                                              disabled={
-                                                                resolvingDecisionId ===
-                                                                messageDecision.decisionId
-                                                              }
-                                                          >
-                                                            {resolvingDecisionId ===
-                                                            messageDecision.decisionId
-                                                                ? "Resolving..."
-                                                                : "Tie-Break Reject"}
-                                                          </button>
+                                                          {openDecisionActionsId ===
+                                                              messageDecision.decisionId && (
+                                                              <div
+                                                                  style={
+                                                                    styles.memberVotingBallotActions
+                                                                  }
+                                                                  onClick={(event) =>
+                                                                    event.stopPropagation()
+                                                                  }
+                                                              >
+                                                                <button
+                                                                    type="button"
+                                                                    style={{
+                                                                      ...styles.memberVotingChoiceButton,
+                                                                      ...(resolvingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                          ? styles.decisionGovernanceButtonDisabled
+                                                                          : {}),
+                                                                    }}
+                                                                    onClick={(event) => {
+                                                                      event.stopPropagation();
+                                                                      setOpenDecisionActionsId(null);
+
+                                                                      resolveMemberVoteTieBreak(
+                                                                          messageDecision,
+                                                                          "APPROVE"
+                                                                      );
+                                                                    }}
+                                                                    disabled={
+                                                                      resolvingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                    }
+                                                                >
+                                                                  {resolvingDecisionId ===
+                                                                  messageDecision.decisionId
+                                                                      ? "Resolving..."
+                                                                      : "Tie-Break Approve"}
+                                                                </button>
+
+                                                                <button
+                                                                    type="button"
+                                                                    style={{
+                                                                      ...styles.memberVotingChoiceButton,
+                                                                      ...(resolvingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                          ? styles.decisionGovernanceButtonDisabled
+                                                                          : {}),
+                                                                    }}
+                                                                    onClick={(event) => {
+                                                                      event.stopPropagation();
+                                                                      setOpenDecisionActionsId(null);
+
+                                                                      resolveMemberVoteTieBreak(
+                                                                          messageDecision,
+                                                                          "REJECT"
+                                                                      );
+                                                                    }}
+                                                                    disabled={
+                                                                      resolvingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                    }
+                                                                >
+                                                                  {resolvingDecisionId ===
+                                                                  messageDecision.decisionId
+                                                                      ? "Resolving..."
+                                                                      : "Tie-Break Reject"}
+                                                                </button>
+                                                              </div>
+                                                          )}
                                                         </div>
                                                       </div>
                                                   )}
