@@ -36,6 +36,14 @@ export default function GroupChat() {
       useState([]);
   const [resolvingDecisionId, setResolvingDecisionId] =
       useState(null);
+  const [openingVotingDecisionId, setOpeningVotingDecisionId] =
+      useState(null);
+  const [votingDeadlineInputs, setVotingDeadlineInputs] =
+      useState({});
+  const [castingVoteDecisionId, setCastingVoteDecisionId] =
+      useState(null);
+  const [recordedBallotDecisionIds, setRecordedBallotDecisionIds] =
+      useState({});
   const [hoveredMessageActionsId, setHoveredMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
@@ -367,6 +375,282 @@ export default function GroupChat() {
     }
   }
 
+
+  async function resolveMemberVoting(decision) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (currentGroupRole !== "OWNER") {
+      showNotification(
+          "error",
+          "Only the group owner can resolve voting"
+      );
+      return;
+    }
+
+    if (
+        decision?.governanceMode !== "MEMBER_VOTE" ||
+        decision?.status !== "VOTING_OPEN"
+    ) {
+      showNotification(
+          "error",
+          "Only an open member vote can be resolved"
+      );
+      return;
+    }
+
+    try {
+      setResolvingDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/voting/resolve`
+      );
+
+      await loadGroupDecisions(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          "Group decision voting resolved"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to resolve group decision voting"
+      );
+    } finally {
+      setResolvingDecisionId(null);
+    }
+  }
+
+  async function resolveMemberVoteTieBreak(
+      decision,
+      tieBreakChoice
+  ) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (currentGroupRole !== "OWNER") {
+      showNotification(
+          "error",
+          "Only the group owner can resolve a tie"
+      );
+      return;
+    }
+
+    if (
+        decision?.governanceMode !== "MEMBER_VOTE" ||
+        decision?.status !== "WAITING_FOR_TIE_BREAK"
+    ) {
+      showNotification(
+          "error",
+          "This decision is not waiting for a tie-break"
+      );
+      return;
+    }
+
+    if (
+        tieBreakChoice !== "APPROVE" &&
+        tieBreakChoice !== "REJECT"
+    ) {
+      showNotification(
+          "error",
+          "Tie-break choice must be Approve or Reject"
+      );
+      return;
+    }
+
+    try {
+      setResolvingDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/tie-break`,
+          {
+            tieBreakChoice,
+          }
+      );
+
+      await loadGroupDecisions(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          "Decision tie-break resolved"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to resolve decision tie-break"
+      );
+    } finally {
+      setResolvingDecisionId(null);
+    }
+  }
+
+  async function openMemberVoting(decision) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (currentGroupRole !== "OWNER") {
+      showNotification(
+          "error",
+          "Only the group owner can open voting"
+      );
+      return;
+    }
+
+    if (
+        decision?.governanceMode !== "MEMBER_VOTE" ||
+        decision?.status !== "PROPOSED"
+    ) {
+      showNotification(
+          "error",
+          "This decision is not ready to open for voting"
+      );
+      return;
+    }
+
+    const localDeadline =
+        votingDeadlineInputs[decision.decisionId];
+
+    if (!localDeadline) {
+      showNotification(
+          "error",
+          "Please select a voting deadline"
+      );
+      return;
+    }
+
+    const parsedDeadline = new Date(localDeadline);
+
+    if (
+        Number.isNaN(parsedDeadline.getTime()) ||
+        parsedDeadline.getTime() <= Date.now()
+    ) {
+      showNotification(
+          "error",
+          "Voting deadline must be in the future"
+      );
+      return;
+    }
+
+    const utcVotingDeadline =
+        parsedDeadline.toISOString().slice(0, 19);
+
+    try {
+      setOpeningVotingDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/voting/open`,
+          {
+            votingDeadline: utcVotingDeadline,
+          }
+      );
+
+      setVotingDeadlineInputs((currentInputs) => {
+        const nextInputs = { ...currentInputs };
+        delete nextInputs[decision.decisionId];
+        return nextInputs;
+      });
+
+      await loadGroupDecisions(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          "Group decision voting opened"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to open group decision voting"
+      );
+    } finally {
+      setOpeningVotingDecisionId(null);
+    }
+  }
+
+  async function castMemberVote(decision, voteChoice) {
+    if (!selectedGroupId) {
+      showNotification("error", "Please select a group first");
+      return;
+    }
+
+    if (
+        decision?.governanceMode !== "MEMBER_VOTE" ||
+        decision?.status !== "VOTING_OPEN"
+    ) {
+      showNotification(
+          "error",
+          "Voting is not open for this decision"
+      );
+      return;
+    }
+
+    if (
+        voteChoice !== "APPROVE" &&
+        voteChoice !== "REJECT" &&
+        voteChoice !== "ABSTAIN"
+    ) {
+      showNotification(
+          "error",
+          "Please select a valid ballot choice"
+      );
+      return;
+    }
+
+    try {
+      setCastingVoteDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/votes`,
+          {
+            voteChoice,
+          }
+      );
+
+      setRecordedBallotDecisionIds(
+          (currentDecisionIds) => ({
+            ...currentDecisionIds,
+            [decision.decisionId]:
+                response.data?.hasVoted === true,
+          })
+      );
+
+      await loadGroupDecisions(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.status ||
+          "Secret ballot recorded"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+          "Failed to record secret ballot"
+      );
+    } finally {
+      setCastingVoteDecisionId(null);
+    }
+  }
 
   async function loadGroupAttachments(groupId = selectedGroupId) {
     if (!groupId) return;
@@ -2342,6 +2626,292 @@ export default function GroupChat() {
                                                         </button>
                                                       </div>
                                                   )}
+
+                                              {currentGroupRole === "OWNER" &&
+                                                  messageDecision.governanceMode ===
+                                                      "MEMBER_VOTE" &&
+                                                  messageDecision.status ===
+                                                      "PROPOSED" && (
+                                                      <div
+                                                          style={
+                                                            styles.memberVotingOpenPanel
+                                                          }
+                                                      >
+                                                        <label
+                                                            style={
+                                                              styles.memberVotingDeadlineLabel
+                                                            }
+                                                        >
+                                                          Voting deadline
+
+                                                          <input
+                                                              type="datetime-local"
+                                                              value={
+                                                                votingDeadlineInputs[
+                                                                    messageDecision.decisionId
+                                                                ] || ""
+                                                              }
+                                                              onChange={(event) =>
+                                                                setVotingDeadlineInputs(
+                                                                    (
+                                                                        currentInputs
+                                                                    ) => ({
+                                                                      ...currentInputs,
+                                                                      [messageDecision.decisionId]:
+                                                                          event.target.value,
+                                                                    })
+                                                                )
+                                                              }
+                                                              style={
+                                                                styles.memberVotingDeadlineInput
+                                                              }
+                                                              disabled={
+                                                                openingVotingDecisionId ===
+                                                                messageDecision.decisionId
+                                                              }
+                                                          />
+                                                        </label>
+
+                                                        <button
+                                                            type="button"
+                                                            style={{
+                                                              ...styles.openVotingButton,
+                                                              ...(openingVotingDecisionId ===
+                                                              messageDecision.decisionId
+                                                                  ? styles.decisionGovernanceButtonDisabled
+                                                                  : {}),
+                                                            }}
+                                                            onClick={() =>
+                                                              openMemberVoting(
+                                                                  messageDecision
+                                                              )
+                                                            }
+                                                            disabled={
+                                                              openingVotingDecisionId ===
+                                                              messageDecision.decisionId
+                                                            }
+                                                        >
+                                                          {openingVotingDecisionId ===
+                                                          messageDecision.decisionId
+                                                              ? "Opening..."
+                                                              : "Open Voting"}
+                                                        </button>
+                                                      </div>
+                                                  )}
+                                              {messageDecision.governanceMode ===
+                                                  "MEMBER_VOTE" &&
+                                                  messageDecision.status ===
+                                                      "VOTING_OPEN" && (
+                                                      <div
+                                                          style={
+                                                            styles.memberVotingBallotPanel
+                                                          }
+                                                      >
+                                                        <div
+                                                            style={
+                                                              styles.memberVotingBallotText
+                                                            }
+                                                        >
+                                                          <strong>
+                                                            Secret ballot
+                                                          </strong>
+
+                                                          <span>
+                                                            Choose Approve,
+                                                            Reject, or Abstain.
+                                                          </span>
+
+                                                          {recordedBallotDecisionIds[
+                                                              messageDecision.decisionId
+                                                          ] && (
+                                                              <span
+                                                                  style={
+                                                                    styles.memberVotingRecordedText
+                                                                  }
+                                                              >
+                                                                Your secret ballot
+                                                                has been recorded.
+                                                                Select another
+                                                                option to change it.
+                                                              </span>
+                                                          )}
+                                                        </div>
+
+                                                        <div
+                                                            style={
+                                                              styles.memberVotingBallotActions
+                                                            }
+                                                        >
+                                                          {[
+                                                            "APPROVE",
+                                                            "REJECT",
+                                                            "ABSTAIN",
+                                                          ].map(
+                                                              (
+                                                                  voteChoice
+                                                              ) => (
+                                                                  <button
+                                                                      key={
+                                                                        voteChoice
+                                                                      }
+                                                                      type="button"
+                                                                      style={{
+                                                                        ...styles.memberVotingChoiceButton,
+                                                                        ...(castingVoteDecisionId ===
+                                                                        messageDecision.decisionId
+                                                                            ? styles.decisionGovernanceButtonDisabled
+                                                                            : {}),
+                                                                      }}
+                                                                      onClick={() =>
+                                                                        castMemberVote(
+                                                                            messageDecision,
+                                                                            voteChoice
+                                                                        )
+                                                                      }
+                                                                      disabled={
+                                                                        castingVoteDecisionId ===
+                                                                        messageDecision.decisionId
+                                                                      }
+                                                                  >
+                                                                    {castingVoteDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                        ? "Recording..."
+                                                                        : voteChoice ===
+                                                                          "APPROVE"
+                                                                          ? "Approve"
+                                                                          : voteChoice ===
+                                                                            "REJECT"
+                                                                            ? "Reject"
+                                                                            : "Abstain"}
+                                                                  </button>
+                                                              )
+                                                          )}
+                                                        </div>
+                                                      </div>
+                                                  )}
+
+                                              {currentGroupRole === "OWNER" &&
+                                                  messageDecision.governanceMode ===
+                                                      "MEMBER_VOTE" &&
+                                                  messageDecision.status ===
+                                                      "VOTING_OPEN" && (
+                                                      <div
+                                                          style={
+                                                            styles.memberVotingBallotActions
+                                                          }
+                                                      >
+                                                        <button
+                                                            type="button"
+                                                            style={{
+                                                              ...styles.openVotingButton,
+                                                              ...(resolvingDecisionId ===
+                                                              messageDecision.decisionId
+                                                                  ? styles.decisionGovernanceButtonDisabled
+                                                                  : {}),
+                                                            }}
+                                                            onClick={() =>
+                                                              resolveMemberVoting(
+                                                                  messageDecision
+                                                              )
+                                                            }
+                                                            disabled={
+                                                              resolvingDecisionId ===
+                                                              messageDecision.decisionId
+                                                            }
+                                                        >
+                                                          {resolvingDecisionId ===
+                                                          messageDecision.decisionId
+                                                              ? "Resolving..."
+                                                              : "Resolve Voting"}
+                                                        </button>
+                                                      </div>
+                                                  )}
+
+                                              {currentGroupRole === "OWNER" &&
+                                                  messageDecision.governanceMode ===
+                                                      "MEMBER_VOTE" &&
+                                                  messageDecision.status ===
+                                                      "WAITING_FOR_TIE_BREAK" && (
+                                                      <div
+                                                          style={
+                                                            styles.memberVotingBallotPanel
+                                                          }
+                                                      >
+                                                        <div
+                                                            style={
+                                                              styles.memberVotingBallotText
+                                                            }
+                                                        >
+                                                          <strong>
+                                                            Owner tie-break
+                                                          </strong>
+
+                                                          <span>
+                                                            Cast the public
+                                                            deciding vote.
+                                                          </span>
+                                                        </div>
+
+                                                        <div
+                                                            style={
+                                                              styles.memberVotingBallotActions
+                                                            }
+                                                        >
+                                                          <button
+                                                              type="button"
+                                                              style={{
+                                                                ...styles.memberVotingChoiceButton,
+                                                                ...(resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? styles.decisionGovernanceButtonDisabled
+                                                                    : {}),
+                                                              }}
+                                                              onClick={() =>
+                                                                resolveMemberVoteTieBreak(
+                                                                    messageDecision,
+                                                                    "APPROVE"
+                                                                )
+                                                              }
+                                                              disabled={
+                                                                resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                              }
+                                                          >
+                                                            {resolvingDecisionId ===
+                                                            messageDecision.decisionId
+                                                                ? "Resolving..."
+                                                                : "Tie-Break Approve"}
+                                                          </button>
+
+                                                          <button
+                                                              type="button"
+                                                              style={{
+                                                                ...styles.memberVotingChoiceButton,
+                                                                ...(resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? styles.decisionGovernanceButtonDisabled
+                                                                    : {}),
+                                                              }}
+                                                              onClick={() =>
+                                                                resolveMemberVoteTieBreak(
+                                                                    messageDecision,
+                                                                    "REJECT"
+                                                                )
+                                                              }
+                                                              disabled={
+                                                                resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                              }
+                                                          >
+                                                            {resolvingDecisionId ===
+                                                            messageDecision.decisionId
+                                                                ? "Resolving..."
+                                                                : "Tie-Break Reject"}
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                  )}
+
                                             </div>
                                         )}
                                       </>
@@ -3251,6 +3821,91 @@ messageCard: {
     gap: "8px",
     marginTop: "8px",
   },
+  memberVotingBallotPanel: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "9px",
+    marginTop: "8px",
+    padding: "10px",
+    border: "1px solid #334155",
+    borderRadius: "8px",
+    backgroundColor: "#111c2e",
+  },
+
+  memberVotingBallotText: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "3px",
+    color: "#cbd5e1",
+    fontSize: "12px",
+  },
+
+  memberVotingRecordedText: {
+    marginTop: "3px",
+    color: "#d6c6a8",
+    fontWeight: "700",
+  },
+
+  memberVotingBallotActions: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "7px",
+  },
+
+  memberVotingChoiceButton: {
+    border: "1px solid #64748b",
+    borderRadius: "8px",
+    padding: "7px 12px",
+    backgroundColor: "#1e293b",
+    color: "#e2e8f0",
+    fontSize: "12px",
+    fontWeight: "800",
+    cursor: "pointer",
+  },
+
+  memberVotingOpenPanel: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "flex-end",
+    gap: "8px",
+    marginTop: "8px",
+    padding: "10px",
+    border: "1px solid #334155",
+    borderRadius: "8px",
+    backgroundColor: "#111c2e",
+  },
+
+  memberVotingDeadlineLabel: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
+    color: "#d6c6a8",
+    fontSize: "12px",
+    fontWeight: "700",
+  },
+
+  memberVotingDeadlineInput: {
+    minWidth: "210px",
+    padding: "7px 9px",
+    border: "1px solid #64748b",
+    borderRadius: "7px",
+    backgroundColor: "#0f172a",
+    color: "#e2e8f0",
+    fontSize: "12px",
+    outline: "none",
+  },
+
+  openVotingButton: {
+    border: "1px solid #60a5fa",
+    borderRadius: "8px",
+    padding: "7px 12px",
+    backgroundColor: "#1e3a5f",
+    color: "#dbeafe",
+    fontSize: "12px",
+    fontWeight: "800",
+    cursor: "pointer",
+  },
+
   approveDecisionButton: {
     border: "1px solid #60a5fa",
     borderRadius: "8px",
