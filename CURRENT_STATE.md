@@ -104,18 +104,30 @@ This document summarizes the currently implemented and deployed behavior of the 
 
 ## Group Decision Governance
 - Eligible text group messages can be converted into persisted decision records.
-- The current completed governance workflow is Owner Review.
 - Decision records preserve the source group, source message, source sender, decision-text snapshot, creator, governance mode, status, and creation time.
+- Owner Review and Member Vote governance workflows are implemented.
 - Owner Review decisions begin with the `PROPOSED` status.
-- Only the group owner can approve or reject an Owner Review decision.
+- Only the group owner can approve or reject an unresolved Owner Review decision.
+- Owner Review Approve and Reject controls remain hidden behind a `Decision actions` control until needed.
+- Member Vote decisions begin with the `PROPOSED` status.
+- Only the group owner can set the voting deadline and open voting.
+- Open-voting controls remain hidden behind a `Decision actions` control until needed.
+- Eligible members can cast a secret ballot for Approve, Reject, or Abstain.
+- Members may change their ballot while voting remains open; only the latest ballot is counted.
+- The interface confirms that a secret ballot was recorded without revealing the selected choice.
+- Individual ballot choices are not displayed in the ordinary group interface.
+- Voting cannot be resolved before the configured deadline.
+- The owner resolves voting after the deadline through a `Decision actions` control.
+- Deterministic vote resolution applies quorum and vote-total rules.
+- A tied result enters the `WAITING_FOR_TIE_BREAK` status.
+- The group owner can cast a public deciding vote for Approve or Reject.
+- Tie-break choices remain hidden behind a `Decision actions` control until needed.
 - Approved decisions use the `APPROVED` status.
 - Rejected decisions use the `REJECTED` status.
 - Group members can view the governance mode and current decision status.
-- The group owner sees Approve and Reject controls only for unresolved Owner Review decisions.
-- Decision creation is broadcast through the group WebSocket topic after the decision record has been created.
-- Decision approval and rejection are broadcast through the group WebSocket topic.
-- Decision creation and resolution update connected group members without requiring a browser refresh.
-- Member Vote and Owner Led governance workflows remain the next implementation stages.
+- Decision creation and resolution are broadcast through the group WebSocket topic.
+- Connected group members receive decision updates without requiring a browser refresh.
+- Owner Led governance remains the next governance implementation stage.
 ## Typing Indicators
 - Group members can see when another member is typing.
 - Typing indicators are scoped to the selected group.
@@ -146,9 +158,15 @@ This document summarizes the currently implemented and deployed behavior of the 
 - PostgreSQL runs in the `secure-postgres` container.
 - The frontend is built with Node and served from an Nginx production container.
 - Nginx provides SPA fallback routing and reverse-proxy access to the backend.
-- The latest deployed commit is `95163f2 Broadcast group decision creation in real time`.
+- The corrected EC2 deployment workflow was successfully verified beginning with commit `c09fbc0 Fix EC2 deployment workflow`.
 - The production health endpoint returns HTTP 200.
 - The backend STOMP simple broker starts successfully during application startup.
+- GitHub Actions deploys pushes to `main` through an SSH connection to EC2.
+- The deployment workflow fetches `origin/main`, checks out `main`, and resets the EC2 repository to the latest remote commit.
+- Docker images are rebuilt without deleting the PostgreSQL volume.
+- Application containers are force-recreated and verified after deployment.
+- The workflow stops on the first failed remote command.
+- Port 22 is opened temporarily for GitHub-hosted runner access and returned to `My IP` after deployment verification.
 
 ## Current Phase Status
 - Group search is complete.
@@ -167,14 +185,20 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Invalid-login and expired-session responses are handled separately.
 - Phase 5 conversation and member tools are complete for the current planned scope.
 - Persisted group decision records are implemented.
-- Owner Review governance is implemented, deployed, and browser-tested.
-- Real-time decision creation, approval, and rejection are implemented.
+- Owner Review governance is implemented, deployed, browser-tested, and accepted.
+- Member Vote governance is implemented, deployed, browser-tested, and accepted.
+- Secret-ballot recording and ballot replacement are implemented.
+- Voting-deadline enforcement and post-deadline resolution are implemented.
+- Tie detection, `WAITING_FOR_TIE_BREAK`, and owner tie-break resolution are implemented.
+- Decision controls are compacted behind `Decision actions` where appropriate.
+- Real-time decision creation and resolution updates are implemented.
+- The corrected GitHub Actions EC2 deployment workflow is implemented and tested.
 
 ## Planned Next Work
-- Implement Member Vote governance with member eligibility, vote persistence, vote totals, and deterministic resolution rules
 - Complete the Owner Led governance workflow
 - Add explicit member acknowledgment for selected finalized decisions
 - Expand append-only decision audit history and authorized governance-history views
+- Consider aggregate governance analytics without exposing individual secret-ballot choices
 - Password reset and secure reset-token invalidation
 - Multi-Factor Authentication, recovery codes, and passkey support
 
@@ -187,4 +211,5 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Login throttling is currently keyed only by normalized username and is not yet distributed across multiple backend instances.
 - Legacy SHA-256 support remains temporarily available until active accounts have migrated to BCrypt.
 - Password recovery, token revocation, Multi-Factor Authentication, recovery codes, and passkeys are not yet implemented.
-- Formal decisions are currently created from eligible text messages; attachment-based decisions, required acknowledgments, Member Vote, and full append-only audit-history views remain incomplete.
+- Formal decisions are currently created from eligible text messages; attachment-based decisions, required acknowledgments, Owner Led governance, and full append-only audit-history views remain incomplete.
+- The current GitHub-hosted deployment workflow requires temporary public SSH access to port 22 during deployment.

@@ -24,10 +24,15 @@
 - Real-time group updates through STOMP and SockJS
 - Persisted group decision records created from eligible text messages
 - Owner Review governance mode
-- Proposed, Approved, and Rejected decision states
+- Member Vote governance mode
+- Proposed, Voting Open, Waiting for Tie-Break, Approved, and Rejected decision states
 - Owner-only Approve and Reject controls for unresolved Owner Review decisions
-- Real-time group decision creation events
-- Real-time group decision approval and rejection events
+- Owner-controlled voting deadlines and voting activation
+- Secret member ballots for Approve, Reject, and Abstain
+- Ballot replacement while voting remains open, with only the latest ballot counted
+- Post-deadline vote resolution with deterministic quorum and vote-total rules
+- Owner tie-break resolution for tied Member Vote decisions
+- Real-time group decision creation and resolution events
 - Authenticated Change Password workflow
 - Dashboard navigation to the protected Change Password page
 
@@ -48,6 +53,11 @@
 - Invalid login credentials now return an unauthorized response
 - Public login failures no longer trigger the expired-session workflow
 - Successful password changes clear the frontend authentication state and redirect to Login
+- Compacted Owner Review, voting setup, vote resolution, and tie-break controls behind `Decision actions`
+- Kept secret-ballot Approve, Reject, and Abstain controls directly available during open voting
+- Corrected the GitHub Actions EC2 deployment workflow to fetch and reset to the latest `origin/main`
+- Removed destructive deployment commands that could delete PostgreSQL volumes and application images
+- Rebuild and force-recreate application containers during automated deployment
 
 ### Security
 - Password changes require an authenticated session and verification of the current password
@@ -130,6 +140,18 @@
 - Verified Approved and Rejected states persist after refresh
 - Verified proposal controls appear for the owner without refreshing
 - Verified decision approval and rejection update all connected members without refreshing
+- Verified Member Vote proposal creation and owner-controlled voting activation
+- Verified eligible members can cast secret Approve, Reject, and Abstain ballots
+- Verified members can replace an existing ballot while voting remains open
+- Verified the interface confirms ballot recording without revealing the selected choice
+- Verified voting cannot be resolved before the configured deadline
+- Verified post-deadline vote resolution
+- Verified tied voting enters the `WAITING_FOR_TIE_BREAK` status
+- Verified owner Tie-Break Reject produces the final Rejected state
+- Verified decision-action controls expand and collapse correctly
+- Verified the corrected GitHub Actions workflow deployed commit `c09fbc0`
+- Verified EC2 matched `origin/main` and all Docker Compose services were running
+- Verified the EC2 working tree was clean after removing accidental empty build-output files
 - Verified the production deployment and health endpoint after the governance changes
 
 ### Known Limitations
@@ -138,4 +160,4 @@
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
 - Password recovery, token revocation, Multi-Factor Authentication, recovery codes, distributed login throttling, and passkeys are not yet implemented
-- Owner Review decisions are implemented; Member Vote, complete Owner Led behavior, required acknowledgments, and expanded append-only audit-history views remain incomplete
+- Owner Review and Member Vote decisions are implemented; complete Owner Led behavior, required acknowledgments, attachment-based decisions, and expanded append-only audit-history views remain incomplete
