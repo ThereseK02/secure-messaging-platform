@@ -710,20 +710,43 @@ Periodic REST polling remains available as a fallback when the WebSocket connect
 
 Eligible text group messages can be converted into persisted decision records. A decision preserves the source group, source message, source sender, decision-text snapshot, creator, governance mode, current status, and creation time.
 
-The currently completed workflow is **Owner Review**:
+The platform currently supports two completed governance workflows: **Owner Review** and **Member Vote**.
+
+**Owner Review**
 
 - Any eligible group member can propose an Owner Review decision from a text message.
 - A new decision begins with the `PROPOSED` status.
-- Only the group owner can approve or reject the proposal.
+- Only the group owner can approve or reject the unresolved proposal.
 - Approval changes the status to `APPROVED`.
 - Rejection changes the status to `REJECTED`.
-- Approve and Reject controls appear only to the owner while the proposal remains unresolved.
+- Owner Approve and Reject controls remain compacted behind `Decision actions` until needed.
 - All group members can see the governance mode and current decision status.
 - Approved and rejected statuses remain persisted after page refresh.
 
-Decision creation and resolution are synchronized through dedicated group WebSocket events. The backend publishes the creation event only after the decision record exists, preventing the owner interface from loading the proposal too early. Connected members receive proposal controls and final status changes without refreshing the browser.
+**Member Vote**
 
-The persisted governance model also recognizes **Member Vote** and **Owner Led** modes. Their complete resolution workflows remain the next governance implementation stages.
+- Any eligible group member can propose a Member Vote decision from a text message.
+- The decision begins with the `PROPOSED` status.
+- Only the group owner can set the voting deadline and open voting.
+- Voting setup controls remain compacted behind `Decision actions`.
+- Eligible members can cast a secret ballot for Approve, Reject, or Abstain.
+- Secret-ballot controls remain directly available while voting is open.
+- A member may change an existing ballot while voting remains open.
+- Only the member's latest ballot is counted.
+- The interface confirms that a ballot was recorded without revealing the selected choice.
+- Individual ballot choices are not displayed in the ordinary group interface.
+- Voting cannot be resolved before the configured deadline.
+- After the deadline, the owner can resolve voting through `Decision actions`.
+- Resolution applies deterministic quorum and vote-total rules.
+- A tied result enters the `WAITING_FOR_TIE_BREAK` status.
+- The group owner can cast a public deciding vote for Approve or Reject.
+- Tie-break controls remain compacted behind `Decision actions`.
+- The final result is persisted as `APPROVED` or `REJECTED`.
+
+Decision creation and resolution are synchronized through dedicated group WebSocket events. Connected group members receive proposal, voting, tie-break, and final-status updates without requiring a browser refresh.
+
+The persisted governance model also recognizes **Owner Led** mode. Its complete governance lifecycle remains planned work.
+
 ### Responsive Layout
 
 The Group Chat interface is designed for laptop and monitor screens.
@@ -843,23 +866,18 @@ The platform supports HTTPS-secured communication, ensuring that data exchanged 
 
 ### Deployment Workflow
 
-
-
-1\. Develop and test features locally.
-
-2\. Build Docker images.
-
-3\. Push application updates to GitHub.
-
-4\. Trigger the CI/CD pipeline.
-
-5\. Deploy updated containers to AWS EC2.
-
-6\. Route traffic through Nginx.
-
-7\. Serve the application over HTTPS.
-
-
+1. Develop and test application changes locally.
+2. Review the Git diff and validate the affected components.
+3. Commit the completed changes to the local `main` branch.
+4. Temporarily allow GitHub-hosted runner access to EC2 through SSH port 22.
+5. Push the commit to `origin/main`.
+6. GitHub Actions connects to EC2 using SSH.
+7. EC2 fetches `origin/main`, checks out `main`, and resets the working tree to the latest remote commit.
+8. Docker Compose rebuilds the application images without deleting the PostgreSQL data volume.
+9. Docker Compose force-recreates the application containers.
+10. The workflow prints the Docker Compose service status and deployed Git commit for verification.
+11. After successful deployment verification, SSH port 22 is returned to the administrator's `My IP` rule.
+12. Nginx serves the application over HTTPS at `https://brain-secure-messaging.com`.
 
 ### Deployment Screenshots
 
@@ -1009,107 +1027,65 @@ The screenshot demonstrates backend runtime monitoring through Hibernate SQL log
 
 ---
 
+
 ## CI/CD Pipeline
 
-
-
-The Secure Messaging Platform incorporates a Continuous Integration and Continuous Deployment (CI/CD) workflow to automate the build, testing, and deployment process. This approach improves development efficiency, reduces manual deployment tasks, and ensures consistent application delivery.
-
-
+The Secure Messaging Platform uses GitHub Actions to automate deployment from the `main` branch to the AWS EC2 production environment. The current workflow focuses on controlled continuous deployment after changes have been developed, reviewed, and committed locally.
 
 ### GitHub Actions Automation
 
+A push to `main` triggers the `Deploy to EC2` workflow.
 
+The workflow uses the `appleboy/ssh-action` GitHub Action with protected repository secrets for:
 
-GitHub Actions is used to automate deployment workflows whenever code changes are pushed to the repository. The pipeline provides a reliable mechanism for building and deploying application updates.
+- EC2 host resolution
+- EC2 SSH username
+- EC2 private-key authentication
 
+The remote script uses `set -e`, causing deployment to stop immediately when a command fails.
 
+### Source Synchronization
 
-### Continuous Integration
+The EC2 repository is synchronized by fetching `origin`, checking out `main`, and resetting the working tree to `origin/main`. This ensures that the deployed source exactly matches the latest remote commit and does not depend on uncommitted EC2 changes.
 
+### Container Deployment
 
+The deployment workflow:
 
-The CI process automatically validates project updates by:
+- Rebuilds the backend and frontend images without using cached build layers
+- Force-recreates the application containers through Docker Compose
+- Preserves the PostgreSQL data volume
+- Prints the Docker Compose service status
+- Prints the deployed Git commit for verification
 
+The corrected workflow does not run destructive deployment commands that remove the PostgreSQL volume or prune all Docker images.
 
+### SSH Access Control
 
-- Pulling the latest source code from GitHub
+GitHub-hosted runners do not use a fixed project-specific IP address. For the current deployment procedure, EC2 SSH port 22 is temporarily opened for the GitHub-hosted runner immediately before pushing to `main`.
 
-- Building the application components
+The temporary rule remains in place while the workflow is queued or running. After the workflow succeeds and the deployed containers and Git commit are verified, port 22 is returned to the administrator's `My IP` rule.
 
-- Verifying project configuration
+### Deployment Verification
 
-- Preparing deployment artifacts
+The corrected EC2 deployment workflow was successfully verified beginning with commit `c09fbc0 Fix EC2 deployment workflow`.
 
+Deployment verification includes:
 
-
-This helps identify issues early in the development lifecycle and improves code quality.
-
-
-
-### Continuous Deployment
-
-
-
-After successful validation, the deployment workflow can automatically update the target environment, reducing the need for manual deployment procedures.
-
-
-
-### DevOps Benefits
-
-
-
-Implementing CI/CD provides several advantages:
-
-
-
-- Faster software delivery
-
-- Reduced deployment errors
-
-- Consistent deployment procedures
-
-- Improved development productivity
-
-- Better collaboration through version control automation
-
-
-
-### Deployment Workflow
-
-
-
-1\. Developer pushes code changes to GitHub.
-
-2\. GitHub Actions automatically triggers the workflow.
-
-3\. Application components are built and validated.
-
-4\. Deployment artifacts are generated.
-
-5\. Updated services are deployed to the target environment.
-
-6\. The application becomes available to users.
-
-
+- Confirming the workflow completed successfully
+- Confirming the EC2 repository matches `origin/main`
+- Confirming the backend, frontend, and PostgreSQL services are running
+- Confirming the production application and health endpoint remain available
 
 ### CI/CD Technologies
 
-
-
 - GitHub Actions
-
 - GitHub Repository Management
-
+- SSH
 - Docker
-
 - Docker Compose
-
 - AWS EC2
-
 - Nginx
-
-
 
 ### CI/CD Pipeline Screenshot
 
@@ -1117,11 +1093,9 @@ Implementing CI/CD provides several advantages:
 
 ![GitHub Actions CI/CD Pipeline](screenshots/deployment/20_github_actions_pipeline.png)
 
-
-The GitHub Actions workflow demonstrates the automated deployment pipeline used to build, validate, and deploy application updates, supporting a modern DevOps-oriented software development process.
+The screenshot shows the GitHub Actions workflow used to synchronize the EC2 repository, rebuild the application images, recreate the containers, and verify the deployed services and Git commit.
 
 ---
-
 
 ## Diagrams
 
@@ -1284,28 +1258,27 @@ Future refinements may include:
 
 #### Decision Governance and Acknowledgments
 
-Owner Review decision creation, persistence, owner approval or rejection, and real-time synchronization are implemented.
+Owner Review and Member Vote decision creation, persistence, resolution, and real-time synchronization are implemented. Member Vote includes secret ballots, ballot replacement, voting deadlines, deterministic resolution, tie detection, and owner tie-break resolution.
 
 Remaining governance improvements include:
 
-- Implement Member Vote eligibility and vote persistence
-- Display vote totals and individual voting state
-- Define deterministic approval, rejection, quorum, and tie rules
 - Complete the Owner Led governance lifecycle
 - Require acknowledgment from selected members or all members
 - Record acknowledgment usernames and timestamps
-- Expand append-only decision history and governance audit views
+- Expand append-only decision history and authorized governance audit views
 - Support completed, superseded, withdrawn, or archived decision states
+- Provide aggregate governance analytics without exposing individual secret-ballot choices
 - Provide authorized export and administrative review tools
 
 #### Password and Authentication Management
 
-The current platform already includes a 15-character minimum password policy, a BCrypt byte limit, local and context-specific password screening, compromised-password checking, authenticated Change Password, current-password verification, and temporary login throttling.
+The current platform already includes a 15-character minimum password policy, a 72-byte BCrypt limit, local and context-specific password screening, compromised-password checking, authenticated Change Password, current-password verification, generic login-failure responses, expired-session handling, and in-memory login throttling.
 
 Remaining improvements include:
 
 - Secure Forgot Password and reset-token workflows
 - Token revocation after password reset or important account changes
+- Distributed and persistent login throttling across multiple backend instances
 - Multi-Factor Authentication (MFA)
 - Backup recovery codes
 - Passkey enrollment and sign-in
