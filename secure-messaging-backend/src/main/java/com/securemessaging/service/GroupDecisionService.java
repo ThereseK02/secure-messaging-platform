@@ -496,11 +496,11 @@ public class GroupDecisionService {
                         decisionId,
                         groupId,
                         eventType,
-                        normalizedActorUsername,
+                        "SYSTEM",
                         voteTime,
                         eventType == GroupDecisionEventType.VOTE_CAST
-                                ? "Vote cast: " + voteChoice
-                                : "Vote changed to: " + voteChoice
+                                ? "Secret ballot submitted"
+                                : "Secret ballot updated"
                 )
         );
 
@@ -720,3 +720,4 @@ public class GroupDecisionService {
                 .findByGroupIdOrderByCreatedAtDesc(groupId);
     }
 }
+
