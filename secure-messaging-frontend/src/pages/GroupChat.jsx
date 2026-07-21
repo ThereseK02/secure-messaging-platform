@@ -44,6 +44,7 @@ export default function GroupChat() {
       useState(null);
   const [recordedBallotDecisionIds, setRecordedBallotDecisionIds] =
       useState({});
+  const [openDecisionActionsId, setOpenDecisionActionsId] = useState(null);
   const [hoveredMessageActionsId, setHoveredMessageActionsId] = useState(null);
   const [selectedGroupAttachment, setSelectedGroupAttachment] = useState(null);
   const [groupAttachments, setGroupAttachments] = useState([]);
@@ -2569,63 +2570,109 @@ export default function GroupChat() {
                                                       messageDecision.status
                                                   )}
                                                 </span>
+
+                                                {currentGroupRole === "OWNER" &&
+                                                    messageDecision.governanceMode ===
+                                                        "OWNER_REVIEW" &&
+                                                    messageDecision.status ===
+                                                        "PROPOSED" && (
+                                                        <div
+                                                            style={{
+                                                              position: "relative",
+                                                              display: "inline-flex",
+                                                              marginLeft: "auto",
+                                                            }}
+                                                        >
+                                                          <button
+                                                              type="button"
+                                                              aria-label="Open decision actions"
+                                                              aria-expanded={
+                                                                openDecisionActionsId ===
+                                                                messageDecision.decisionId
+                                                              }
+                                                              style={{
+                                                                ...styles.messageActionMenuButton,
+                                                                padding: "2px 8px",
+                                                                fontSize: "16px",
+                                                                lineHeight: 1,
+                                                              }}
+                                                              onClick={(event) => {
+                                                                event.stopPropagation();
+
+                                                                setOpenDecisionActionsId(
+                                                                    openDecisionActionsId ===
+                                                                    messageDecision.decisionId
+                                                                        ? null
+                                                                        : messageDecision.decisionId
+                                                                );
+                                                              }}
+                                                          >
+                                                            ...
+                                                          </button>
+
+                                                          {openDecisionActionsId ===
+                                                              messageDecision.decisionId && (
+                                                              <div
+                                                                  style={{
+                                                                    ...styles.messageActionsMenu,
+                                                                    top: "calc(100% + 6px)",
+                                                                    right: 0,
+                                                                  }}
+                                                              >
+                                                                <button
+                                                                    type="button"
+                                                                    style={
+                                                                      styles.messageActionMenuButton
+                                                                    }
+                                                                    onClick={(event) => {
+                                                                      event.stopPropagation();
+                                                                      setOpenDecisionActionsId(null);
+
+                                                                      resolveOwnerReviewDecision(
+                                                                          messageDecision,
+                                                                          "approve"
+                                                                      );
+                                                                    }}
+                                                                    disabled={
+                                                                      resolvingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                    }
+                                                                >
+                                                                  {resolvingDecisionId ===
+                                                                  messageDecision.decisionId
+                                                                      ? "Processing..."
+                                                                      : "Approve"}
+                                                                </button>
+
+                                                                <button
+                                                                    type="button"
+                                                                    style={
+                                                                      styles.messageActionMenuButton
+                                                                    }
+                                                                    onClick={(event) => {
+                                                                      event.stopPropagation();
+                                                                      setOpenDecisionActionsId(null);
+
+                                                                      resolveOwnerReviewDecision(
+                                                                          messageDecision,
+                                                                          "reject"
+                                                                      );
+                                                                    }}
+                                                                    disabled={
+                                                                      resolvingDecisionId ===
+                                                                      messageDecision.decisionId
+                                                                    }
+                                                                >
+                                                                  {resolvingDecisionId ===
+                                                                  messageDecision.decisionId
+                                                                      ? "Processing..."
+                                                                      : "Reject"}
+                                                                </button>
+                                                              </div>
+                                                          )}
+                                                        </div>
+                                                    )}
                                               </div>
-
-                                              {currentGroupRole === "OWNER" &&
-                                                  messageDecision.governanceMode ===
-                                                      "OWNER_REVIEW" &&
-                                                  messageDecision.status ===
-                                                      "PROPOSED" && (
-                                                      <div
-                                                          style={
-                                                            styles.messageDecisionActions
-                                                          }
-                                                      >
-                                                        <button
-                                                            type="button"
-                                                            style={
-                                                              styles.approveDecisionButton
-                                                            }
-                                                            onClick={() =>
-                                                              resolveOwnerReviewDecision(
-                                                                  messageDecision,
-                                                                  "approve"
-                                                              )
-                                                            }
-                                                            disabled={
-                                                              resolvingDecisionId ===
-                                                              messageDecision.decisionId
-                                                            }
-                                                        >
-                                                          {resolvingDecisionId ===
-                                                          messageDecision.decisionId
-                                                              ? "Processing..."
-                                                              : "Approve"}
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            style={
-                                                              styles.rejectDecisionButton
-                                                            }
-                                                            onClick={() =>
-                                                              resolveOwnerReviewDecision(
-                                                                  messageDecision,
-                                                                  "reject"
-                                                              )
-                                                            }
-                                                            disabled={
-                                                              resolvingDecisionId ===
-                                                              messageDecision.decisionId
-                                                            }
-                                                        >
-                                                          {resolvingDecisionId ===
-                                                          messageDecision.decisionId
-                                                              ? "Processing..."
-                                                              : "Reject"}
-                                                        </button>
-                                                      </div>
-                                                  )}
 
                                               {currentGroupRole === "OWNER" &&
                                                   messageDecision.governanceMode ===
