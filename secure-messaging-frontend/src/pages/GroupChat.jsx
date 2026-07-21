@@ -2578,26 +2578,27 @@ export default function GroupChat() {
                                                         "PROPOSED" && (
                                                         <div
                                                             style={{
-                                                              position: "relative",
-                                                              display: "inline-flex",
+                                                              display: "flex",
+                                                              flexDirection: "column",
+                                                              alignItems: "flex-end",
+                                                              gap: "6px",
                                                               marginLeft: "auto",
                                                             }}
                                                         >
                                                           <button
                                                               type="button"
-                                                              aria-label="Open decision actions"
+                                                              aria-label="Toggle decision actions"
                                                               aria-expanded={
                                                                 openDecisionActionsId ===
                                                                 messageDecision.decisionId
                                                               }
                                                               style={{
                                                                 ...styles.messageActionMenuButton,
-                                                                padding: "2px 8px",
-                                                                fontSize: "16px",
-                                                                lineHeight: 1,
+                                                                padding: "4px 9px",
                                                               }}
                                                               onClick={(event) => {
                                                                 event.stopPropagation();
+                                                                setOpenMessageActionsId(null);
 
                                                                 setOpenDecisionActionsId(
                                                                     openDecisionActionsId ===
@@ -2607,22 +2608,28 @@ export default function GroupChat() {
                                                                 );
                                                               }}
                                                           >
-                                                            ...
+                                                            Decision actions
                                                           </button>
 
                                                           {openDecisionActionsId ===
                                                               messageDecision.decisionId && (
                                                               <div
                                                                   style={{
-                                                                    ...styles.messageActionsMenu,
-                                                                    top: "calc(100% + 6px)",
-                                                                    right: 0,
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    gap: "8px",
+                                                                    padding: "5px",
+                                                                    border: "1px solid #475569",
+                                                                    borderRadius: "10px",
+                                                                    backgroundColor: "#020617",
+                                                                    boxShadow:
+                                                                        "0 8px 20px rgba(0, 0, 0, 0.30)",
                                                                   }}
                                                               >
                                                                 <button
                                                                     type="button"
                                                                     style={
-                                                                      styles.messageActionMenuButton
+                                                                      styles.approveDecisionButton
                                                                     }
                                                                     onClick={(event) => {
                                                                       event.stopPropagation();
@@ -2647,7 +2654,7 @@ export default function GroupChat() {
                                                                 <button
                                                                     type="button"
                                                                     style={
-                                                                      styles.messageActionMenuButton
+                                                                      styles.rejectDecisionButton
                                                                     }
                                                                     onClick={(event) => {
                                                                       event.stopPropagation();
