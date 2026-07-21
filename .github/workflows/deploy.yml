@@ -17,19 +17,16 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-           script: |
-              cd /home/ec2-user/secure-messaging-platform
-              git pull origin main
+            set -e
 
-              docker compose down --rmi all --volumes --remove-orphans
+            cd /home/ec2-user/secure-messaging-platform
 
-              docker system prune -af
+            git fetch --prune origin
+            git checkout main
+            git reset --hard origin/main
 
-              rm -rf secure-messaging-frontend/dist
+            docker compose build --no-cache
+            docker compose up -d --force-recreate
 
-              docker compose build --no-cache
-
-              docker compose up -d
-
-              docker ps
-          
+            docker compose ps
+            git log -1 --oneline
