@@ -55,6 +55,9 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
     - [Seen Status and Message Metadata](#seen-status-and-message-metadata)
     - [Real-Time Group Updates](#real-time-group-updates)
     - [Group Decision Governance](#group-decision-governance)
+        - [Owner Review Governance](#owner-review-governance)
+        - [Member Vote Governance](#member-vote-governance)
+        - [Owner Led Governance](#owner-led-governance)
     - [Group Messaging Screenshots](#group-messaging-screenshots)
 - [Deployment Architecture](#deployment-architecture)
 - [Monitoring and Logging](#monitoring-and-logging)
@@ -66,6 +69,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
     - [Decision Governance and Acknowledgments](#decision-governance-and-acknowledgments)
     - [Password and Authentication Management](#password-and-authentication-management)
     - [Messaging and Notification Improvements](#messaging-and-notification-improvements)
+    - [AI-Powered Intelligence](#ai-powered-intelligence)
     - [User Experience Improvements](#user-experience-improvements)
     - [Scalability Improvements](#scalability-improvements)
     - [Security Enhancements](#security-enhancements)
@@ -708,30 +712,49 @@ Periodic REST polling remains available as a fallback when the WebSocket connect
 
 ### Group Decision Governance
 
-Eligible text group messages can be converted into persisted decision records. A decision preserves the source group, source message, source sender, decision-text snapshot, creator, governance mode, current status, and creation time.
+The Secure Messaging Platform includes a persisted group decision-governance subsystem that allows eligible text messages to become structured organizational decisions.
 
-The platform currently supports two completed governance workflows: **Owner Review** and **Member Vote**.
+Each decision preserves its source group, source message, source sender, decision-text snapshot, creator, governance mode, current status, and creation time.
 
-**Owner Review**
+The platform supports three completed governance modes:
 
-- Any eligible group member can propose an Owner Review decision from a text message.
-- A new decision begins with the `PROPOSED` status.
+1. **Owner Review**
+2. **Member Vote**
+3. **Owner Led**
+
+Each governance mode defines who may initiate the decision, who has authority to resolve it, and how the final result is recorded.
+
+| Governance mode | Decision initiator | Resolution authority |
+|---|---|---|
+| `OWNER_REVIEW` | Eligible group member | Group owner |
+| `MEMBER_VOTE` | Eligible group member | Member ballot outcome, with owner-controlled voting administration |
+| `OWNER_LED` | Group owner | Group owner |
+
+#### Owner Review Governance
+
+Owner Review allows an eligible group member to submit a proposal that requires a final decision from the group owner.
+
+- Any eligible group member can create an Owner Review decision from a text message.
+- A new Owner Review decision begins with the `PROPOSED` status.
 - Only the group owner can approve or reject the unresolved proposal.
 - Approval changes the status to `APPROVED`.
 - Rejection changes the status to `REJECTED`.
 - Owner Approve and Reject controls remain compacted behind `Decision actions` until needed.
 - All group members can see the governance mode and current decision status.
-- Approved and rejected statuses remain persisted after page refresh.
+- Approved and rejected outcomes remain persisted after page refresh.
+- Non-owner members cannot access the owner-only resolution controls.
 
-**Member Vote**
+#### Member Vote Governance
 
-- Any eligible group member can propose a Member Vote decision from a text message.
+Member Vote provides a structured secret-ballot workflow for decisions resolved through eligible group-member participation.
+
+- Any eligible group member can create a Member Vote decision from a text message.
 - The decision begins with the `PROPOSED` status.
-- Only the group owner can set the voting deadline and open voting.
+- Only the group owner can configure the voting deadline and open voting.
 - Voting setup controls remain compacted behind `Decision actions`.
 - Eligible members can cast a secret ballot for Approve, Reject, or Abstain.
 - Secret-ballot controls remain directly available while voting is open.
-- A member may change an existing ballot while voting remains open.
+- A member may replace an existing ballot while voting remains open.
 - Only the member's latest ballot is counted.
 - The interface confirms that a ballot was recorded without revealing the selected choice.
 - Individual ballot choices are not displayed in the ordinary group interface.
@@ -743,9 +766,48 @@ The platform currently supports two completed governance workflows: **Owner Revi
 - Tie-break controls remain compacted behind `Decision actions`.
 - The final result is persisted as `APPROVED` or `REJECTED`.
 
-Decision creation and resolution are synchronized through dedicated group WebSocket events. Connected group members receive proposal, voting, tie-break, and final-status updates without requiring a browser refresh.
+Secret ballots support organizational decision-making through aggregate participation and vote totals while preventing ordinary users from connecting individual members to their voting choices.
 
-The persisted governance model also recognizes **Owner Led** mode. Its complete governance lifecycle remains planned work.
+#### Owner Led Governance
+
+Owner Led is the third completed governance decision subsystem of the Secure Messaging Platform.
+
+Unlike Owner Review, it does not begin with a proposal submitted by another member. Unlike Member Vote, its resolution does not depend on a member ballot. The group owner initiates the decision and retains final resolution authority.
+
+The Owner Led lifecycle is:
+
+```text
+Owner creates decision
+        ↓
+Discussion Open
+        ↓
+Owner selects a final action
+        ↓
+Approved / Rejected / Withdrawn
+```
+
+The implemented Owner Led workflow includes the following behavior:
+
+- Only the group owner can create an Owner Led decision.
+- The decision is created from an eligible text group message.
+- A new Owner Led decision begins with the `DISCUSSION_OPEN` status.
+- The source message remains visible as the decision record.
+- The owner opens the compact `Owner decision actions` control when ready to resolve the decision.
+- The available actions are Approve, Reject, and Withdraw.
+- Approve changes the final status to `APPROVED`.
+- Reject changes the final status to `REJECTED`.
+- Withdraw changes the final status to `WITHDRAWN`.
+- Selecting a terminal outcome closes and removes the owner action controls.
+- A resolved decision cannot be approved, rejected, or withdrawn again through the normal interface.
+- The decision message remains visible after resolution.
+- The final outcome persists after browser refresh.
+- Other group members can see the governance mode and final outcome.
+- Non-owner members cannot access the owner-only decision controls.
+- Decision creation and final resolution are synchronized with connected group members through dedicated WebSocket events.
+
+The Approved, Rejected, and Withdrawn Owner Led outcomes have been verified through browser testing with both owner and non-owner group-member accounts.
+
+Decision creation and resolution across all three governance modes are persisted in PostgreSQL and synchronized through dedicated group WebSocket events. Connected group members receive proposal, voting, tie-break, discussion, withdrawal, and final-status updates without requiring a browser refresh.
 
 ### Responsive Layout
 
@@ -1258,15 +1320,18 @@ Future refinements may include:
 
 #### Decision Governance and Acknowledgments
 
-Owner Review and Member Vote decision creation, persistence, resolution, and real-time synchronization are implemented. Member Vote includes secret ballots, ballot replacement, voting deadlines, deterministic resolution, tie detection, and owner tie-break resolution.
+Owner Review, Member Vote, and Owner Led decision creation, persistence, resolution, authorization, and real-time synchronization are implemented.
+
+Member Vote includes secret ballots, ballot replacement, voting deadlines, deterministic resolution, tie detection, and owner tie-break resolution.
+
+Owner Led includes owner-controlled decision creation, an open-discussion stage, and persisted Approved, Rejected, or Withdrawn outcomes.
 
 Remaining governance improvements include:
 
-- Complete the Owner Led governance lifecycle
 - Require acknowledgment from selected members or all members
 - Record acknowledgment usernames and timestamps
 - Expand append-only decision history and authorized governance audit views
-- Support completed, superseded, withdrawn, or archived decision states
+- Support decision supersession and archival workflows
 - Provide aggregate governance analytics without exposing individual secret-ballot choices
 - Provide authorized export and administrative review tools
 
@@ -1292,6 +1357,27 @@ Remaining improvements include:
 - Push notifications for new direct and group messages
 - Optional notification preferences and sound controls
 - Richer real-time collaboration events
+
+#### AI-Powered Intelligence
+
+Future AI-assisted capabilities may improve information discovery, conversation understanding, and organizational productivity while preserving the platform's security and authorization boundaries.
+
+Potential capabilities include:
+
+- **AI Message Summarization:** Allow users to summarize long direct-message conversations, group discussions, and decision-related activity. For example, a user could select **Summarize Conversation** to generate concise key points from hundreds of messages.
+- **AI Search:** Support semantic and natural-language search across messages, attachments, and governance records that the authenticated user is authorized to access. This capability may use embeddings, vector search, and Retrieval-Augmented Generation to locate relevant discussions and produce grounded answers.
+- **AI Assistant:** Help users draft professional responses, generate meeting notes, summarize conversation context, identify unresolved questions, and suggest next actions without independently taking privileged actions.
+- **Smart Classification:** Automatically categorize authorized messages and attachments by topics such as Security, Deployment, Database, Urgent, or General, and identify action items, decisions, tasks, deadlines, and follow-up requests.
+- **Decision Discussion Summarization:** Summarize key arguments, unresolved concerns, and discussion outcomes associated with governance decisions.
+- **Action-Item Extraction:** Identify potential tasks, deadlines, responsibilities, and follow-up requests from authorized conversations.
+- **Conversation Topic Detection:** Organize long group histories into meaningful topics without changing the original message records.
+- **Secure Retrieval-Augmented Generation:** Ground AI responses only in records the requesting user is permitted to access.
+- **AI Auditability and Transparency:** Clearly identify AI-generated summaries, preserve links to supporting messages, and allow users to verify generated conclusions.
+- **Privacy-Preserving AI Controls:** Prevent AI features from exposing private messages, secret-ballot choices, restricted attachments, or unauthorized governance information.
+
+These capabilities would demonstrate practical experience with LLM integration, prompt engineering, semantic search, embeddings, vector databases, Retrieval-Augmented Generation, natural-language processing, machine learning, backend API design, and AI-assisted workflow development.
+
+AI-generated content should remain advisory. It must not silently modify messages, cast votes, resolve decisions, expose individual secret ballots, or perform owner- or administrator-only actions.
 
 #### User Experience Improvements
 
@@ -1448,5 +1534,3 @@ Software Engineer | Machine Learning Engineer | Data Scientist
 - GitHub: [ThereseK02](https://github.com/ThereseK02)
 - LinkedIn: [Therese Kabayanja](https://www.linkedin.com/in/therese-kabayanja-14a43739b)
 - Production Website: [brain-secure-messaging.com](https://brain-secure-messaging.com)
-
-
