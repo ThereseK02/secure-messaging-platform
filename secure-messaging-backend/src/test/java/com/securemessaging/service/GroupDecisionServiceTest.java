@@ -253,6 +253,531 @@ class GroupDecisionServiceTest {
     }
 
     @Test
+    void ownerCreatesOwnerLedDecisionWithOpenDiscussionEvents() {
+
+        Long groupId = 12L;
+        Long messageId = 44L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupMessageEntity message =
+                new GroupMessageEntity(
+                        groupId,
+                        "Tom",
+                        "Introduce the new group operating policy.",
+                        LocalDateTime.now()
+                );
+
+        GroupDecisionEntity savedDecision =
+                new GroupDecisionEntity(
+                        groupId,
+                        messageId,
+                        "Tom",
+                        "Introduce the new group operating policy.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(savedDecision, decisionId);
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                groupMessageRepository.findById(messageId)
+        ).thenReturn(Optional.of(message));
+
+        when(
+                decisionRepository
+                        .existsBySourceMessageId(messageId)
+        ).thenReturn(false);
+
+        when(
+                decisionRepository.save(
+                        any(GroupDecisionEntity.class)
+                )
+        ).thenReturn(savedDecision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.createDecision(
+                        groupId,
+                        messageId,
+                        " Tom ",
+                        GroupDecisionGovernanceMode.OWNER_LED
+                );
+
+        assertEquals(savedDecision, result);
+
+        assertEquals(
+                GroupDecisionGovernanceMode.OWNER_LED,
+                result.getGovernanceMode()
+        );
+
+        assertEquals(
+                GroupDecisionStatus.DISCUSSION_OPEN,
+                result.getStatus()
+        );
+
+        ArgumentCaptor<GroupDecisionEntity> decisionCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEntity.class
+                );
+
+        verify(decisionRepository)
+                .save(decisionCaptor.capture());
+
+        GroupDecisionEntity capturedDecision =
+                decisionCaptor.getValue();
+
+        assertEquals(
+                GroupDecisionGovernanceMode.OWNER_LED,
+                capturedDecision.getGovernanceMode()
+        );
+
+        assertEquals(
+                GroupDecisionStatus.DISCUSSION_OPEN,
+                capturedDecision.getStatus()
+        );
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(
+                decisionEventRepository,
+                org.mockito.Mockito.times(2)
+        ).save(eventCaptor.capture());
+
+        List<GroupDecisionEventEntity> events =
+                eventCaptor.getAllValues();
+
+        assertEquals(
+                GroupDecisionEventType.CREATED,
+                events.get(0).getEventType()
+        );
+
+        assertEquals(
+                GroupDecisionEventType.DISCUSSION_OPENED,
+                events.get(1).getEventType()
+        );
+
+        assertEquals(
+                "Tom",
+                events.get(0).getActorUsername()
+        );
+
+        assertEquals(
+                "Tom",
+                events.get(1).getActorUsername()
+        );
+
+        assertTrue(
+                events.get(1)
+                        .getEventDetails()
+                        .contains("member discussion")
+        );
+    }
+
+
+    @Test
+    void ownerApprovesOwnerLedDecisionAndCreatesApprovedEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Introduce the new group operating policy.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(
+                decisionRepository.save(decision)
+        ).thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.approveOwnerLedDecision(
+                        groupId,
+                        decisionId,
+                        " Tom "
+                );
+
+        assertEquals(
+                GroupDecisionStatus.APPROVED,
+                result.getStatus()
+        );
+
+        verify(decisionRepository)
+                .save(decision);
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        GroupDecisionEventEntity event =
+                eventCaptor.getValue();
+
+        assertEquals(
+                GroupDecisionEventType.APPROVED,
+                event.getEventType()
+        );
+
+        assertEquals(
+                decisionId,
+                event.getDecisionId()
+        );
+
+        assertEquals(
+                groupId,
+                event.getGroupId()
+        );
+
+        assertEquals(
+                "Tom",
+                event.getActorUsername()
+        );
+
+        assertTrue(
+                event.getEventDetails()
+                        .contains("after member consultation")
+        );
+    }
+
+
+    @Test
+    void ownerRejectsOwnerLedDecisionAndCreatesRejectedEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Introduce the new group operating policy.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(
+                decisionRepository.save(decision)
+        ).thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.rejectOwnerLedDecision(
+                        groupId,
+                        decisionId,
+                        " Tom "
+                );
+
+        assertEquals(
+                GroupDecisionStatus.REJECTED,
+                result.getStatus()
+        );
+
+        verify(decisionRepository)
+                .save(decision);
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        GroupDecisionEventEntity event =
+                eventCaptor.getValue();
+
+        assertEquals(
+                GroupDecisionEventType.REJECTED,
+                event.getEventType()
+        );
+
+        assertEquals(
+                decisionId,
+                event.getDecisionId()
+        );
+
+        assertEquals(
+                groupId,
+                event.getGroupId()
+        );
+
+        assertEquals(
+                "Tom",
+                event.getActorUsername()
+        );
+
+        assertTrue(
+                event.getEventDetails()
+                        .contains("after member consultation")
+        );
+    }
+
+
+    @Test
+    void ownerWithdrawsOwnerLedDecisionAndCreatesWithdrawnEvent() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity owner =
+                new GroupMemberEntity(
+                        groupId,
+                        "Tom",
+                        GroupRole.OWNER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Gombo",
+                        "Introduce the new group operating policy.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        setEntityId(decision, decisionId);
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Tom"
+                        )
+        ).thenReturn(Optional.of(owner));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        when(
+                decisionRepository.save(decision)
+        ).thenReturn(decision);
+
+        GroupDecisionEntity result =
+                groupDecisionService.withdrawOwnerLedDecision(
+                        groupId,
+                        decisionId,
+                        " Tom "
+                );
+
+        assertEquals(
+                GroupDecisionStatus.WITHDRAWN,
+                result.getStatus()
+        );
+
+        verify(decisionRepository)
+                .save(decision);
+
+        ArgumentCaptor<GroupDecisionEventEntity> eventCaptor =
+                ArgumentCaptor.forClass(
+                        GroupDecisionEventEntity.class
+                );
+
+        verify(decisionEventRepository)
+                .save(eventCaptor.capture());
+
+        GroupDecisionEventEntity event =
+                eventCaptor.getValue();
+
+        assertEquals(
+                GroupDecisionEventType.WITHDRAWN,
+                event.getEventType()
+        );
+
+        assertEquals(
+                decisionId,
+                event.getDecisionId()
+        );
+
+        assertEquals(
+                groupId,
+                event.getGroupId()
+        );
+
+        assertEquals(
+                "Tom",
+                event.getActorUsername()
+        );
+
+        assertTrue(
+                event.getEventDetails()
+                        .contains("after member consultation")
+        );
+    }
+
+
+    @Test
+    void regularMemberCannotFinalizeOwnerLedDecision() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        RuntimeException approvalException =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService
+                                .approveOwnerLedDecision(
+                                        groupId,
+                                        decisionId,
+                                        " Kelly "
+                                )
+                );
+
+        RuntimeException rejectionException =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService
+                                .rejectOwnerLedDecision(
+                                        groupId,
+                                        decisionId,
+                                        "Kelly"
+                                )
+                );
+
+        RuntimeException withdrawalException =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService
+                                .withdrawOwnerLedDecision(
+                                        groupId,
+                                        decisionId,
+                                        "Kelly"
+                                )
+                );
+
+        assertEquals(
+                "Only the group owner can finalize an owner-led decision",
+                approvalException.getMessage()
+        );
+
+        assertEquals(
+                "Only the group owner can finalize an owner-led decision",
+                rejectionException.getMessage()
+        );
+
+        assertEquals(
+                "Only the group owner can finalize an owner-led decision",
+                withdrawalException.getMessage()
+        );
+
+        verify(
+                groupMemberRepository,
+                org.mockito.Mockito.times(3)
+        ).findByGroupIdAndUsername(
+                groupId,
+                "Kelly"
+        );
+
+        verify(decisionRepository, never())
+                .findByIdAndGroupId(
+                        any(),
+                        any()
+                );
+
+        verify(decisionRepository, never())
+                .save(any());
+
+        verify(decisionEventRepository, never())
+                .save(any());
+    }
+
+
+    @Test
     void regularMemberCannotSelectOwnerLedGovernance() {
 
         Long groupId = 12L;

@@ -377,6 +377,112 @@ export default function GroupChat() {
   }
 
 
+  async function resolveOwnerLedDecision(
+      decision,
+      action
+  ) {
+    if (!selectedGroupId) {
+      showNotification(
+          "error",
+          "Please select a group first"
+      );
+      return;
+    }
+
+    if (!decision?.decisionId) {
+      showNotification(
+          "error",
+          "Group decision information is unavailable"
+      );
+      return;
+    }
+
+    if (currentGroupRole !== "OWNER") {
+      showNotification(
+          "error",
+          "Only the group owner can finalize an Owner Led decision"
+      );
+      return;
+    }
+
+    if (
+        decision.governanceMode !== "OWNER_LED" ||
+        decision.status !== "DISCUSSION_OPEN"
+    ) {
+      showNotification(
+          "error",
+          "Only an open Owner Led discussion can be finalized"
+      );
+      return;
+    }
+
+    if (
+        action !== "approve" &&
+        action !== "reject" &&
+        action !== "withdraw"
+    ) {
+      showNotification(
+          "error",
+          "Unsupported Owner Led decision action"
+      );
+      return;
+    }
+
+    try {
+      setResolvingDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/owner-led/${action}`
+      );
+
+      await loadGroupDecisions(selectedGroupId);
+
+      let successMessage =
+          "Owner Led decision finalized";
+
+      if (action === "approve") {
+        successMessage =
+            "Owner Led decision approved";
+      } else if (action === "reject") {
+        successMessage =
+            "Owner Led decision rejected";
+      } else if (action === "withdraw") {
+        successMessage =
+            "Owner Led decision withdrawn";
+      }
+
+      showNotification(
+          "success",
+          response.data?.status || successMessage
+      );
+    } catch (error) {
+      console.error(error);
+
+      let failureMessage =
+          "Failed to finalize Owner Led decision";
+
+      if (action === "approve") {
+        failureMessage =
+            "Failed to approve Owner Led decision";
+      } else if (action === "reject") {
+        failureMessage =
+            "Failed to reject Owner Led decision";
+      } else if (action === "withdraw") {
+        failureMessage =
+            "Failed to withdraw Owner Led decision";
+      }
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+              failureMessage
+      );
+    } finally {
+      setResolvingDecisionId(null);
+    }
+  }
+
+
   async function resolveMemberVoting(decision) {
     if (!selectedGroupId) {
       showNotification("error", "Please select a group first");
@@ -1668,11 +1774,25 @@ export default function GroupChat() {
                 groupEvent.resolvedBy !==
                     currentUsername
             ) {
-              const resolutionLabel =
+              let resolutionLabel =
+                  "resolved";
+
+              if (
                   groupEvent.decisionStatus ===
                   "APPROVED"
-                      ? "approved"
-                      : "rejected";
+              ) {
+                resolutionLabel = "approved";
+              } else if (
+                  groupEvent.decisionStatus ===
+                  "REJECTED"
+              ) {
+                resolutionLabel = "rejected";
+              } else if (
+                  groupEvent.decisionStatus ===
+                  "WITHDRAWN"
+              ) {
+                resolutionLabel = "withdrawn";
+              }
 
               showNotification(
                   "success",
@@ -2680,6 +2800,142 @@ export default function GroupChat() {
                                                         </div>
                                                     )}
                                               </div>
+
+                                              {currentGroupRole === "OWNER" &&
+                                                  messageDecision.governanceMode ===
+                                                      "OWNER_LED" &&
+                                                  messageDecision.status ===
+                                                      "DISCUSSION_OPEN" && (
+                                                      <div
+                                                          style={{
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            alignItems: "flex-end",
+                                                            gap: "6px",
+                                                            marginTop: "8px",
+                                                          }}
+                                                      >
+                                                        <button
+                                                            type="button"
+                                                            aria-label="Toggle Owner Led decision actions"
+                                                            aria-expanded={
+                                                              openDecisionActionsId ===
+                                                              messageDecision.decisionId
+                                                            }
+                                                            style={{
+                                                              ...styles.messageActionMenuButton,
+                                                              padding: "4px 9px",
+                                                            }}
+                                                            onClick={(event) => {
+                                                              event.stopPropagation();
+                                                              setOpenMessageActionsId(null);
+
+                                                              setOpenDecisionActionsId(
+                                                                  openDecisionActionsId ===
+                                                                  messageDecision.decisionId
+                                                                      ? null
+                                                                      : messageDecision.decisionId
+                                                              );
+                                                            }}
+                                                        >
+                                                          Owner decision actions
+                                                        </button>
+
+                                                        {openDecisionActionsId ===
+                                                            messageDecision.decisionId && (
+                                                            <div
+                                                                style={{
+                                                                  display: "flex",
+                                                                  alignItems: "center",
+                                                                  flexWrap: "wrap",
+                                                                  gap: "8px",
+                                                                  padding: "5px",
+                                                                  border: "1px solid #475569",
+                                                                  borderRadius: "10px",
+                                                                  backgroundColor: "#020617",
+                                                                  boxShadow:
+                                                                      "0 8px 20px rgba(0, 0, 0, 0.30)",
+                                                                }}
+                                                            >
+                                                              <button
+                                                                  type="button"
+                                                                  style={
+                                                                    styles.approveDecisionButton
+                                                                  }
+                                                                  onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setOpenDecisionActionsId(null);
+
+                                                                    resolveOwnerLedDecision(
+                                                                        messageDecision,
+                                                                        "approve"
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    resolvingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                  }
+                                                              >
+                                                                {resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? "Processing..."
+                                                                    : "Approve"}
+                                                              </button>
+
+                                                              <button
+                                                                  type="button"
+                                                                  style={
+                                                                    styles.rejectDecisionButton
+                                                                  }
+                                                                  onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setOpenDecisionActionsId(null);
+
+                                                                    resolveOwnerLedDecision(
+                                                                        messageDecision,
+                                                                        "reject"
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    resolvingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                  }
+                                                              >
+                                                                {resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? "Processing..."
+                                                                    : "Reject"}
+                                                              </button>
+
+                                                              <button
+                                                                  type="button"
+                                                                  style={{
+                                                                    ...styles.messageActionMenuButton,
+                                                                    padding: "5px 10px",
+                                                                  }}
+                                                                  onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setOpenDecisionActionsId(null);
+
+                                                                    resolveOwnerLedDecision(
+                                                                        messageDecision,
+                                                                        "withdraw"
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    resolvingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                                  }
+                                                              >
+                                                                {resolvingDecisionId ===
+                                                                messageDecision.decisionId
+                                                                    ? "Processing..."
+                                                                    : "Withdraw"}
+                                                              </button>
+                                                            </div>
+                                                        )}
+                                                      </div>
+                                                  )}
 
                                               {currentGroupRole === "OWNER" &&
                                                   messageDecision.governanceMode ===

@@ -1487,6 +1487,233 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
         }
     }
 
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/owner-led/approve"
+    )
+    public ResponseEntity<?> approveOwnerLedDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionEntity decision =
+                    groupDecisionService.approveOwnerLedDecision(
+                            groupId,
+                            decisionId,
+                            currentUsername
+                    );
+
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_RESOLVED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "governanceMode",
+                            decision.getGovernanceMode().name(),
+                            "decisionStatus",
+                            decision.getStatus().name(),
+                            "resolvedBy",
+                            currentUsername
+                    )
+            );
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "status",
+                    "Owner-led decision approved"
+            );
+            response.put(
+                    "decisionId",
+                    decision.getId()
+            );
+            response.put(
+                    "groupId",
+                    decision.getGroupId()
+            );
+            response.put(
+                    "governanceMode",
+                    decision.getGovernanceMode()
+            );
+            response.put(
+                    "decisionStatus",
+                    decision.getStatus()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException exception) {
+            return buildOwnerReviewDecisionErrorResponse(
+                    exception,
+                    "Unable to approve owner-led decision"
+            );
+        }
+    }
+
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/owner-led/reject"
+    )
+    public ResponseEntity<?> rejectOwnerLedDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionEntity decision =
+                    groupDecisionService.rejectOwnerLedDecision(
+                            groupId,
+                            decisionId,
+                            currentUsername
+                    );
+
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_RESOLVED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "governanceMode",
+                            decision.getGovernanceMode().name(),
+                            "decisionStatus",
+                            decision.getStatus().name(),
+                            "resolvedBy",
+                            currentUsername
+                    )
+            );
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "status",
+                    "Owner-led decision rejected"
+            );
+            response.put(
+                    "decisionId",
+                    decision.getId()
+            );
+            response.put(
+                    "groupId",
+                    decision.getGroupId()
+            );
+            response.put(
+                    "governanceMode",
+                    decision.getGovernanceMode()
+            );
+            response.put(
+                    "decisionStatus",
+                    decision.getStatus()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException exception) {
+            return buildOwnerReviewDecisionErrorResponse(
+                    exception,
+                    "Unable to reject owner-led decision"
+            );
+        }
+    }
+
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/owner-led/withdraw"
+    )
+    public ResponseEntity<?> withdrawOwnerLedDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionEntity decision =
+                    groupDecisionService.withdrawOwnerLedDecision(
+                            groupId,
+                            decisionId,
+                            currentUsername
+                    );
+
+            messagingTemplate.convertAndSend(
+                    "/topic/groups/" + groupId,
+                    Map.of(
+                            "type",
+                            "GROUP_DECISION_RESOLVED",
+                            "groupId",
+                            groupId,
+                            "decisionId",
+                            decision.getId(),
+                            "sourceMessageId",
+                            decision.getSourceMessageId(),
+                            "governanceMode",
+                            decision.getGovernanceMode().name(),
+                            "decisionStatus",
+                            decision.getStatus().name(),
+                            "resolvedBy",
+                            currentUsername
+                    )
+            );
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "status",
+                    "Owner-led decision withdrawn"
+            );
+            response.put(
+                    "decisionId",
+                    decision.getId()
+            );
+            response.put(
+                    "groupId",
+                    decision.getGroupId()
+            );
+            response.put(
+                    "governanceMode",
+                    decision.getGovernanceMode()
+            );
+            response.put(
+                    "decisionStatus",
+                    decision.getStatus()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException exception) {
+            return buildOwnerReviewDecisionErrorResponse(
+                    exception,
+                    "Unable to withdraw owner-led decision"
+            );
+        }
+    }
 
     @PostMapping("/groups/{groupId}/decisions/{decisionId}/approve")
     public ResponseEntity<?> approveGroupDecision(

@@ -177,7 +177,65 @@ public class GroupDecisionService {
 
         decisionEventRepository.save(creationEvent);
 
+        if (
+                governanceMode ==
+                        GroupDecisionGovernanceMode.OWNER_LED
+        ) {
+            decisionEventRepository.save(
+                    new GroupDecisionEventEntity(
+                            savedDecision.getId(),
+                            groupId,
+                            GroupDecisionEventType.DISCUSSION_OPENED,
+                            normalizedActorUsername,
+                            createdAt,
+                            "Owner-led consultation opened for member discussion"
+                    )
+            );
+        }
+
         return savedDecision;
+    }
+
+    @Transactional
+    public GroupDecisionEntity approveOwnerLedDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        return finalizeOwnerLedDecision(
+                groupId,
+                decisionId,
+                actorUsername,
+                GroupDecisionStatus.APPROVED
+        );
+    }
+
+    @Transactional
+    public GroupDecisionEntity rejectOwnerLedDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        return finalizeOwnerLedDecision(
+                groupId,
+                decisionId,
+                actorUsername,
+                GroupDecisionStatus.REJECTED
+        );
+    }
+
+    @Transactional
+    public GroupDecisionEntity withdrawOwnerLedDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        return finalizeOwnerLedDecision(
+                groupId,
+                decisionId,
+                actorUsername,
+                GroupDecisionStatus.WITHDRAWN
+        );
     }
 
     @Transactional
@@ -206,6 +264,114 @@ public class GroupDecisionService {
                 actorUsername,
                 GroupDecisionStatus.REJECTED
         );
+    }
+
+    private GroupDecisionEntity finalizeOwnerLedDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername,
+            GroupDecisionStatus targetStatus) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        GroupMemberEntity currentMember =
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "You are not a member of this group"
+                                )
+                        );
+
+        if (currentMember.getRole() != GroupRole.OWNER) {
+            throw new RuntimeException(
+                    "Only the group owner can finalize an owner-led decision"
+            );
+        }
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        try {
+            if (targetStatus == GroupDecisionStatus.APPROVED) {
+                decision.approveOwnerLedDecision();
+            } else if (targetStatus == GroupDecisionStatus.REJECTED) {
+                decision.rejectOwnerLedDecision();
+            } else if (targetStatus == GroupDecisionStatus.WITHDRAWN) {
+                decision.withdrawOwnerLedDecision();
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported owner-led decision status"
+                );
+            }
+        } catch (IllegalStateException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+
+        GroupDecisionEntity savedDecision =
+                decisionRepository.save(decision);
+
+        LocalDateTime eventAt = LocalDateTime.now();
+
+        GroupDecisionEventType eventType;
+
+        String eventDetails;
+
+        if (targetStatus == GroupDecisionStatus.APPROVED) {
+            eventType = GroupDecisionEventType.APPROVED;
+            eventDetails =
+                    "Owner-led decision approved after member consultation";
+        } else if (targetStatus == GroupDecisionStatus.REJECTED) {
+            eventType = GroupDecisionEventType.REJECTED;
+            eventDetails =
+                    "Owner-led decision rejected after member consultation";
+        } else {
+            eventType = GroupDecisionEventType.WITHDRAWN;
+            eventDetails =
+                    "Owner-led decision withdrawn after member consultation";
+        }
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        savedDecision.getId(),
+                        groupId,
+                        eventType,
+                        normalizedActorUsername,
+                        eventAt,
+                        eventDetails
+                )
+        );
+
+        return savedDecision;
     }
 
     private GroupDecisionEntity resolveOwnerReviewDecision(

@@ -99,7 +99,10 @@ public class GroupDecisionEntity {
         this.sourceSender = sourceSender;
         this.decisionTextSnapshot = decisionTextSnapshot;
         this.createdBy = createdBy;
-        this.status = GroupDecisionStatus.PROPOSED;
+        this.status =
+                governanceMode == GroupDecisionGovernanceMode.OWNER_LED
+                        ? GroupDecisionStatus.DISCUSSION_OPEN
+                        : GroupDecisionStatus.PROPOSED;
         this.category = GroupDecisionCategory.ROUTINE_OPERATION;
         this.threshold = GroupDecisionThreshold.SIMPLE_MAJORITY;
         this.governanceMode =
@@ -323,6 +326,35 @@ public class GroupDecisionEntity {
 
         this.status = finalStatus;
         this.tieBreakDeadline = null;
+    }
+
+    public void approveOwnerLedDecision() {
+        requireOpenOwnerLedDiscussion();
+        this.status = GroupDecisionStatus.APPROVED;
+    }
+
+    public void rejectOwnerLedDecision() {
+        requireOpenOwnerLedDiscussion();
+        this.status = GroupDecisionStatus.REJECTED;
+    }
+
+    public void withdrawOwnerLedDecision() {
+        requireOpenOwnerLedDiscussion();
+        this.status = GroupDecisionStatus.WITHDRAWN;
+    }
+
+    private void requireOpenOwnerLedDiscussion() {
+        if (governanceMode != GroupDecisionGovernanceMode.OWNER_LED) {
+            throw new IllegalStateException(
+                    "Only owner-led decisions can be finalized from discussion"
+            );
+        }
+
+        if (status != GroupDecisionStatus.DISCUSSION_OPEN) {
+            throw new IllegalStateException(
+                    "Only an open owner-led discussion can be finalized"
+            );
+        }
     }
 
     private void requireProposedOwnerReviewDecision() {
