@@ -10,5 +10,6 @@ public enum GroupDecisionEventType {
     QUORUM_NOT_MET,
     APPROVED,
     REJECTED,
-    WITHDRAWN
+    WITHDRAWN,
+    ACKNOWLEDGED
 }

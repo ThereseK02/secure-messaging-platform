@@ -14,6 +14,7 @@ import com.securemessaging.entity.AttachmentEntity;
 import com.securemessaging.entity.EmailGroupInvitationEntity;
 import com.securemessaging.entity.EmailGroupInvitationStatus;
 import com.securemessaging.entity.GroupEntity;
+import com.securemessaging.entity.GroupDecisionAcknowledgmentEntity;
 import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionGovernanceMode;
 import com.securemessaging.entity.GroupInvitationEntity;
@@ -44,6 +45,7 @@ import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
 import com.securemessaging.service.InvitationTokenService;
+import com.securemessaging.service.GroupDecisionAcknowledgmentResult;
 import com.securemessaging.service.GroupDecisionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1447,6 +1449,47 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                                         "createdAt",
                                         decision.getCreatedAt()
                                 );
+                                GroupDecisionAcknowledgmentEntity currentUserAcknowledgment =
+                                        groupDecisionService
+                                                .getAcknowledgmentForUser(
+                                                        groupId,
+                                                        decision.getId(),
+                                                        currentUsername
+                                                )
+                                                .orElse(null);
+
+                                item.put(
+                                        "acknowledgmentCount",
+                                        groupDecisionService
+                                                .getAcknowledgmentCount(
+                                                        groupId,
+                                                        decision.getId(),
+                                                        currentUsername
+                                                )
+                                );
+
+                                item.put(
+                                        "requiredAcknowledgmentCount",
+                                        groupDecisionService
+                                                .getRequiredAcknowledgmentCount(
+                                                        groupId,
+                                                        decision.getId(),
+                                                        currentUsername
+                                                )
+                                );
+
+                                item.put(
+                                        "acknowledgedByCurrentUser",
+                                        currentUserAcknowledgment != null
+                                );
+
+                                item.put(
+                                        "currentUserAcknowledgedAt",
+                                        currentUserAcknowledgment == null
+                                                ? null
+                                                : currentUserAcknowledgment
+                                                .getAcknowledgedAt()
+                                );
 
                                 return item;
                             })
@@ -1486,6 +1529,93 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                     );
         }
     }
+
+    @PostMapping(
+            "/groups/{groupId}/decisions/{decisionId}/acknowledgments"
+    )
+    public ResponseEntity<?> acknowledgeGroupDecision(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("decisionId") Long decisionId) {
+
+        String currentUsername =
+                org.springframework.security.core.context
+                        .SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        try {
+            GroupDecisionAcknowledgmentResult acknowledgmentResult =
+                    groupDecisionService.acknowledgeDecision(
+                            groupId,
+                            decisionId,
+                            currentUsername
+                    );
+
+            GroupDecisionAcknowledgmentEntity acknowledgment =
+                    acknowledgmentResult.acknowledgment();
+
+            if (acknowledgmentResult.newlyCreated()) {
+                messagingTemplate.convertAndSend(
+                        "/topic/groups/" + groupId,
+                        Map.of(
+                                "type",
+                                "GROUP_DECISION_ACKNOWLEDGED",
+                                "groupId",
+                                groupId,
+                                "decisionId",
+                                decisionId,
+                                "acknowledgedBy",
+                                acknowledgment.getUsername(),
+                                "acknowledgedAt",
+                                acknowledgment.getAcknowledgedAt()
+                        )
+                );
+            }
+
+            Map<String, Object> response =
+                    new java.util.LinkedHashMap<>();
+
+            response.put(
+                    "decisionId",
+                    acknowledgment.getDecisionId()
+            );
+            response.put(
+                    "groupId",
+                    acknowledgment.getGroupId()
+            );
+            response.put(
+                    "acknowledgedBy",
+                    acknowledgment.getUsername()
+            );
+            response.put(
+                    "acknowledgedAt",
+                    acknowledgment.getAcknowledgedAt()
+            );
+            response.put(
+                    "newlyCreated",
+                    acknowledgmentResult.newlyCreated()
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException exception) {
+            String errorMessage =
+                    exception.getMessage() == null ||
+                            exception.getMessage().isBlank()
+                            ? "Unable to acknowledge group decision"
+                            : exception.getMessage();
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            Map.of(
+                                    "error",
+                                    errorMessage
+                            )
+                    );
+        }
+    }
+
 
     @PostMapping(
             "/groups/{groupId}/decisions/{decisionId}/owner-led/approve"

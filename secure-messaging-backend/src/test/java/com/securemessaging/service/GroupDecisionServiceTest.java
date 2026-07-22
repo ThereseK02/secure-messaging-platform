@@ -1,5 +1,6 @@
 package com.securemessaging.service;
 
+import com.securemessaging.entity.GroupDecisionAcknowledgmentEntity;
 import com.securemessaging.entity.GroupDecisionCategory;
 import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionGovernanceMode;
@@ -17,7 +18,8 @@ import com.securemessaging.repository.GroupDecisionRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
 import com.securemessaging.repository.GroupMessageEntityRepository;
 import com.securemessaging.repository.GroupDecisionVoteRepository;
-
+import com.securemessaging.repository.GroupDecisionAcknowledgmentRepository;
+import com.securemessaging.repository.GroupDecisionAcknowledgmentRequirementRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,16 +44,25 @@ class GroupDecisionServiceTest {
     private GroupDecisionRepository decisionRepository;
     private GroupDecisionEventRepository decisionEventRepository;
     private GroupDecisionVoteRepository decisionVoteRepository;
+
     private GroupMemberEntityRepository groupMemberRepository;
     private GroupMessageEntityRepository groupMessageRepository;
+
+    private GroupDecisionAcknowledgmentRepository
+            decisionAcknowledgmentRepository;
     private GroupDecisionService groupDecisionService;
+
+    private GroupDecisionAcknowledgmentRequirementRepository
+               decisionAcknowledgmentRequirementRepository;
 
     @BeforeEach
     void setUp() {
-
+        decisionAcknowledgmentRepository =
+                mock(GroupDecisionAcknowledgmentRepository.class);
+        decisionAcknowledgmentRequirementRepository =
+                mock(GroupDecisionAcknowledgmentRequirementRepository.class);
         decisionRepository =
                 mock(GroupDecisionRepository.class);
-
         decisionEventRepository =
                 mock(GroupDecisionEventRepository.class);
         decisionVoteRepository =
@@ -67,6 +79,8 @@ class GroupDecisionServiceTest {
                         decisionRepository,
                         decisionEventRepository,
                         decisionVoteRepository,
+                        decisionAcknowledgmentRepository,
+                        decisionAcknowledgmentRequirementRepository,
                         groupMemberRepository,
                         groupMessageRepository
                 );
@@ -2218,6 +2232,360 @@ class GroupDecisionServiceTest {
                 .save(any());
     }
 
+
+    @Test
+    void requiredMemberAcknowledgesFinalizedDecision() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Kelly",
+                        "Review the finalized group decision.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        setDecisionStatus(
+                decision,
+                GroupDecisionStatus.APPROVED
+        );
+
+        when(
+                decisionAcknowledgmentRequirementRepository
+                        .existsByDecisionIdAndUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(true);
+
+        when(
+                decisionAcknowledgmentRepository
+                        .findByDecisionIdAndUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.empty());
+
+        when(
+                decisionAcknowledgmentRepository.save(any())
+        ).thenAnswer(
+                invocation -> invocation.getArgument(0)
+        );
+
+        GroupDecisionAcknowledgmentResult result =
+                groupDecisionService.acknowledgeDecision(
+                        groupId,
+                        decisionId,
+                        " Kelly "
+                );
+
+        assertTrue(result.newlyCreated());
+        assertEquals(
+                decisionId,
+                result.acknowledgment().getDecisionId()
+        );
+        assertEquals(
+                groupId,
+                result.acknowledgment().getGroupId()
+        );
+        assertEquals(
+                "Kelly",
+                result.acknowledgment().getUsername()
+        );
+
+        verify(decisionAcknowledgmentRepository)
+                .save(any());
+
+        verify(decisionEventRepository)
+                .save(any());
+    }
+
+    @Test
+    void repeatedAcknowledgmentReturnsExistingRecord() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Kelly",
+                        "Review the finalized group decision.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        GroupDecisionAcknowledgmentEntity existingAcknowledgment =
+                new GroupDecisionAcknowledgmentEntity(
+                        decisionId,
+                        groupId,
+                        "Kelly",
+                        LocalDateTime.now()
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        setDecisionStatus(
+                decision,
+                GroupDecisionStatus.APPROVED
+        );
+
+        when(
+                decisionAcknowledgmentRequirementRepository
+                        .existsByDecisionIdAndUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(true);
+
+        when(
+                decisionAcknowledgmentRepository
+                        .findByDecisionIdAndUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(existingAcknowledgment));
+
+        GroupDecisionAcknowledgmentResult result =
+                groupDecisionService.acknowledgeDecision(
+                        groupId,
+                        decisionId,
+                        "Kelly"
+                );
+
+        assertFalse(result.newlyCreated());
+        assertEquals(
+                existingAcknowledgment,
+                result.acknowledgment()
+        );
+
+        verify(
+                decisionAcknowledgmentRepository,
+                never()
+        ).save(any());
+
+        verify(
+                decisionEventRepository,
+                never()
+        ).save(any());
+    }
+
+    @Test
+    void nonFinalizedDecisionCannotBeAcknowledged() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Kelly",
+                        "Review the finalized group decision.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        setDecisionStatus(
+                decision,
+                null
+        );
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService
+                                .acknowledgeDecision(
+                                        groupId,
+                                        decisionId,
+                                        "Kelly"
+                                )
+                );
+
+        assertEquals(
+                "Only a finalized decision can be acknowledged",
+                exception.getMessage()
+        );
+
+        verify(
+                decisionAcknowledgmentRepository,
+                never()
+        ).save(any());
+
+        verify(
+                decisionEventRepository,
+                never()
+        ).save(any());
+    }
+
+    @Test
+    void memberOutsideAcknowledgmentSnapshotCannotAcknowledge() {
+
+        Long groupId = 12L;
+        Long decisionId = 91L;
+
+        GroupMemberEntity member =
+                new GroupMemberEntity(
+                        groupId,
+                        "Kelly",
+                        GroupRole.MEMBER
+                );
+
+        GroupDecisionEntity decision =
+                new GroupDecisionEntity(
+                        groupId,
+                        44L,
+                        "Kelly",
+                        "Review the finalized group decision.",
+                        "Tom",
+                        GroupDecisionGovernanceMode.OWNER_LED,
+                        LocalDateTime.now()
+                );
+
+        when(
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                "Kelly"
+                        )
+        ).thenReturn(Optional.of(member));
+
+        when(
+                decisionRepository.findByIdAndGroupId(
+                        decisionId,
+                        groupId
+                )
+        ).thenReturn(Optional.of(decision));
+
+        setDecisionStatus(
+                decision,
+                GroupDecisionStatus.APPROVED
+        );
+
+        when(
+                decisionAcknowledgmentRequirementRepository
+                        .existsByDecisionIdAndUsername(
+                                decisionId,
+                                "Kelly"
+                        )
+        ).thenReturn(false);
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> groupDecisionService
+                                .acknowledgeDecision(
+                                        groupId,
+                                        decisionId,
+                                        "Kelly"
+                                )
+                );
+
+        assertEquals(
+                "You are not required to acknowledge this decision",
+                exception.getMessage()
+        );
+
+        verify(
+                decisionAcknowledgmentRepository,
+                never()
+        ).save(any());
+
+        verify(
+                decisionEventRepository,
+                never()
+        ).save(any());
+    }
+    private void setDecisionStatus(
+            GroupDecisionEntity decision,
+            GroupDecisionStatus status) {
+
+        try {
+            java.lang.reflect.Field statusField =
+                    GroupDecisionEntity.class
+                            .getDeclaredField("status");
+
+            statusField.setAccessible(true);
+            statusField.set(decision, status);
+        } catch (ReflectiveOperationException exception) {
+            throw new RuntimeException(
+                    "Unable to set decision status for test",
+                    exception
+            );
+        }
+    }
     private GroupDecisionEntity createWaitingForTieBreakDecision(
             Long groupId,
             Long decisionId) {

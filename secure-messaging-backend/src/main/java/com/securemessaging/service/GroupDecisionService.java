@@ -1,5 +1,7 @@
 package com.securemessaging.service;
 
+import com.securemessaging.entity.GroupDecisionAcknowledgmentEntity;
+import com.securemessaging.entity.GroupDecisionAcknowledgmentRequirementEntity;
 import com.securemessaging.entity.GroupDecisionEntity;
 import com.securemessaging.entity.GroupDecisionEventEntity;
 import com.securemessaging.entity.GroupDecisionEventType;
@@ -11,6 +13,8 @@ import com.securemessaging.entity.GroupDecisionVoteEntity;
 import com.securemessaging.entity.GroupMemberEntity;
 import com.securemessaging.entity.GroupMessageEntity;
 import com.securemessaging.entity.GroupRole;
+import com.securemessaging.repository.GroupDecisionAcknowledgmentRepository;
+import com.securemessaging.repository.GroupDecisionAcknowledgmentRequirementRepository;
 import com.securemessaging.repository.GroupDecisionEventRepository;
 import com.securemessaging.repository.GroupDecisionRepository;
 import com.securemessaging.repository.GroupMemberEntityRepository;
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GroupDecisionService {
@@ -29,6 +34,10 @@ public class GroupDecisionService {
     private final GroupDecisionRepository decisionRepository;
     private final GroupDecisionEventRepository decisionEventRepository;
     private final GroupDecisionVoteRepository decisionVoteRepository;
+    private final GroupDecisionAcknowledgmentRepository
+            decisionAcknowledgmentRepository;
+    private final GroupDecisionAcknowledgmentRequirementRepository
+            decisionAcknowledgmentRequirementRepository;
     private final GroupMemberEntityRepository groupMemberRepository;
     private final GroupMessageEntityRepository groupMessageRepository;
 
@@ -36,12 +45,20 @@ public class GroupDecisionService {
             GroupDecisionRepository decisionRepository,
             GroupDecisionEventRepository decisionEventRepository,
             GroupDecisionVoteRepository decisionVoteRepository,
+            GroupDecisionAcknowledgmentRepository
+                    decisionAcknowledgmentRepository,
+            GroupDecisionAcknowledgmentRequirementRepository
+                    decisionAcknowledgmentRequirementRepository,
             GroupMemberEntityRepository groupMemberRepository,
             GroupMessageEntityRepository groupMessageRepository) {
 
         this.decisionRepository = decisionRepository;
         this.decisionEventRepository = decisionEventRepository;
         this.decisionVoteRepository = decisionVoteRepository;
+        this.decisionAcknowledgmentRepository =
+                decisionAcknowledgmentRepository;
+        this.decisionAcknowledgmentRequirementRepository =
+                decisionAcknowledgmentRequirementRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMessageRepository = groupMessageRepository;
     }
@@ -359,7 +376,6 @@ public class GroupDecisionService {
             eventDetails =
                     "Owner-led decision withdrawn after member consultation";
         }
-
         decisionEventRepository.save(
                 new GroupDecisionEventEntity(
                         savedDecision.getId(),
@@ -369,6 +385,12 @@ public class GroupDecisionService {
                         eventAt,
                         eventDetails
                 )
+        );
+
+        createAcknowledgmentRequirementSnapshot(
+                groupId,
+                savedDecision.getId(),
+                eventAt
         );
 
         return savedDecision;
@@ -467,6 +489,12 @@ public class GroupDecisionService {
                         eventAt,
                         eventDetails
                 )
+        );
+
+        createAcknowledgmentRequirementSnapshot(
+                groupId,
+                savedDecision.getId(),
+                eventAt
         );
 
         return savedDecision;
@@ -846,6 +874,17 @@ public class GroupDecisionService {
                 )
         );
 
+        if (
+                outcomeStatus == GroupDecisionStatus.APPROVED ||
+                        outcomeStatus == GroupDecisionStatus.REJECTED
+        ) {
+            createAcknowledgmentRequirementSnapshot(
+                    groupId,
+                    savedDecision.getId(),
+                    resolvedAt
+            );
+        }
+
         return savedDecision;
     }
 
@@ -961,8 +1000,270 @@ public class GroupDecisionService {
                 )
         );
 
+        createAcknowledgmentRequirementSnapshot(
+                groupId,
+                savedDecision.getId(),
+                resolvedAt
+        );
+
         return savedDecision;
     }
+
+    private void createAcknowledgmentRequirementSnapshot(
+            Long groupId,
+            Long decisionId,
+            LocalDateTime requiredAt) {
+
+        if (
+                decisionAcknowledgmentRequirementRepository
+                        .existsByDecisionId(decisionId)
+        ) {
+            return;
+        }
+
+        List<GroupDecisionAcknowledgmentRequirementEntity> requirements =
+                groupMemberRepository
+                        .findByGroupId(groupId)
+                        .stream()
+                        .map(
+                                member ->
+                                        new GroupDecisionAcknowledgmentRequirementEntity(
+                                                decisionId,
+                                                groupId,
+                                                member.getUsername(),
+                                                requiredAt
+                                        )
+                        )
+                        .toList();
+
+        decisionAcknowledgmentRequirementRepository
+                .saveAll(requirements);
+    }
+
+
+    @Transactional
+    public GroupDecisionAcknowledgmentResult acknowledgeDecision(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        groupMemberRepository
+                .findByGroupIdAndUsername(
+                        groupId,
+                        normalizedActorUsername
+                )
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "You are not a member of this group"
+                        )
+                );
+
+        GroupDecisionEntity decision =
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Group decision not found"
+                                )
+                        );
+
+        GroupDecisionStatus decisionStatus =
+                decision.getStatus();
+
+        if (
+                decisionStatus != GroupDecisionStatus.APPROVED &&
+                        decisionStatus != GroupDecisionStatus.REJECTED &&
+                        decisionStatus != GroupDecisionStatus.WITHDRAWN
+        ) {
+            throw new RuntimeException(
+                    "Only a finalized decision can be acknowledged"
+            );
+        }
+
+        if (
+                !decisionAcknowledgmentRequirementRepository
+                        .existsByDecisionIdAndUsername(
+                                decisionId,
+                                normalizedActorUsername
+                        )
+        ) {
+            throw new RuntimeException(
+                    "You are not required to acknowledge this decision"
+            );
+        }
+
+        Optional<GroupDecisionAcknowledgmentEntity> existingAcknowledgment =
+                decisionAcknowledgmentRepository
+                        .findByDecisionIdAndUsername(
+                                decisionId,
+                                normalizedActorUsername
+                        );
+
+        if (existingAcknowledgment.isPresent()) {
+            return new GroupDecisionAcknowledgmentResult(
+                    existingAcknowledgment.get(),
+                    false
+            );
+        }
+
+        LocalDateTime acknowledgedAt = LocalDateTime.now();
+
+        GroupDecisionAcknowledgmentEntity acknowledgment =
+                decisionAcknowledgmentRepository.save(
+                        new GroupDecisionAcknowledgmentEntity(
+                                decisionId,
+                                groupId,
+                                normalizedActorUsername,
+                                acknowledgedAt
+                        )
+                );
+
+        decisionEventRepository.save(
+                new GroupDecisionEventEntity(
+                        decisionId,
+                        groupId,
+                        GroupDecisionEventType.ACKNOWLEDGED,
+                        normalizedActorUsername,
+                        acknowledgedAt,
+                        "Decision acknowledged: status=" + decisionStatus
+                )
+        );
+
+        return new GroupDecisionAcknowledgmentResult(
+                acknowledgment,
+                true
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public long getRequiredAcknowledgmentCount(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        validateDecisionReadAccess(
+                groupId,
+                decisionId,
+                actorUsername
+        );
+
+        return decisionAcknowledgmentRequirementRepository
+                .countByDecisionId(decisionId);
+    }
+
+
+    @Transactional(readOnly = true)
+    public long getAcknowledgmentCount(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        validateDecisionReadAccess(
+                groupId,
+                decisionId,
+                actorUsername
+        );
+
+        return decisionAcknowledgmentRepository
+                .countByDecisionId(decisionId);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<GroupDecisionAcknowledgmentEntity>
+    getAcknowledgmentForUser(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        String normalizedActorUsername =
+                validateDecisionReadAccess(
+                        groupId,
+                        decisionId,
+                        actorUsername
+                );
+
+        return decisionAcknowledgmentRepository
+                .findByDecisionIdAndUsername(
+                        decisionId,
+                        normalizedActorUsername
+                );
+    }
+
+    private String validateDecisionReadAccess(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        if (groupId == null) {
+            throw new RuntimeException("Group ID is required");
+        }
+
+        if (decisionId == null) {
+            throw new RuntimeException("Decision ID is required");
+        }
+
+        String normalizedActorUsername =
+                actorUsername == null
+                        ? ""
+                        : actorUsername.trim();
+
+        if (normalizedActorUsername.isBlank()) {
+            throw new RuntimeException(
+                    "Authenticated user is required"
+            );
+        }
+
+        if (
+                groupMemberRepository
+                        .findByGroupIdAndUsername(
+                                groupId,
+                                normalizedActorUsername
+                        )
+                        .isEmpty()
+        ) {
+            throw new RuntimeException(
+                    "You are not a member of this group"
+            );
+        }
+
+        if (
+                decisionRepository
+                        .findByIdAndGroupId(
+                                decisionId,
+                                groupId
+                        )
+                        .isEmpty()
+        ) {
+            throw new RuntimeException(
+                    "Group decision not found"
+            );
+        }
+
+        return normalizedActorUsername;
+    }
+
 
     @Transactional(readOnly = true)
     public List<GroupDecisionEntity> getGroupDecisions(
@@ -1001,4 +1302,3 @@ public class GroupDecisionService {
                 .findByGroupIdOrderByCreatedAtDesc(groupId);
     }
 }
-
