@@ -44,6 +44,7 @@ import com.securemessaging.core.SecureMessagingSystem.DecryptedMessageView;
 import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
+import com.securemessaging.service.BlockedUserService;
 import com.securemessaging.service.InvitationTokenService;
 import com.securemessaging.service.GroupDecisionAcknowledgmentResult;
 import com.securemessaging.service.GroupDecisionService;
@@ -59,6 +60,7 @@ public class MessagingController {
 
     private final DatabaseMessagingService databaseMessagingService;
     private final DatabaseUserService databaseUserService;
+    private final BlockedUserService blockedUserService;
     private final GroupEntityRepository groupRepository;
     private final GroupInvitationRepository groupInvitationRepository;
     private final EmailGroupInvitationRepository emailGroupInvitationRepository;
@@ -74,6 +76,7 @@ public class MessagingController {
 
     public MessagingController(DatabaseMessagingService databaseMessagingService,
                                DatabaseUserService databaseUserService,
+                               BlockedUserService blockedUserService,
                                GroupEntityRepository groupRepository,
                                GroupInvitationRepository groupInvitationRepository,
                                EmailGroupInvitationRepository emailGroupInvitationRepository,
@@ -88,6 +91,7 @@ public class MessagingController {
                                SimpMessagingTemplate messagingTemplate) {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
+        this.blockedUserService = blockedUserService;
         this.groupRepository = groupRepository;
         this.groupInvitationRepository = groupInvitationRepository;
         this.emailGroupInvitationRepository =
@@ -162,6 +166,25 @@ public class MessagingController {
 
         String receiverUsername = request.get("receiver");
         String messageText = request.get("message");
+
+        boolean receiverBlockedSender =
+                blockedUserService.isBlocked(
+                        receiverUsername,
+                        senderUsername);
+
+        boolean senderBlockedReceiver =
+                blockedUserService.isBlocked(
+                        senderUsername,
+                        receiverUsername);
+
+        if (receiverBlockedSender || senderBlockedReceiver) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    Map.of(
+                            "error",
+                            "Direct messaging is unavailable between these users"
+                    )
+            );
+        }
 
         SecureMessagingSystem.User sender =
                 databaseUserService.findDomainUser(senderUsername);
