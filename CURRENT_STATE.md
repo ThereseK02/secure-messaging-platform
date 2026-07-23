@@ -35,10 +35,22 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Browser compromised-password warnings may appear for weak or commonly breached test-account passwords.
 
 ## Direct Messaging
-- Authenticated users can send and receive encrypted direct messages.
-- Received direct messages can be marked as read.
+- Authenticated users can send and receive encrypted direct messages without sharing a group.
+- Unread messages display an `UNREAD` badge and an explicit `Mark as read` control.
+- Selecting an unread message card also marks the message as read.
+- Marking a message as read updates the unread count and persists after refresh.
 - Direct-message attachments can be uploaded and downloaded.
-- Direct messaging and group messaging remain separate workflows.
+- Downloading an attachment does not automatically mark its parent message as read.
+- The Inbox displays `Needs attention: 0` as an AI-ready placeholder; no active AI classifier currently calculates this value.
+- Direct messaging and private-group membership remain separate workflows.
+
+## Platform Access Model
+- Opening the public website does not require an invitation.
+- Normal registration and login do not require an invitation.
+- Authenticated users can create their own private groups and automatically become the group owner.
+- Invitations apply only when a user needs to join another user's private group.
+- An uninvited user cannot see or access another user's private group.
+- Group membership is created only after the invited user explicitly accepts the invitation.
 
 ## Group Messaging
 - Users can create private groups.
@@ -105,29 +117,30 @@ This document summarizes the currently implemented and deployed behavior of the 
 ## Group Decision Governance
 - Eligible text group messages can be converted into persisted decision records.
 - Decision records preserve the source group, source message, source sender, decision-text snapshot, creator, governance mode, status, and creation time.
-- Owner Review and Member Vote governance workflows are implemented.
+- Owner Review, Member Vote, and Owner Led governance workflows are implemented.
 - Owner Review decisions begin with the `PROPOSED` status.
 - Only the group owner can approve or reject an unresolved Owner Review decision.
 - Owner Review Approve and Reject controls remain hidden behind a `Decision actions` control until needed.
 - Member Vote decisions begin with the `PROPOSED` status.
 - Only the group owner can set the voting deadline and open voting.
-- Open-voting controls remain hidden behind a `Decision actions` control until needed.
-- Eligible members can cast a secret ballot for Approve, Reject, or Abstain.
-- Members may change their ballot while voting remains open; only the latest ballot is counted.
-- The interface confirms that a secret ballot was recorded without revealing the selected choice.
-- Individual ballot choices are not displayed in the ordinary group interface.
+- Eligible members can cast secret Approve, Reject, or Abstain ballots.
+- Members may replace their ballot while voting remains open; only the latest ballot is counted.
+- Individual secret-ballot choices are not displayed in the ordinary group interface.
 - Voting cannot be resolved before the configured deadline.
-- The owner resolves voting after the deadline through a `Decision actions` control.
-- Deterministic vote resolution applies quorum and vote-total rules.
-- A tied result enters the `WAITING_FOR_TIE_BREAK` status.
-- The group owner can cast a public deciding vote for Approve or Reject.
-- Tie-break choices remain hidden behind a `Decision actions` control until needed.
-- Approved decisions use the `APPROVED` status.
-- Rejected decisions use the `REJECTED` status.
-- Group members can view the governance mode and current decision status.
-- Decision creation and resolution are broadcast through the group WebSocket topic.
-- Connected group members receive decision updates without requiring a browser refresh.
-- Owner Led governance remains the next governance implementation stage.
+- Deterministic resolution applies quorum and aggregate vote-total rules.
+- Tied voting enters the `WAITING_FOR_TIE_BREAK` status.
+- The group owner can cast a public Approve or Reject tie-break decision.
+- Owner Led decisions support owner-controlled final resolution.
+- Finalized decisions can require and record explicit member acknowledgment.
+- Acknowledgment records are persisted and exposed through the decision workflow.
+- Governance activity is recorded through append-only decision events.
+- Persisted event types include creation, discussion opening, voting opening, ballot submission or replacement, quorum failure, tie-break requirement, final resolution, withdrawal, and acknowledgment.
+- Secret-ballot audit events do not reveal individual ballot choices.
+- Resolution events may preserve aggregate vote totals without exposing individual ballots.
+- Decision creation, resolution, and acknowledgment updates are broadcast through the group WebSocket topic.
+- Connected group members receive governance updates without requiring a browser refresh.
+- A dedicated authorized governance-history interface remains future administrative work.
+
 ## Typing Indicators
 - Group members can see when another member is typing.
 - Typing indicators are scoped to the selected group.
@@ -169,38 +182,49 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Port 22 is opened temporarily for GitHub-hosted runner access and returned to `My IP` after deployment verification.
 
 ## Current Phase Status
-- Group search is complete.
-- Group read and seen status is complete.
-- Group unread counts are complete.
-- Group message edit and delete are complete for eligible user-owned messages.
-- Group message pinning is complete for eligible user-owned messages.
-- Group member role management is complete.
-- Group member removal is complete.
-- Group deletion is complete.
-- Group attachment support is complete for the current workflow.
-- Group typing indicators are complete.
-- Online and offline member presence is complete.
-- Password policy enforcement and compromised-password screening are complete.
-- Authenticated Change Password is complete.
-- Invalid-login and expired-session responses are handled separately.
-- Phase 5 conversation and member tools are complete for the current planned scope.
-- Persisted group decision records are implemented.
+- Group search, read and seen status, unread counts, message actions, member controls, attachments, typing indicators, and presence are complete for the current scope.
+- Password policy enforcement, compromised-password screening, authenticated Change Password, and separated invalid-login and expired-session handling are implemented.
+- Direct messages support explicit `Mark as read` controls and persistent unread-state updates.
+- Direct-message attachment downloads remain independent from read status.
+- Open registration, login, direct messaging, and private-group creation do not require invitations.
+- Joining another user's private group requires an invitation and explicit acceptance.
 - Owner Review governance is implemented, deployed, browser-tested, and accepted.
 - Member Vote governance is implemented, deployed, browser-tested, and accepted.
-- Secret-ballot recording and ballot replacement are implemented.
-- Voting-deadline enforcement and post-deadline resolution are implemented.
-- Tie detection, `WAITING_FOR_TIE_BREAK`, and owner tie-break resolution are implemented.
-- Decision controls are compacted behind `Decision actions` where appropriate.
-- Real-time decision creation and resolution updates are implemented.
+- Owner Led governance is implemented, deployed, browser-tested, and accepted.
+- Secret-ballot recording, ballot replacement, voting deadlines, quorum resolution, tie detection, and owner tie-break resolution are implemented.
+- Explicit decision acknowledgments are implemented.
+- Append-only governance audit events are persisted.
+- Secret-ballot audit events preserve ballot secrecy.
+- Governance updates are delivered through the existing group WebSocket workflow.
 - The corrected GitHub Actions EC2 deployment workflow is implemented and tested.
+- The Inbox includes an AI-ready `Needs attention` interface location, but AI classification is not yet active.
+
+## AI Readiness and Roadmap
+- AI-assisted attention detection may populate the existing `Needs attention` count.
+- AI summaries may cover direct messages, group discussions, and governance activity.
+- AI search may use semantic retrieval, embeddings, vector search, and Retrieval-Augmented Generation.
+- An AI assistant may support drafting, conversation understanding, meeting notes, unresolved-question detection, and suggested next actions.
+- Smart classification may identify topics, urgency, tasks, deadlines, decisions, and follow-up requests.
+- User-directory and contact search may be improved through authorized username, name, organization, role, and contact discovery.
+- AI responses must be restricted to information the requesting user is authorized to access.
+- AI-generated results should identify supporting messages and remain reviewable by users.
+- AI features must not reveal secret ballots or perform owner-, administrator-, or governance-restricted actions.
+- Initial AI processing may use authenticated REST requests or controlled polling.
+- An optional AI-specific WebSocket or server-push channel may be added if polling is insufficient for streaming responses, long-running summaries, or live classification updates.
+- Any AI-specific transport should complement rather than replace the existing STOMP/SockJS group update system.
 
 ## Planned Next Work
-- Complete the Owner Led governance workflow
-- Add explicit member acknowledgment for selected finalized decisions
-- Expand append-only decision audit history and authorized governance-history views
+- Begin the AI subsystem with attention detection and a real `Needs attention` calculation
+- Implement secure AI summaries for authorized conversations
+- Design AI search and Retrieval-Augmented Generation with permission-aware retrieval
+- Add a controlled AI assistant workflow
+- Add smart classification and action-item extraction
+- Improve the user directory and contact-search workflow
+- Add authorized governance-history views and administrative audit tools
 - Consider aggregate governance analytics without exposing individual secret-ballot choices
-- Password reset and secure reset-token invalidation
-- Multi-Factor Authentication, recovery codes, and passkey support
+- Support attachment-based governance decisions
+- Implement password reset and secure reset-token invalidation
+- Add Multi-Factor Authentication, recovery codes, and passkey support
 
 ## Known Limitations
 - Messages with attachments cannot yet be edited.
@@ -211,5 +235,8 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Login throttling is currently keyed only by normalized username and is not yet distributed across multiple backend instances.
 - Legacy SHA-256 support remains temporarily available until active accounts have migrated to BCrypt.
 - Password recovery, token revocation, Multi-Factor Authentication, recovery codes, and passkeys are not yet implemented.
-- Formal decisions are currently created from eligible text messages; attachment-based decisions, required acknowledgments, Owner Led governance, and full append-only audit-history views remain incomplete.
+- Formal decisions are currently created from eligible text messages; attachment-based decisions remain future work.
+- Append-only governance events are implemented, but a dedicated authorized governance-history interface is not yet available.
+- The `Needs attention` value is currently a frontend placeholder rather than an AI-generated result.
+- AI summaries, AI search/RAG, the AI assistant, smart classification, and improved directory search are not yet implemented.
 - The current GitHub-hosted deployment workflow requires temporary public SSH access to port 22 during deployment.
