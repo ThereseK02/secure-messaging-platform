@@ -35,6 +35,12 @@
 - Real-time group decision creation and resolution events
 - Authenticated Change Password workflow
 - Dashboard navigation to the protected Change Password page
+- Explicit Mark as read control for unread direct messages
+- Owner Led governance mode
+- Decision acknowledgment workflow for finalized decisions
+- Append-only governance audit events
+- Governance event persistence for decision creation, voting, resolution, withdrawal, and acknowledgment
+- AI-ready Needs attention inbox indicator
 
 ### Changed
 - Improved group member management layout
@@ -90,6 +96,9 @@
 - Group member removal is restricted by group role
 - Group deletion is restricted to the group owner
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
+- Clarified that attachment downloads do not automatically mark direct messages as read
+- Documented open registration and direct messaging as independent from private-group invitations
+- Documented private-group access as invitation and explicit-acceptance only
 
 ### Tested
 - Added six automated tests for compromised-password range checking, response parsing, privacy, padding, and service failures
@@ -153,6 +162,12 @@
 - Verified EC2 matched `origin/main` and all Docker Compose services were running
 - Verified the EC2 working tree was clean after removing accidental empty build-output files
 - Verified the production deployment and health endpoint after the governance changes
+- Verified normal registration and login without a group invitation
+- Verified direct messaging between registered users without shared group membership
+- Verified an authenticated user can create a private group and becomes its owner
+- Verified an uninvited user cannot see or access another user's private group
+- Verified direct-message read status updates through the message card and explicit Mark as read control
+- Verified attachment download does not change direct-message unread status
 
 ### Known Limitations
 - Messages with attachments cannot yet be edited
@@ -160,4 +175,4 @@
 - Online presence is stored in application memory and resets when the backend restarts
 - Online status shows activity anywhere in the application, not the group currently being viewed
 - Password recovery, token revocation, Multi-Factor Authentication, recovery codes, distributed login throttling, and passkeys are not yet implemented
-- Owner Review and Member Vote decisions are implemented; complete Owner Led behavior, required acknowledgments, attachment-based decisions, and expanded append-only audit-history views remain incomplete
+- Owner Review, Member Vote, Owner Led governance, decision acknowledgments, and append-only audit events are implemented; attachment-based decisions and authorized governance-history views remain future work
