@@ -22,7 +22,7 @@ public class BlockedUserController {
 
     @PostMapping("/{username}")
     public ResponseEntity<?> blockUser(
-            @PathVariable String username) {
+            @PathVariable("username") String username) {
 
         String currentUsername = getCurrentUsername();
 
@@ -40,7 +40,7 @@ public class BlockedUserController {
 
     @DeleteMapping("/{username}")
     public ResponseEntity<?> unblockUser(
-            @PathVariable String username) {
+            @PathVariable("username") String username) {
 
         String currentUsername = getCurrentUsername();
 
@@ -72,7 +72,7 @@ public class BlockedUserController {
 
     @GetMapping("/check/{username}")
     public ResponseEntity<?> checkBlocked(
-            @PathVariable String username) {
+            @PathVariable("username") String username) {
 
         String currentUsername = getCurrentUsername();
 
