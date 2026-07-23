@@ -3713,7 +3713,7 @@ export default function GroupChat() {
                         onClick={() => setShowEmojiPicker((current) => !current)}
                         style={styles.emojiToggleButton}
                     >
-                      {"\uD83D\uDE0A"}Ã‚Â 
+                      {"\uD83D\uDE0A"}
                     </button>
 
                     {showEmojiPicker && (
