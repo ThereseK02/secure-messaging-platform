@@ -42,6 +42,8 @@ export default function GroupChat() {
       useState({});
   const [castingVoteDecisionId, setCastingVoteDecisionId] =
       useState(null);
+  const [acknowledgingDecisionId, setAcknowledgingDecisionId] =
+      useState(null);
   const [recordedBallotDecisionIds, setRecordedBallotDecisionIds] =
       useState({});
   const [openDecisionActionsId, setOpenDecisionActionsId] = useState(null);
@@ -71,10 +73,10 @@ export default function GroupChat() {
   const [showGroups, setShowGroups] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiOptions = [
-    "😀", "😂", "😊", "😍", "🥰", "😎", "🤔", "😭",
-    "👍", "👏", "🙏", "💪", "❤️", "💙", "✨", "🔥",
-    "🎉", "🥳", "🎁", "🎀", "💝", "💐", "🧸", "🍫",
-    "💌", "💎", "🌟", "✅", "🔒", "🔐", "🛡️", "💬"
+    "Ã°Å¸Ëœâ‚¬", "Ã°Å¸Ëœâ€š", "Ã°Å¸ËœÅ ", "Ã°Å¸ËœÂ", "Ã°Å¸Â¥Â°", "Ã°Å¸ËœÅ½", "Ã°Å¸Â¤â€", "Ã°Å¸ËœÂ­",
+    "Ã°Å¸â€˜Â", "Ã°Å¸â€˜Â", "Ã°Å¸â„¢Â", "Ã°Å¸â€™Âª", "Ã¢ÂÂ¤Ã¯Â¸Â", "Ã°Å¸â€™â„¢", "Ã¢Å“Â¨", "Ã°Å¸â€Â¥",
+    "Ã°Å¸Å½â€°", "Ã°Å¸Â¥Â³", "Ã°Å¸Å½Â", "Ã°Å¸Å½â‚¬", "Ã°Å¸â€™Â", "Ã°Å¸â€™Â", "Ã°Å¸Â§Â¸", "Ã°Å¸ÂÂ«",
+    "Ã°Å¸â€™Å’", "Ã°Å¸â€™Å½", "Ã°Å¸Å’Å¸", "Ã¢Å“â€¦", "Ã°Å¸â€â€™", "Ã°Å¸â€Â", "Ã°Å¸â€ºÂ¡Ã¯Â¸Â", "Ã°Å¸â€™Â¬"
   ];
 
   function addEmoji(emoji) {
@@ -759,6 +761,70 @@ export default function GroupChat() {
     }
   }
 
+  async function acknowledgeGroupDecision(decision) {
+    if (!selectedGroupId) {
+      showNotification(
+          "error",
+          "Please select a group first"
+      );
+      return;
+    }
+
+    if (!decision?.decisionId) {
+      showNotification(
+          "error",
+          "Group decision information is unavailable"
+      );
+      return;
+    }
+
+    if (
+        decision.status !== "APPROVED" &&
+        decision.status !== "REJECTED" &&
+        decision.status !== "WITHDRAWN"
+    ) {
+      showNotification(
+          "error",
+          "Only a finalized decision can be acknowledged"
+      );
+      return;
+    }
+
+    if (decision.acknowledgedByCurrentUser === true) {
+      showNotification(
+          "success",
+          "You already acknowledged this decision"
+      );
+      return;
+    }
+
+    try {
+      setAcknowledgingDecisionId(decision.decisionId);
+
+      const response = await api.post(
+          `/api/groups/${selectedGroupId}/decisions/${decision.decisionId}/acknowledgments`
+      );
+
+      await loadGroupDecisions(selectedGroupId);
+
+      showNotification(
+          "success",
+          response.data?.newlyCreated === false
+              ? "You already acknowledged this decision"
+              : "Decision acknowledged"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showNotification(
+          "error",
+          error.response?.data?.error ||
+              "Failed to acknowledge group decision"
+      );
+    } finally {
+      setAcknowledgingDecisionId(null);
+    }
+  }
   async function loadGroupAttachments(groupId = selectedGroupId) {
     if (!groupId) return;
 
@@ -1805,6 +1871,13 @@ export default function GroupChat() {
 
           if (
               groupEvent.type ===
+              "GROUP_DECISION_ACKNOWLEDGED"
+          ) {
+            loadGroupDecisions(selectedGroupId);
+            return;
+          }
+          if (
+              groupEvent.type ===
               "GROUP_DECISION_CREATED"
           ) {
             loadGroupDecisions(selectedGroupId);
@@ -2691,6 +2764,89 @@ export default function GroupChat() {
                                                   )}
                                                 </span>
 
+                                                {(
+                                                    messageDecision.status ===
+                                                        "APPROVED" ||
+                                                    messageDecision.status ===
+                                                        "REJECTED" ||
+                                                    messageDecision.status ===
+                                                        "WITHDRAWN"
+                                                ) && (
+                                                    <div
+                                                        style={
+                                                          styles.decisionAcknowledgmentPanel
+                                                        }
+                                                    >
+                                                      {Number(
+                                                          messageDecision.requiredAcknowledgmentCount
+                                                      ) > 0 ? (
+                                                          <span
+                                                              style={
+                                                                styles.decisionAcknowledgmentProgress
+                                                              }
+                                                          >
+                                                            Acknowledged by{" "}
+                                                            {Number(
+                                                                messageDecision.acknowledgmentCount
+                                                            ) || 0}{" "}
+                                                            of{" "}
+                                                            {Number(
+                                                                messageDecision.requiredAcknowledgmentCount
+                                                            ) || 0}
+                                                          </span>
+                                                      ) : (
+                                                          <span
+                                                              style={
+                                                                styles.decisionAcknowledgmentUnavailable
+                                                              }
+                                                          >
+                                                            Acknowledgment tracking unavailable
+                                                          </span>
+                                                      )}
+
+                                                      {messageDecision
+                                                          .acknowledgmentRequiredForCurrentUser ===
+                                                          true && (
+                                                          <button
+                                                              type="button"
+                                                              style={{
+                                                                ...styles.decisionAcknowledgmentButton,
+                                                                ...(
+                                                                    messageDecision
+                                                                        .acknowledgedByCurrentUser ===
+                                                                        true
+                                                                        ? styles.decisionAcknowledgmentButtonDisabled
+                                                                        : {}
+                                                                ),
+                                                              }}
+                                                              onClick={(event) => {
+                                                                event.stopPropagation();
+
+                                                                acknowledgeGroupDecision(
+                                                                    messageDecision
+                                                                );
+                                                              }}
+                                                              disabled={
+                                                                messageDecision
+                                                                    .acknowledgedByCurrentUser ===
+                                                                    true ||
+                                                                acknowledgingDecisionId ===
+                                                                    messageDecision.decisionId
+                                                              }
+                                                          >
+                                                            {acknowledgingDecisionId ===
+                                                            messageDecision.decisionId
+                                                                ? "Acknowledging..."
+                                                                : messageDecision
+                                                                      .acknowledgedByCurrentUser ===
+                                                                  true
+                                                                  ? "Acknowledged"
+                                                                  : "Acknowledge"}
+                                                          </button>
+                                                      )}
+                                                    </div>
+                                                )}
+
                                                 {currentGroupRole === "OWNER" &&
                                                     messageDecision.governanceMode ===
                                                         "OWNER_REVIEW" &&
@@ -3371,7 +3527,7 @@ export default function GroupChat() {
                                           onClick={() => downloadGroupAttachment(attachment)}
                                           title="Download attachment"
                                       >
-                                        <span style={styles.groupAttachmentIcon}>📎</span>
+                                        <span style={styles.groupAttachmentIcon}>Ã°Å¸â€œÅ½</span>
 
                                         <span style={styles.groupAttachmentText}>
                                             <span style={styles.groupAttachmentName}>
@@ -3466,14 +3622,14 @@ export default function GroupChat() {
                                                     style={styles.messageActionsHint}
                                                     aria-hidden="true"
                                                 >
-                                                  ⋯
+                                                  Ã¢â€¹Â¯
                                                 </span>
                                             )}
 
                                         {msg.seenCount !== undefined && msg.memberCount !== undefined && (
                                             <p style={styles.seenStatus}>
                                               Seen by {msg.seenCount} of {msg.memberCount}
-                                              {msg.editedAt && " · edited"}
+                                              {msg.editedAt && " Ã‚Â· edited"}
                                             </p>
                                         )}
                                       </div>
@@ -3532,7 +3688,7 @@ export default function GroupChat() {
                         onClick={() => setShowEmojiPicker((current) => !current)}
                         style={styles.emojiToggleButton}
                     >
-                      😊
+                      Ã°Å¸ËœÅ 
                     </button>
 
                     {showEmojiPicker && (
@@ -3554,7 +3710,7 @@ export default function GroupChat() {
                   <div style={styles.messageButtonColumn}>
                     <div style={styles.groupAttachmentInputRow}>
                       <label style={styles.groupAttachmentUploadLabel}>
-                        📎 Choose file
+                        Ã°Å¸â€œÅ½ Choose file
                         <input
                             ref={groupAttachmentInputRef}
                             type="file"
@@ -4260,6 +4416,40 @@ messageCard: {
     fontSize: "11px",
     fontWeight: "700",
   },
+  decisionAcknowledgmentPanel: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "7px",
+    width: "100%",
+    marginTop: "3px",
+  },
+  decisionAcknowledgmentProgress: {
+    color: "#cbd5e1",
+    fontSize: "11px",
+    fontWeight: "700",
+  },
+  decisionAcknowledgmentUnavailable: {
+    color: "#94a3b8",
+    fontSize: "11px",
+    fontStyle: "italic",
+  },
+  decisionAcknowledgmentButton: {
+    border: "1px solid #d6c6a8",
+    borderRadius: "8px",
+    padding: "5px 10px",
+    backgroundColor: "#0f172a",
+    color: "#d6c6a8",
+    fontSize: "11px",
+    fontWeight: "800",
+    cursor: "pointer",
+  },
+  decisionAcknowledgmentButtonDisabled: {
+    borderColor: "#475569",
+    color: "#94a3b8",
+    cursor: "default",
+    opacity: 0.8,
+  },
   messageDecisionActions: {
     display: "flex",
     alignItems: "center",
@@ -4793,4 +4983,3 @@ refreshButton: {
   },
 
 };
-

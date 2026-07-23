@@ -1175,6 +1175,25 @@ public class GroupDecisionService {
 
 
     @Transactional(readOnly = true)
+    public boolean isAcknowledgmentRequiredForUser(
+            Long groupId,
+            Long decisionId,
+            String actorUsername) {
+
+        String normalizedActorUsername =
+                validateDecisionReadAccess(
+                        groupId,
+                        decisionId,
+                        actorUsername
+                );
+
+        return decisionAcknowledgmentRequirementRepository
+                .existsByDecisionIdAndUsername(
+                        decisionId,
+                        normalizedActorUsername
+                );
+    }
+    @Transactional(readOnly = true)
     public long getAcknowledgmentCount(
             Long groupId,
             Long decisionId,

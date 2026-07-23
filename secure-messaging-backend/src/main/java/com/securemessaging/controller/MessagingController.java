@@ -1479,8 +1479,30 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
                                 );
 
                                 item.put(
+
+                                        "acknowledgmentRequiredForCurrentUser",
+
+                                        groupDecisionService
+
+                                                .isAcknowledgmentRequiredForUser(
+
+                                                        groupId,
+
+                                                        decision.getId(),
+
+                                                        currentUsername
+
+                                                )
+
+                                );
+
+
+                                item.put(
+
                                         "acknowledgedByCurrentUser",
+
                                         currentUserAcknowledgment != null
+
                                 );
 
                                 item.put(
@@ -2717,4 +2739,3 @@ public ResponseEntity<?> sendGroupMessage(@PathVariable("groupId") Long groupId,
             }
 
         }
-
