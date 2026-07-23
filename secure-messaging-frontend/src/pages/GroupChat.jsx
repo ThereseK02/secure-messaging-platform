@@ -73,10 +73,37 @@ export default function GroupChat() {
   const [showGroups, setShowGroups] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiOptions = [
-    "Ã°Å¸Ëœâ‚¬", "Ã°Å¸Ëœâ€š", "Ã°Å¸ËœÅ ", "Ã°Å¸ËœÂ", "Ã°Å¸Â¥Â°", "Ã°Å¸ËœÅ½", "Ã°Å¸Â¤â€", "Ã°Å¸ËœÂ­",
-    "Ã°Å¸â€˜Â", "Ã°Å¸â€˜Â", "Ã°Å¸â„¢Â", "Ã°Å¸â€™Âª", "Ã¢ÂÂ¤Ã¯Â¸Â", "Ã°Å¸â€™â„¢", "Ã¢Å“Â¨", "Ã°Å¸â€Â¥",
-    "Ã°Å¸Å½â€°", "Ã°Å¸Â¥Â³", "Ã°Å¸Å½Â", "Ã°Å¸Å½â‚¬", "Ã°Å¸â€™Â", "Ã°Å¸â€™Â", "Ã°Å¸Â§Â¸", "Ã°Å¸ÂÂ«",
-    "Ã°Å¸â€™Å’", "Ã°Å¸â€™Å½", "Ã°Å¸Å’Å¸", "Ã¢Å“â€¦", "Ã°Å¸â€â€™", "Ã°Å¸â€Â", "Ã°Å¸â€ºÂ¡Ã¯Â¸Â", "Ã°Å¸â€™Â¬"
+    "\uD83D\uDE00",
+    "\uD83D\uDE02",
+    "\uD83D\uDE03",
+    "\uD83D\uDE04",
+    "\uD83E\uDD70",
+    "\uD83D\uDE0E",
+    "\uD83E\uDD14",
+    "\uD83D\uDE0A",
+    "\uD83D\uDC4D",
+    "\uD83D\uDC4E",
+    "\uD83D\uDE4F",
+    "\uD83D\uDCAA",
+    "\u2764\uFE0F",
+    "\uD83D\uDC99",
+    "\u2728",
+    "\uD83D\uDCA5",
+    "\uD83C\uDF89",
+    "\uD83E\uDD73",
+    "\uD83C\uDF81",
+    "\uD83C\uDF80",
+    "\uD83D\uDCA1",
+    "\uD83D\uDCAC",
+    "\uD83E\uDDD8",
+    "\uD83E\uDD1D",
+    "\uD83C\uDF0C",
+    "\uD83C\uDF0E",
+    "\uD83C\uDF1F",
+    "\u2705",
+    "\uD83D\uDE80",
+    "\uD83D\uDEE1\uFE0F",
+    "\uD83D\uDCAC"
   ];
 
   function addEmoji(emoji) {
@@ -3527,7 +3554,7 @@ export default function GroupChat() {
                                           onClick={() => downloadGroupAttachment(attachment)}
                                           title="Download attachment"
                                       >
-                                        <span style={styles.groupAttachmentIcon}>Ã°Å¸â€œÅ½</span>
+                                        <span style={styles.groupAttachmentIcon}>{"\uD83D\uDCCE"}</span>
 
                                         <span style={styles.groupAttachmentText}>
                                             <span style={styles.groupAttachmentName}>
@@ -3621,15 +3648,13 @@ export default function GroupChat() {
                                                 <span
                                                     style={styles.messageActionsHint}
                                                     aria-hidden="true"
-                                                >
-                                                  Ã¢â€¹Â¯
-                                                </span>
+                                                >{"\u22EF"}</span>
                                             )}
 
                                         {msg.seenCount !== undefined && msg.memberCount !== undefined && (
                                             <p style={styles.seenStatus}>
                                               Seen by {msg.seenCount} of {msg.memberCount}
-                                              {msg.editedAt && " Ã‚Â· edited"}
+                                              {msg.editedAt && " \u00B7 edited"}
                                             </p>
                                         )}
                                       </div>
@@ -3688,7 +3713,7 @@ export default function GroupChat() {
                         onClick={() => setShowEmojiPicker((current) => !current)}
                         style={styles.emojiToggleButton}
                     >
-                      Ã°Å¸ËœÅ 
+                      {"\uD83D\uDE0A"}Â 
                     </button>
 
                     {showEmojiPicker && (
@@ -3710,7 +3735,8 @@ export default function GroupChat() {
                   <div style={styles.messageButtonColumn}>
                     <div style={styles.groupAttachmentInputRow}>
                       <label style={styles.groupAttachmentUploadLabel}>
-                        Ã°Å¸â€œÅ½ Choose file
+                        {"\uD83D\uDCCE"} Choose file
+
                         <input
                             ref={groupAttachmentInputRef}
                             type="file"
