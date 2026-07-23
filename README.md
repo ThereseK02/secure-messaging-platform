@@ -219,12 +219,12 @@ This architecture provides a clear separation of concerns between the presentati
 
 ```text
 secure-messaging-platform/
-â”œâ”€ secure-messaging-backend/
-â”œâ”€ secure-messaging-frontend/
-â”œâ”€ screenshots/
-â”œâ”€ diagrams/
-â”œâ”€ docker-compose.yml
-â””â”€ README.md
+├─ secure-messaging-backend/
+├─ secure-messaging-frontend/
+├─ screenshots/
+├─ diagrams/
+├─ docker-compose.yml
+└─ README.md
 ```
 
 ---
@@ -518,9 +518,15 @@ The platform supports direct message attachments. Users can send a message with 
 
 Incoming messages are displayed in the user's inbox, allowing users to review received communications in a centralized location. The inbox displays sender information, message content, timestamps, unread status, and attachment download controls when a file is included.
 
-### Unread Message Tracking
+Unread messages display both an `UNREAD` badge and an explicit **Mark as read** control. Users can mark a message as read by selecting the message card or by using the dedicated control.
 
-The inbox includes unread message tracking to help users identify new messages that require attention. Message cards display unread indicators, and the inbox summary shows unread and attention counts.
+Downloading an attachment does not automatically mark its parent message as read. This preserves the distinction between retrieving a file and explicitly reviewing the associated communication.
+
+### Unread Message Tracking and AI Readiness
+
+The inbox includes unread-message tracking to help users identify new communications. Message cards display unread indicators, and the inbox summary shows the current unread count.
+
+The inbox also displays `Needs attention: 0`. This value is currently an AI-ready interface placeholder and is not yet calculated by an active classification model. It reserves a consistent location for future AI-assisted attention detection, prioritization, and follow-up identification.
 
 ### Messaging Screenshots
 
@@ -652,7 +658,7 @@ Clearing the search restores the complete conversation history.
 
 Group messages use a compact actions interface instead of displaying permanent action buttons inside every message bubble.
 
-A small `â‹¯` hint appears when a message is hovered, focused, or opened. Selecting the message displays the available actions.
+A small `⋯` hint appears when a message is hovered, focused, or opened. Selecting the message displays the available actions.
 
 The message bubble also supports keyboard activation with `Enter` or `Space`.
 
@@ -682,7 +688,7 @@ Example:
 
 Edited messages display both the seen count and edited status:
 
-`Seen by 1 of 7 Â· edited`
+`Seen by 1 of 7 · edited`
 
 The message-actions hint and seen-status text share a responsive metadata row. This prevents overlap and keeps normal, edited, pinned, short, and long messages aligned consistently.
 
@@ -1415,24 +1421,32 @@ Remaining improvements include:
 
 #### AI-Powered Intelligence
 
-Future AI-assisted capabilities may improve information discovery, conversation understanding, and organizational productivity while preserving the platform's security and authorization boundaries.
+The Inbox already includes a reserved `Needs attention` count for future AI-assisted message prioritization. The displayed value is currently a frontend placeholder and does not yet represent an active AI classification result.
+
+Future AI-assisted capabilities may improve information discovery, conversation understanding, user discovery, and organizational productivity while preserving the platform's authentication, authorization, encryption, and governance boundaries.
 
 Potential capabilities include:
 
-- **AI Message Summarization:** Allow users to summarize long direct-message conversations, group discussions, and decision-related activity. For example, a user could select **Summarize Conversation** to generate concise key points from hundreds of messages.
-- **AI Search:** Support semantic and natural-language search across messages, attachments, and governance records that the authenticated user is authorized to access. This capability may use embeddings, vector search, and Retrieval-Augmented Generation to locate relevant discussions and produce grounded answers.
+- **AI Attention Detection:** Analyze authorized direct messages, group conversations, and decision activity to identify unresolved questions, follow-up requests, deadlines, urgent communications, and items that may require a response. The resulting count may populate the existing `Needs attention` interface.
+- **AI Message Summarization:** Allow users to summarize long direct-message conversations, group discussions, and decision-related activity.
+- **AI Search and Retrieval-Augmented Generation:** Support semantic and natural-language search across messages, attachments, and governance records that the authenticated user is authorized to access. This capability may use embeddings, vector search, and Retrieval-Augmented Generation to locate relevant discussions and produce grounded answers.
 - **AI Assistant:** Help users draft professional responses, generate meeting notes, summarize conversation context, identify unresolved questions, and suggest next actions without independently taking privileged actions.
-- **Smart Classification:** Automatically categorize authorized messages and attachments by topics such as Security, Deployment, Database, Urgent, or General, and identify action items, decisions, tasks, deadlines, and follow-up requests.
+- **Smart Classification:** Categorize authorized messages and attachments by topics such as Security, Deployment, Database, Urgent, or General, and identify action items, decisions, tasks, deadlines, and follow-up requests.
 - **Decision Discussion Summarization:** Summarize key arguments, unresolved concerns, and discussion outcomes associated with governance decisions.
 - **Action-Item Extraction:** Identify potential tasks, deadlines, responsibilities, and follow-up requests from authorized conversations.
 - **Conversation Topic Detection:** Organize long group histories into meaningful topics without changing the original message records.
+- **Better User Directory and Contact Search:** Improve discovery of registered users through authorized username, name, organization, role, and contact-related search while preventing unauthorized profile exposure.
 - **Secure Retrieval-Augmented Generation:** Ground AI responses only in records the requesting user is permitted to access.
 - **AI Auditability and Transparency:** Clearly identify AI-generated summaries, preserve links to supporting messages, and allow users to verify generated conclusions.
 - **Privacy-Preserving AI Controls:** Prevent AI features from exposing private messages, secret-ballot choices, restricted attachments, or unauthorized governance information.
 
+The initial AI implementation may use authenticated REST requests or controlled polling for background processing and result retrieval. An optional AI-specific WebSocket or server-push channel may be added if polling is not sufficient for long-running summaries, streaming assistant responses, or live classification updates.
+
+This optional AI transport would complement rather than replace the existing STOMP/SockJS WebSocket system already used for group messaging, typing indicators, presence, and governance updates.
+
 These capabilities would demonstrate practical experience with LLM integration, prompt engineering, semantic search, embeddings, vector databases, Retrieval-Augmented Generation, natural-language processing, machine learning, backend API design, and AI-assisted workflow development.
 
-AI-generated content should remain advisory. It must not silently modify messages, cast votes, resolve decisions, expose individual secret ballots, or perform owner- or administrator-only actions.
+AI-generated content should remain advisory. It must not silently modify messages, cast votes, resolve decisions, expose individual secret ballots, invite users, change group membership, or perform owner- or administrator-only actions.
 
 #### User Experience Improvements
 
