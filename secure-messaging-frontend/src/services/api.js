@@ -29,8 +29,7 @@ api.interceptors.response.use(
             requestUrl.includes("/users/register");
 
         const isUnauthorized =
-            error.response?.status === 401 ||
-            error.response?.status === 403;
+            error.response?.status === 401;
 
         if (isUnauthorized && !isPublicAuthRequest) {
             localStorage.removeItem("token");

@@ -10,6 +10,9 @@ export default function SendMessage() {
     const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
     const [showEmojiPanel, setShowEmojiPanel] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [recipientBlocked, setRecipientBlocked] = useState(null);
+    const [isCheckingBlock, setIsCheckingBlock] = useState(false);
+    const [isUpdatingBlock, setIsUpdatingBlock] = useState(false);
     const fileInputRef = useRef(null);
 
     const emojiOptions = [
@@ -32,10 +35,87 @@ export default function SendMessage() {
         }, 3500);
     }
 
+    async function checkRecipientBlockStatus() {
+        const normalizedRecipient = recipient.trim();
+
+        if (!normalizedRecipient) {
+            showNotification("error", "Please enter a recipient username.");
+            return;
+        }
+
+        try {
+            setIsCheckingBlock(true);
+
+            const response = await api.get(
+                `/api/blocked/check/${encodeURIComponent(normalizedRecipient)}`
+            );
+
+            setRecipientBlocked(Boolean(response.data.blocked));
+        } catch (error) {
+            console.error(error);
+
+            const errorMessage =
+                error.response?.data?.error ||
+                "Unable to check block status";
+
+            showNotification("error", errorMessage);
+            setRecipientBlocked(null);
+        } finally {
+            setIsCheckingBlock(false);
+        }
+    }
+
+    async function handleBlockToggle() {
+        const normalizedRecipient = recipient.trim();
+
+        if (!normalizedRecipient) {
+            showNotification("error", "Please enter a recipient username.");
+            return;
+        }
+
+        if (recipientBlocked === null) {
+            await checkRecipientBlockStatus();
+            return;
+        }
+
+        try {
+            setIsUpdatingBlock(true);
+
+            const response = recipientBlocked
+                ? await api.delete(
+                    `/api/blocked/${encodeURIComponent(normalizedRecipient)}`
+                )
+                : await api.post(
+                    `/api/blocked/${encodeURIComponent(normalizedRecipient)}`
+                );
+
+            setRecipientBlocked(!recipientBlocked);
+            showNotification("success", response.data.message);
+        } catch (error) {
+            console.error(error);
+
+            const errorMessage =
+                error.response?.data?.error ||
+                "Unable to update block status";
+
+            showNotification("error", errorMessage);
+        } finally {
+            setIsUpdatingBlock(false);
+        }
+    }
+
     async function handleSend() {
         try {
             if (!recipient.trim() || !message.trim()) {
                 showNotification("error", "Please enter a recipient and a message.");
+                return;
+            }
+
+            if (recipientBlocked === true) {
+                showNotification(
+                    "error",
+                    "Unblock this user before sending a direct message."
+                );
                 return;
             }
 
@@ -88,7 +168,12 @@ export default function SendMessage() {
 
         } catch (error) {
             console.error(error);
-            showNotification("error", "Message sending failed");
+
+            const errorMessage =
+                error.response?.data?.error ||
+                "Message sending failed";
+
+            showNotification("error", errorMessage);
         } finally {
             setIsUploadingAttachment(false);
         }
@@ -205,7 +290,10 @@ export default function SendMessage() {
                     type="text"
                     placeholder="Recipient username"
                     value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
+                    onChange={(e) => {
+                        setRecipient(e.target.value);
+                        setRecipientBlocked(null);
+                    }}
                     style={{
                         width: "100%",
                         boxSizing: "border-box",
@@ -217,6 +305,55 @@ export default function SendMessage() {
                         color: "white"
                     }}
                 />
+
+                <button
+                    type="button"
+                    onClick={handleBlockToggle}
+                    disabled={isCheckingBlock || isUpdatingBlock}
+                    style={{
+                        width: "100%",
+                        marginBottom: "10px",
+                        padding: "9px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #c8b68a",
+                        backgroundColor: "#1e293b",
+                        color: "#f5e6c8",
+                        fontWeight: "bold",
+                        cursor:
+                            isCheckingBlock || isUpdatingBlock
+                                ? "not-allowed"
+                                : "pointer",
+                        opacity:
+                            isCheckingBlock || isUpdatingBlock
+                                ? 0.65
+                                : 1
+                    }}
+                >
+                    {isCheckingBlock
+                        ? "Checking..."
+                        : isUpdatingBlock
+                            ? "Updating..."
+                            : recipientBlocked === true
+                                ? "Unblock User"
+                                : recipientBlocked === false
+                                    ? "Block User"
+                                    : "Check Block Status"}
+                </button>
+
+                {recipientBlocked !== null && (
+                    <p
+                        style={{
+                            margin: "0 0 10px",
+                            color: "#cbd5e1",
+                            fontSize: "13px",
+                            textAlign: "center"
+                        }}
+                    >
+                        {recipientBlocked
+                            ? "You have blocked this user."
+                            : "You have not blocked this user."}
+                    </p>
+                )}
                 <textarea
                     placeholder="Type your encrypted message..."
                     value={message}
