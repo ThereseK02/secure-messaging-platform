@@ -216,7 +216,7 @@ export default function Inbox() {
       <h1
         style={{
           color: "#38bdf8",
-          fontSize: "56px",
+          fontSize: "44px",
           marginBottom: "20px",
         }}
       >
