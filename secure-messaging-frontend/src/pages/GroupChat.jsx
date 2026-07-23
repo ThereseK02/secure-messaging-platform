@@ -3713,7 +3713,7 @@ export default function GroupChat() {
                         onClick={() => setShowEmojiPicker((current) => !current)}
                         style={styles.emojiToggleButton}
                     >
-                      {"\uD83D\uDE0A"}Â 
+                      {"\uD83D\uDE0A"}Ã‚Â 
                     </button>
 
                     {showEmojiPicker && (
@@ -3736,7 +3736,6 @@ export default function GroupChat() {
                     <div style={styles.groupAttachmentInputRow}>
                       <label style={styles.groupAttachmentUploadLabel}>
                         {"\uD83D\uDCCE"} Choose file
-
                         <input
                             ref={groupAttachmentInputRef}
                             type="file"
