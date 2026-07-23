@@ -58,6 +58,8 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
         - [Owner Review Governance](#owner-review-governance)
         - [Member Vote Governance](#member-vote-governance)
         - [Owner Led Governance](#owner-led-governance)
+        - [Append-Only Governance Audit Trail](#append-only-governance-audit-trail)
+            - [Decision Acknowledgment Workflow](#decision-acknowledgment-workflow)
     - [Group Messaging Screenshots](#group-messaging-screenshots)
 - [Deployment Architecture](#deployment-architecture)
 - [Monitoring and Logging](#monitoring-and-logging)
@@ -66,7 +68,7 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 - [Key Contributions](#key-contributions)
 - [Future Improvements](#future-improvements)
     - [Group Conversation Awareness](#group-conversation-awareness)
-    - [Decision Governance and Acknowledgments](#decision-governance-and-acknowledgments)
+    - [Governance Audit Administration](#governance-audit-administration)
     - [Password and Authentication Management](#password-and-authentication-management)
     - [Messaging and Notification Improvements](#messaging-and-notification-improvements)
     - [AI-Powered Intelligence](#ai-powered-intelligence)
@@ -809,6 +811,63 @@ The Approved, Rejected, and Withdrawn Owner Led outcomes have been verified thro
 
 Decision creation and resolution across all three governance modes are persisted in PostgreSQL and synchronized through dedicated group WebSocket events. Connected group members receive proposal, voting, tie-break, discussion, withdrawal, and final-status updates without requiring a browser refresh.
 
+#### Append-Only Governance Audit Trail
+
+The Secure Messaging Platform maintains a persisted, append-only governance audit trail across all three governance modes. Each governance action is stored as a separate event in the `group_decision_events` table instead of replacing earlier events in the normal decision workflow.
+
+This chronological history provides a durable record of how each decision progresses from creation through discussion, voting, resolution, and acknowledgment. Every event preserves the related decision, group, acting username, event type, event timestamp, and descriptive event details.
+
+The audit trail records the following governance event types:
+
+| Event type | Recorded governance activity |
+|---|---|
+| `CREATED` | A structured decision was created from an eligible group message. |
+| `DISCUSSION_OPENED` | An Owner Led decision entered its member-discussion stage. |
+| `VOTING_OPENED` | The group owner configured and opened Member Vote participation. |
+| `VOTE_CAST` | An eligible member submitted an initial secret ballot. |
+| `VOTE_CHANGED` | A member replaced a previous ballot while voting remained open. |
+| `TIE_BREAK_REQUIRED` | Member Vote resolution produced a tie requiring the owner's deciding vote. |
+| `QUORUM_NOT_MET` | The required Member Vote participation threshold was not satisfied. |
+| `APPROVED` | A decision reached an approved final outcome. |
+| `REJECTED` | A decision reached a rejected final outcome. |
+| `WITHDRAWN` | The group owner withdrew an Owner Led decision. |
+| `ACKNOWLEDGED` | A group member individually acknowledged a finalized decision outcome. |
+
+Because each activity is appended as a new event, later governance actions do not erase the earlier history. The audit trail supports accountability, chronological review, troubleshooting, and future authorized reporting and administrative-review capabilities.
+
+Secret-ballot privacy remains separate from ordinary audit presentation. The platform records that Member Vote activity occurred without exposing individual ballot choices through the normal group interface.
+
+##### Decision Acknowledgment Workflow
+
+After a decision reaches the final `APPROVED`, `REJECTED`, or `WITHDRAWN` status, eligible group members can individually acknowledge that they have seen the outcome.
+
+The implemented acknowledgment workflow includes the following behavior:
+
+- Acknowledgment is available only for finalized decisions.
+- Each group member acknowledges the outcome individually.
+- Acknowledging a decision does not change its final status.
+- The interface displays acknowledgment progress as `Acknowledged by x of y`.
+- After the current user acknowledges the decision, the action changes to the non-actionable `Acknowledged` state.
+- The acknowledgment state and total remain persisted after browser refresh.
+- A unique decision-and-username rule prevents the same member from acknowledging the same decision more than once.
+- Each acknowledgment preserves the acknowledging username and acknowledgment timestamp.
+- Connected group members receive a `GROUP_DECISION_ACKNOWLEDGED` WebSocket update.
+- Every successful acknowledgment appends an `ACKNOWLEDGED` event to `group_decision_events`.
+
+The database event-type constraint is version-controlled through Flyway migration `V1__allow_acknowledged_group_decision_events.sql`. The migration adds `ACKNOWLEDGED` to the permitted governance event types while retaining all previously supported event values.
+
+Production testing verified this persisted decision-event sequence:
+
+```text
+CREATED
+  ->
+APPROVED
+  ->
+ACKNOWLEDGED
+```
+
+Browser testing confirmed the acknowledgment state and displayed total. PostgreSQL verification confirmed the corresponding `ACKNOWLEDGED` event and confirmed that no duplicate acknowledgment existed for the same decision and username.
+
 ### Responsive Layout
 
 The Group Chat interface is designed for laptop and monitor screens.
@@ -1318,22 +1377,18 @@ Future refinements may include:
 - More detailed availability states
 - Optional user-controlled presence preferences
 
-#### Decision Governance and Acknowledgments
+#### Governance Audit Administration
 
-Owner Review, Member Vote, and Owner Led decision creation, persistence, resolution, authorization, and real-time synchronization are implemented.
+The platform now includes persisted append-only governance events and individual decision acknowledgments across Owner Review, Member Vote, and Owner Led workflows.
 
-Member Vote includes secret ballots, ballot replacement, voting deadlines, deterministic resolution, tie detection, and owner tie-break resolution.
+Potential future administrative capabilities include:
 
-Owner Led includes owner-controlled decision creation, an open-discussion stage, and persisted Approved, Rejected, or Withdrawn outcomes.
-
-Remaining governance improvements include:
-
-- Require acknowledgment from selected members or all members
-- Record acknowledgment usernames and timestamps
-- Expand append-only decision history and authorized governance audit views
-- Support decision supersession and archival workflows
-- Provide aggregate governance analytics without exposing individual secret-ballot choices
-- Provide authorized export and administrative review tools
+- Configurable acknowledgment requirements for selected members, roles, or all eligible members
+- Decision supersession and archival workflows
+- Authorized governance audit views with role-based access controls
+- Aggregate governance analytics that do not expose individual secret-ballot choices
+- Authorized export and administrative-review tools
+- Retention and archival policies for long-term governance records
 
 #### Password and Authentication Management
 
