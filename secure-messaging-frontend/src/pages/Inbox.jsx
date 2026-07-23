@@ -420,18 +420,41 @@ export default function Inbox() {
                       </p>
 
                       {!message.readByReceiver && (
-                          <span
-                              style={{
-                                backgroundColor: "#38bdf8",
-                                color: "#020617",
-                                padding: "4px 10px",
-                                borderRadius: "999px",
-                                fontSize: "12px",
-                                fontWeight: "800",
-                              }}
-                          >
-                            UNREAD
-                          </span>
+                          <>
+                            <span
+                                style={{
+                                  backgroundColor: "#38bdf8",
+                                  color: "#020617",
+                                  padding: "4px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "12px",
+                                  fontWeight: "800",
+                                }}
+                            >
+                              UNREAD
+                            </span>
+
+                            <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  markMessageAsRead(message.id);
+                                }}
+                                style={{
+                                  backgroundColor: "#0f172a",
+                                  color: "#f5deb3",
+                                  border: "1px solid #d6b37a",
+                                  borderRadius: "999px",
+                                  padding: "5px 11px",
+                                  fontSize: "12px",
+                                  fontWeight: "700",
+                                  cursor: "pointer",
+                                }}
+                                title="Mark this message as read"
+                            >
+                              Mark as read
+                            </button>
+                          </>
                       )}
                     </div>
                     <p
