@@ -227,16 +227,16 @@ export default function Inbox() {
           style={{
             backgroundColor:
               notification.type === "success"
-                ? "rgba(34, 197, 94, 0.12)"
-                : "rgba(239, 68, 68, 0.12)",
+                ? "rgba(30, 58, 138, 0.35)"
+                : "rgba(30, 41, 59, 0.85)",
             border:
               notification.type === "success"
-                ? "1px solid #22c55e"
-                : "1px solid #ef4444",
+                ? "1px solid #38bdf8"
+                : "1px solid #c8b68a",
             color:
               notification.type === "success"
-                ? "#bbf7d0"
-                : "#fecaca",
+                ? "#dbeafe"
+                : "#f5e6c8",
             padding: "12px",
             borderRadius: "10px",
             marginBottom: "20px",

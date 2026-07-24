@@ -110,9 +110,9 @@ localStorage.setItem("username", username);
                 {errorMessage && (
                     <div
                         style={{
-                            backgroundColor: "rgba(239, 68, 68, 0.12)",
-                            border: "1px solid #ef4444",
-                            color: "#fecaca",
+                            backgroundColor: "rgba(30, 41, 59, 0.85)",
+                            border: "1px solid #c8b68a",
+                            color: "#f5e6c8",
                             padding: "12px",
                             borderRadius: "10px",
                             marginBottom: "18px",

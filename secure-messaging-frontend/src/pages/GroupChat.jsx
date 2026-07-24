@@ -2027,14 +2027,14 @@ export default function GroupChat() {
                   maxWidth: "calc(100vw - 32px)",
                   backgroundColor:
                       notification.type === "success"
-                          ? "rgba(34, 197, 94, 0.16)"
-                          : "rgba(239, 68, 68, 0.16)",
+                          ? "rgba(30, 58, 138, 0.35)"
+                          : "rgba(30, 41, 59, 0.85)",
                   border:
                       notification.type === "success"
-                          ? "1px solid #22c55e"
-                          : "1px solid #ef4444",
+                          ? "1px solid #38bdf8"
+                          : "1px solid #c8b68a",
                   color:
-                      notification.type === "success" ? "#bbf7d0" : "#fecaca",
+                      notification.type === "success" ? "#dbeafe" : "#f5e6c8",
                   padding: "12px 14px",
                   borderRadius: "10px",
                   fontWeight: "bold",
