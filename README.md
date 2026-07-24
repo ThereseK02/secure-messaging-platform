@@ -549,6 +549,13 @@ The inbox also displays `Needs attention: 0`. This value is currently an AI-read
 
 ### Messaging Screenshots
 
+#### Direct Message Blocking
+
+![Direct Message Blocking](screenshots/messaging/09_direct_message_blocking.png)
+
+Shows the persisted direct-message block status for a registered recipient. The interface displays **Block User** and confirms that the current user has not blocked the recipient.
+
+
 #### Send Message with Attachment
 
 ![Send Message with Attachment](screenshots/messaging/07_send_message_with_attachment_success.png)
@@ -925,6 +932,13 @@ The group messaging workflow uses stored records for:
 Deleting a group also removes its related messages, read records, invitations, memberships, attachments, and group attachment keys.
 
 ### Group Messaging Screenshots
+
+#### Governance Mode Selection
+
+![Governance Mode Selection](screenshots/group-messaging/22_governance_modes.png)
+
+Shows the decision-creation interface with the three implemented governance modes: **Owner Review**, **Member Vote**, and **Owner Led**.
+
 
 The screenshots below include updated views of the invitation and active-conversation workflows together with selected earlier development milestones. Milestone images are labeled accordingly and may contain controls or visual indicators that were later replaced or refined.
 

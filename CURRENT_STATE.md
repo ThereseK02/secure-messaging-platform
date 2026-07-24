@@ -194,6 +194,8 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Password policy enforcement, compromised-password screening, authenticated Change Password, and separated invalid-login and expired-session handling are implemented.
 - Direct messages support explicit `Mark as read` controls and persistent unread-state updates.
 - Direct-message user blocking is implemented, persisted, deployed, browser-tested, and accepted.
+- README visual documentation includes the deployed direct-message blocking interface.
+- README visual documentation includes the three-mode group governance selector.
 - Block and unblock controls retrieve the persisted backend state for the entered recipient.
 - Direct-message blocking is enforced bidirectionally without revealing which participant created the block.
 - Direct-message attachment downloads remain independent from read status.
