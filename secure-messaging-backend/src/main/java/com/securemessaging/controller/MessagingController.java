@@ -33,6 +33,7 @@ import com.securemessaging.repository.GroupMessageEntityRepository;
 import com.securemessaging.repository.GroupMessageReadRepository;
 import com.securemessaging.repository.UserEntityRepository;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -45,6 +46,7 @@ import com.securemessaging.core.SecureMessagingSystem;
 import com.securemessaging.service.DatabaseUserService;
 import com.securemessaging.service.DatabaseMessagingService;
 import com.securemessaging.service.BlockedUserService;
+import com.securemessaging.service.AttentionClassificationService;
 import com.securemessaging.service.InvitationTokenService;
 import com.securemessaging.service.GroupDecisionAcknowledgmentResult;
 import com.securemessaging.service.GroupDecisionService;
@@ -61,6 +63,7 @@ public class MessagingController {
     private final DatabaseMessagingService databaseMessagingService;
     private final DatabaseUserService databaseUserService;
     private final BlockedUserService blockedUserService;
+    private final AttentionClassificationService attentionClassificationService;
     private final GroupEntityRepository groupRepository;
     private final GroupInvitationRepository groupInvitationRepository;
     private final EmailGroupInvitationRepository emailGroupInvitationRepository;
@@ -77,6 +80,7 @@ public class MessagingController {
     public MessagingController(DatabaseMessagingService databaseMessagingService,
                                DatabaseUserService databaseUserService,
                                BlockedUserService blockedUserService,
+                               AttentionClassificationService attentionClassificationService,
                                GroupEntityRepository groupRepository,
                                GroupInvitationRepository groupInvitationRepository,
                                EmailGroupInvitationRepository emailGroupInvitationRepository,
@@ -92,6 +96,8 @@ public class MessagingController {
         this.databaseMessagingService = databaseMessagingService;
         this.databaseUserService = databaseUserService;
         this.blockedUserService = blockedUserService;
+        this.attentionClassificationService =
+                attentionClassificationService;
         this.groupRepository = groupRepository;
         this.groupInvitationRepository = groupInvitationRepository;
         this.emailGroupInvitationRepository =
@@ -261,16 +267,59 @@ public class MessagingController {
                             sender
                     );
 
-            decryptedMessages.add(
-                    Map.of(
-                            "id", entity.getId(),
-                            "sender", encryptedMessage.getSender(),
-                            "receiver", encryptedMessage.getReceiver(),
-                            "message", decryptedText,
-                            "timestamp", entity.getTimestamp(),
-                            "readByReceiver", entity.isReadByReceiver()
-                    )
+
+            AttentionClassificationService.ClassificationResult
+                    attentionResult =
+                    attentionClassificationService.classify(
+                            decryptedText
+                    );
+
+            Map<String, Object> decryptedMessage =
+                    new LinkedHashMap<>();
+
+            decryptedMessage.put("id", entity.getId());
+            decryptedMessage.put(
+                    "sender",
+                    encryptedMessage.getSender()
             );
+            decryptedMessage.put(
+                    "receiver",
+                    encryptedMessage.getReceiver()
+            );
+            decryptedMessage.put(
+                    "message",
+                    decryptedText
+            );
+            decryptedMessage.put(
+                    "timestamp",
+                    entity.getTimestamp()
+            );
+            decryptedMessage.put(
+                    "readByReceiver",
+                    entity.isReadByReceiver()
+            );
+            decryptedMessage.put(
+                    "attentionAvailable",
+                    attentionResult.available()
+            );
+            decryptedMessage.put(
+                    "needsAttention",
+                    attentionResult.needsAttention()
+            );
+            decryptedMessage.put(
+                    "attentionProbability",
+                    attentionResult.attentionProbability()
+            );
+            decryptedMessage.put(
+                    "attentionThreshold",
+                    attentionResult.threshold()
+            );
+            decryptedMessage.put(
+                    "attentionModelVersion",
+                    attentionResult.modelVersion()
+            );
+
+            decryptedMessages.add(decryptedMessage);
         }
 
         decryptedMessages.sort(
