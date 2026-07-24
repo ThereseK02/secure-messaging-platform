@@ -144,3 +144,56 @@ Next:
 - Connect Spring Boot to that service
 - Add attention metadata to the authorized inbox response
 - Replace the hard-coded frontend attention count
+
+## Internal Inference API
+
+The local FastAPI service loads the trained attention model once during application startup.
+
+Available endpoints:
+
+- `GET /health` reports service and model availability.
+- `POST /classify` returns advisory attention metadata for authorized message text.
+
+The classification endpoint requires the `X-Internal-API-Key` header.
+
+The internal key is supplied through the `AI_INTERNAL_API_KEY` environment variable and is never stored in source control.
+
+Start the service locally:
+
+```powershell
+$env:AI_INTERNAL_API_KEY = "local-development-key"
+
+python -m uvicorn `
+  attention_api:app `
+  --app-dir .\secure-messaging-ai\src `
+  --host 127.0.0.1 `
+  --port 8090
+```
+
+Example authorized request:
+
+```powershell
+$headers = @{
+  "X-Internal-API-Key" = "local-development-key"
+}
+
+$body = @{
+  message = "Please investigate the failed deployment."
+  threshold = 0.50
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://127.0.0.1:8090/classify" `
+  -Headers $headers `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+Local validation confirmed:
+
+- Health endpoint availability
+- Successful attention classification
+- Successful normal-message classification
+- Rejection of requests without the internal API key
+- Graceful service startup and shutdown
