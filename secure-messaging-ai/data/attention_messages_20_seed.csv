@@ -1,0 +1,21 @@
+﻿message,label,category
+"Can you review the deployment logs before noon?",1,follow_up
+"The production server is down and users cannot log in.",1,urgent
+"Please respond by Friday with your decision.",1,deadline
+"Did you complete the database backup?",1,question
+"We still need approval before releasing this change.",1,unresolved
+"Call me immediately. This is an emergency.",1,urgent
+"Could you send the updated report today?",1,follow_up
+"The payment deadline expires tomorrow.",1,deadline
+"Why did the deployment fail again?",1,question
+"Please confirm that you received this message.",1,follow_up
+"Thank you for your help.",0,normal
+"The deployment completed successfully.",0,normal
+"I reviewed the document.",0,normal
+"That sounds good to me.",0,normal
+"The meeting notes are attached.",0,normal
+"Welcome to the group.",0,normal
+"I agree with the proposed approach.",0,normal
+"The application is running normally.",0,normal
+"Here is the information you requested.",0,normal
+"Have a good evening.",0,normal

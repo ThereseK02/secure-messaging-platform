@@ -1,0 +1,55 @@
+message,label,category,predicted_label,attention_probability,correct,error_type
+The security certificate expires this week.,1,deadline,0,0.49946678786139453,False,false_negative
+The deployment cannot continue without the environment variable.,1,unresolved,0,0.49113503424712585,False,false_negative
+The production API is currently unavailable.,1,urgent,0,0.49093870637590303,False,false_negative
+No one has accepted responsibility for this task.,1,unresolved,0,0.49044137490686973,False,false_negative
+Users are reporting that messages are disappearing.,1,urgent,0,0.49042821530045183,False,false_negative
+The support request has been waiting for three days.,1,unresolved,0,0.48529170918475983,False,false_negative
+The API continues to return errors.,1,urgent,0,0.4776843064663901,False,false_negative
+The database storage is almost full.,1,urgent,0,0.4584686295613726,False,false_negative
+Has the incident been resolved?,1,question,0,0.45393536950469365,False,false_negative
+Are you available to review the change?,1,question,0,0.4417283323637988,False,false_negative
+The access request has not been approved.,1,unresolved,0,0.4412057160027144,False,false_negative
+The production outage has not been resolved.,1,urgent,0,0.4356438371345544,False,false_negative
+We have not received the requested evidence.,1,unresolved,0,0.43082688228874083,False,false_negative
+The registration deadline is approaching.,1,deadline,0,0.4239941842927335,False,false_negative
+Please check whether the backup completed successfully.,1,follow_up,0,0.4199260534405536,False,false_negative
+The pull request has not yet been reviewed.,1,unresolved,0,0.41719223816984,False,false_negative
+The application is returning errors for every login attempt.,1,urgent,0,0.41432238893194173,False,false_negative
+Did the customer receive the response?,1,question,0,0.38633507169351283,False,false_negative
+Have the permissions been verified?,1,question,0,0.32810667086247647,False,false_negative
+I hope you have a pleasant weekend.,0,normal,1,0.7559920132185765,False,false_positive
+Therese is responsible for the deployment.,0,normal,1,0.6668964370179853,False,false_positive
+The release will proceed as planned.,0,normal,1,0.6604452649123207,False,false_positive
+Thank you for your help.,0,normal,1,0.6520373001009225,False,false_positive
+I completed the database migration.,0,normal,1,0.6485116999246928,False,false_positive
+Users can access their accounts again.,0,normal,1,0.6267195620338332,False,false_positive
+The current server status is healthy.,0,normal,1,0.6247805971550867,False,false_positive
+The contract review is complete.,0,normal,1,0.618049817861588,False,false_positive
+The remaining security checks are complete.,0,normal,1,0.612757190923351,False,false_positive
+The production outage has been resolved.,0,normal,1,0.6072835847634548,False,false_positive
+The security review is complete.,0,normal,1,0.6012849955495079,False,false_positive
+Here is the information you requested.,0,normal,1,0.5988283102675054,False,false_positive
+The user permissions were verified.,0,normal,1,0.5972127973882978,False,false_positive
+The API is no longer unavailable.,0,normal,1,0.5930374811884793,False,false_positive
+The deployment finished before the maintenance window.,0,normal,1,0.5903042353429487,False,false_positive
+I am available to review the change.,0,normal,1,0.587945479853861,False,false_positive
+Welcome to the group.,0,normal,1,0.5796364635717944,False,false_positive
+The production API is available again.,0,normal,1,0.5684959039329807,False,false_positive
+The permissions have been verified.,0,normal,1,0.5610153274690926,False,false_positive
+The failed health check now passes.,0,normal,1,0.5566474916324091,False,false_positive
+The server is back online.,0,normal,1,0.5557202701390775,False,false_positive
+The customer received an update.,0,normal,1,0.5513131103574731,False,false_positive
+The server restarted without errors.,0,normal,1,0.5378910641901101,False,false_positive
+The production issue has been resolved.,0,normal,1,0.5345875694460743,False,false_positive
+The database backup completed successfully.,0,normal,1,0.5325761766715389,False,false_positive
+I agree with the proposed approach.,0,normal,1,0.5285604627438304,False,false_positive
+The response was sent before the end of the day.,0,normal,1,0.5251304242952662,False,false_positive
+That sounds good to me.,0,normal,1,0.5250767629859268,False,false_positive
+The attachment is included in the message.,0,normal,1,0.518248685635605,False,false_positive
+The attachment contains the final version.,0,normal,1,0.5173105250553884,False,false_positive
+The team approved the release.,0,normal,1,0.5168566691433443,False,false_positive
+The login service is available again.,0,normal,1,0.5146153770835903,False,false_positive
+Messages are being delivered normally.,0,normal,1,0.5096806988087513,False,false_positive
+The incident call concluded without further action.,0,normal,1,0.5075877931013013,False,false_positive
+The service has been restored.,0,normal,1,0.5026515403060273,False,false_positive

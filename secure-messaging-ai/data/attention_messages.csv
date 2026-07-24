@@ -1,0 +1,201 @@
+message,label,category
+The database backup completed successfully.,0,normal
+We still need approval before releasing this change.,1,unresolved
+Please investigate the failed authentication requests.,1,follow_up
+The security incident has been closed.,0,normal
+The registration deadline is approaching.,1,deadline
+The deployment is still blocked.,1,unresolved
+The user permissions were verified.,0,normal
+The report was submitted before the deadline.,0,normal
+The invoice was approved before Friday.,0,normal
+We need a decision about the deployment strategy.,1,unresolved
+The application needs to be restarted before the next test.,1,deadline
+Therese is responsible for the deployment.,0,normal
+The deployment block was removed.,0,normal
+The unusual activity was investigated and cleared.,0,normal
+The API is no longer unavailable.,0,normal
+The backup was verified before midnight.,0,normal
+Could you send the updated report today?,1,follow_up
+The API is responding normally.,0,normal
+Please complete the access review by Thursday.,1,deadline
+I received your message.,0,normal
+The invoice requires approval before Friday.,1,deadline
+The account was restored this morning.,0,normal
+Please upload the missing documentation.,1,follow_up
+The question was answered during the meeting.,0,normal
+The meeting ended at three o'clock.,0,normal
+I agree with the proposed approach.,0,normal
+The production server is down and users cannot log in.,1,urgent
+The attachment contains the final version.,0,normal
+The deployment must finish before the maintenance window.,1,deadline
+Who is responsible for the deployment?,1,question
+Can you review the deployment logs before noon?,1,follow_up
+The customer needs an answer before the end of the day.,1,deadline
+The incident was closed after testing.,0,normal
+The application is running normally.,0,normal
+The login service is available again.,0,normal
+Users still cannot access their accounts.,1,urgent
+Did the customer receive the response?,1,question
+Should we postpone the release?,1,question
+The incident is fully resolved.,0,normal
+I completed the database migration.,0,normal
+Have a good evening.,0,normal
+The pending request was approved.,0,normal
+The production API is currently unavailable.,1,urgent
+Everything looks correct.,0,normal
+The application must be submitted tonight.,1,deadline
+The customer received an update.,0,normal
+The security review is complete.,0,normal
+Why has the application not been deployed yet?,1,question
+Please verify the deployment status.,1,follow_up
+The application is returning errors for every login attempt.,1,urgent
+The incident remains unresolved.,1,unresolved
+The security review was completed early.,0,normal
+The deployment cannot continue without the environment variable.,1,unresolved
+The response is required by the end of the day.,1,deadline
+The access request has not been approved.,1,unresolved
+Please acknowledge the final governance decision.,1,follow_up
+Please review the attached evidence.,1,follow_up
+The invoice was approved and paid.,0,normal
+The application was submitted successfully.,0,normal
+The customer received the requested response.,0,normal
+The configuration problem was fixed.,0,normal
+The security certificate expires this week.,1,deadline
+Who can help resolve the failed workflow?,1,question
+The workflow finished successfully.,0,normal
+Call me immediately. This is an emergency.,1,urgent
+The configuration problem remains open.,1,unresolved
+The payment deadline expires tomorrow.,1,deadline
+The attachment is included in the message.,0,normal
+The project status was updated this afternoon.,0,normal
+Why is the API still unavailable?,1,question
+Did you complete the database backup?,1,question
+The backup must be verified before midnight.,1,deadline
+The task owner has been assigned.,0,normal
+Can you send the missing attachment?,1,question
+The investigation has not been completed.,1,unresolved
+The requested evidence is still missing.,1,unresolved
+Please respond as soon as possible.,1,urgent
+Where is the missing attachment?,1,question
+The login service remains unavailable.,1,urgent
+The pull request has not yet been reviewed.,1,unresolved
+The certificate was renewed successfully.,0,normal
+The support request has been waiting for three days.,1,unresolved
+The deadline was extended until next month.,0,normal
+The release will proceed as planned.,0,normal
+The open incident status was updated.,0,normal
+I reviewed the document.,0,normal
+The pull request has already been reviewed.,0,normal
+I have already reviewed the deployment logs.,0,normal
+I reviewed the attached evidence.,0,normal
+I hope you have a pleasant weekend.,0,normal
+The release remains blocked until the security review is complete.,1,unresolved
+Please provide an update on the open incident.,1,follow_up
+The login service is still unavailable after the restart.,1,urgent
+Can you update the project status this afternoon?,1,follow_up
+Please confirm whether the meeting time still works.,1,follow_up
+The remaining security checks are complete.,0,normal
+The payment service is operating normally.,0,normal
+Can you join the incident call in ten minutes?,1,urgent
+The environment variable was configured correctly.,0,normal
+The report is due tomorrow.,1,deadline
+Please investigate the unusual account activity.,1,urgent
+The application was deployed successfully.,0,normal
+Please send the corrected configuration.,1,follow_up
+Please contact the customer with an update.,1,follow_up
+The payment service remains down.,1,urgent
+Please complete the remaining security checks.,1,follow_up
+Who will complete the server migration?,1,question
+The meeting notes are attached.,0,normal
+No one has accepted responsibility for this task.,1,unresolved
+Please investigate the failed health check.,1,follow_up
+The final decision has already been made.,0,normal
+The requested attachment was sent earlier.,0,normal
+The missing documentation was uploaded.,0,normal
+The production outage has been resolved.,0,normal
+The payment was processed yesterday.,0,normal
+The security review must be completed this week.,1,deadline
+Thank you for your help.,0,normal
+We need your approval before purchasing the service.,1,unresolved
+The requested evidence was received.,0,normal
+Please confirm that you received this message.,1,follow_up
+The incident remains open and requires further investigation.,1,unresolved
+The security incident is still active.,1,urgent
+The server is back online.,0,normal
+The database connection was restored.,0,normal
+Can you approve the production release?,1,question
+The invoice must be approved before it can be paid.,1,deadline
+The current server status is healthy.,0,normal
+Please approve or reject the pending request.,1,follow_up
+The failed test has now passed.,0,normal
+Please upload the revised document when it is ready.,1,follow_up
+The investigation was completed.,0,normal
+Please let me know when the issue is resolved.,1,follow_up
+Please check whether the backup completed successfully.,1,follow_up
+Users can access their accounts again.,0,normal
+The contract review is complete.,0,normal
+Have the permissions been verified?,1,question
+Can you review the contract and provide feedback?,1,follow_up
+The server remains offline.,1,urgent
+Could you verify the new user's permissions?,1,follow_up
+When will the report be completed?,1,question
+I am available to review the change.,0,normal
+The registration deadline was extended.,0,normal
+The customer received the response.,0,normal
+We have not resolved the database connection problem.,1,unresolved
+The report was submitted yesterday.,0,normal
+The evidence was received and archived.,0,normal
+The urgent issue has already been fixed.,0,normal
+The approval is still pending.,1,unresolved
+The updated documentation is now available.,0,normal
+The database storage is almost full.,1,urgent
+The response was sent before the end of the day.,0,normal
+The incident has been resolved.,0,normal
+The support request has been resolved.,0,normal
+Can you verify that the health endpoint is responding?,1,question
+Please reset my account before tomorrow morning.,1,deadline
+The pull request was reviewed and merged.,0,normal
+The certificate was renewed yesterday.,0,normal
+Has the incident been resolved?,1,question
+The team approved the release.,0,normal
+Here is the information you requested.,0,normal
+The deployment finished before the maintenance window.,0,normal
+Can you confirm the current server status?,1,question
+The access request was approved.,0,normal
+The report was completed this morning.,0,normal
+We have not received the requested evidence.,1,unresolved
+Why did the deployment fail again?,1,question
+Messages are still not being delivered.,1,urgent
+Could you explain why the test failed?,1,question
+The failed health check now passes.,0,normal
+We still need someone to review the pull request.,1,unresolved
+The production issue has been resolved.,0,normal
+The final report must be submitted by Monday.,1,deadline
+The production API is available again.,0,normal
+Your access request was approved.,0,normal
+The approval was completed yesterday.,0,normal
+The corrected configuration was sent.,0,normal
+The final decision is required before Monday.,1,deadline
+The server restarted without errors.,0,normal
+Messages are being delivered normally.,0,normal
+The deployment status was verified.,0,normal
+That sounds good to me.,0,normal
+Users are reporting that messages are disappearing.,1,urgent
+Please confirm when the service is restored.,1,follow_up
+Are you available to review the change?,1,question
+The login issue was resolved after the restart.,0,normal
+The production outage has not been resolved.,1,urgent
+The deployment completed successfully.,0,normal
+We are still waiting for the final decision.,1,unresolved
+Please respond by Friday with your decision.,1,deadline
+The incident call concluded without further action.,0,normal
+The certificate will expire in two days.,1,deadline
+The service has been restored.,0,normal
+Welcome to the group.,0,normal
+The permissions have been verified.,0,normal
+Can you confirm who owns this task?,1,question
+The database connection continues to fail.,1,urgent
+The final decision has been recorded.,0,normal
+The access review was completed on Thursday.,0,normal
+The final decision was recorded on Monday.,0,normal
+The API continues to return errors.,1,urgent
