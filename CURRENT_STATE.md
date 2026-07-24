@@ -69,6 +69,9 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Smart autoscroll keeps sent messages visible while avoiding unwanted forced scrolling.
 - Message spacing has been refined for consecutive and different senders.
 - Compact notification toasts appear in the upper-right area of the interface.
+- Success notifications use navy backgrounds, light-blue borders, and pale-blue text.
+- Error, validation, authentication, and denied-action notifications use dark-slate backgrounds with beige borders and text instead of red.
+- The notification palette is deployed, browser-tested, and accepted across direct messaging, group chat, registration, and login.
 
 ## Group Membership and Roles
 - All groups are private and invitation-only.

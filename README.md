@@ -966,6 +966,8 @@ Documents a two-user conversation test used to verify message exchange, responsi
 
 Documents the WebSocket connectivity milestone that introduced real-time group update notifications. The earlier green connection indicator shown in the screenshot is no longer treated as the final interface design.
 
+Current notification styling follows the platform's professional navy, light-blue, dark-slate, and beige palette. Success notifications use navy and light-blue styling, while validation, authentication, and denied-action notifications use dark slate and beige instead of bright green or red.
+
 ---
 
 

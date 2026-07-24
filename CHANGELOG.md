@@ -50,6 +50,7 @@
 - Updated role labels for Owner, Admin, and Member
 - Improved group attachment presentation
 - Improved group notification toast layout and responsiveness
+- Replaced bright green and red notification styling with the platform navy, light-blue, dark-slate, and beige palette
 - Reduced group message vertical spacing
 - Improved spacing between messages from different senders
 - Improved group conversation autoscroll behavior
@@ -126,6 +127,10 @@
 - Verified a valid passphrase registers successfully and authenticates normally
 - Verified the new Gana account stores a 60-character BCrypt hash with the $2a$ prefix
 - Verified registration errors use the application's custom notification styling
+- Verified direct-message send, block, and unblock success notifications use the navy and light-blue palette
+- Verified invalid-login errors use dark-slate and beige styling without red
+- Verified Group Chat success notifications use navy and light-blue styling
+- Verified Group Chat validation errors use dark-slate and beige styling without red
 - Verified direct-message block creation persists in PostgreSQL
 - Verified both communication directions are denied while either participant has created the block
 - Verified blocked direct-message attempts are not persisted
