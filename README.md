@@ -45,6 +45,11 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 - [Welcome Page](#welcome-page)
 - [Authentication Workflow](#authentication-workflow)
 - [Messaging Features](#messaging-features)
+    - [Secure Message Delivery](#secure-message-delivery)
+    - [Direct Message Blocking](#direct-message-blocking)
+    - [Attachment Upload and Download](#attachment-upload-and-download)
+    - [Inbox Management](#inbox-management)
+    - [Unread Message Tracking and AI Readiness](#unread-message-tracking-and-ai-readiness)
 - [Group Messaging](#group-messaging)
     - [Group Creation and Private Membership](#group-creation-and-private-membership)
     - [Invitations for Registered and Unregistered Users](#invitations-for-registered-and-unregistered-users)
@@ -96,6 +101,8 @@ The platform demonstrates full-stack software engineering, cloud deployment, Dev
 - Authenticated Change Password workflow
 
 - Private messaging between registered users
+
+- Persisted direct-message block and unblock controls with bidirectional backend enforcement
 
 - Direct message attachment upload and download
 
@@ -509,6 +516,18 @@ The Secure Messaging Platform enables authenticated users to exchange private me
 ### Secure Message Delivery
 
 Users can compose and send private messages to other registered users through the messaging interface. Messages are transmitted through protected REST API endpoints secured with JWT authentication.
+
+### Direct Message Blocking
+
+Authenticated users can block or unblock another registered user from the direct-message composition interface. The block relationship is persisted in PostgreSQL and remains effective across browser refreshes, new sessions, and application restarts.
+
+The sender can enter a recipient username and use **Check Block Status** to retrieve the current persisted status. The interface then displays either **Block User** or **Unblock User**, together with a clear explanation of the current state.
+
+Direct-message blocking is enforced by the backend in both communication directions. When either participant has blocked the other, neither user can send a direct message across that relationship. The backend returns the neutral response `Direct messaging is unavailable between these users` without revealing which participant created the block.
+
+The frontend also prevents a user from sending to someone they have personally blocked and displays `Unblock this user before sending a direct message.` Changing the recipient clears the previous recipient's frontend status, requiring the application to retrieve the correct status for the newly entered username.
+
+Blocking applies only to direct messaging. It does not remove users from shared private groups, modify group membership, or alter group-governance permissions.
 
 ### Attachment Upload and Download
 

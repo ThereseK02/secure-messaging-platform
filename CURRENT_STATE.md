@@ -40,6 +40,14 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Selecting an unread message card also marks the message as read.
 - Marking a message as read updates the unread count and persists after refresh.
 - Direct-message attachments can be uploaded and downloaded.
+- Authenticated users can check whether they have blocked a registered recipient.
+- Users can block or unblock another registered user from the direct-message composition page.
+- Block relationships are persisted in PostgreSQL and remain effective after refresh, logout and login, and application restart.
+- Direct-message blocking is enforced by the backend in both directions when either participant has blocked the other.
+- Blocked direct-message attempts return the neutral response `Direct messaging is unavailable between these users`.
+- The frontend prevents sending to a user the current user has blocked and displays `Unblock this user before sending a direct message.`
+- Changing the recipient clears the previous recipient's frontend block status before the new status is retrieved.
+- Blocking affects only direct messaging and does not change shared private-group membership or governance permissions.
 - Downloading an attachment does not automatically mark its parent message as read.
 - The Inbox displays `Needs attention: 0` as an AI-ready placeholder; no active AI classifier currently calculates this value.
 - Direct messaging and private-group membership remain separate workflows.
@@ -185,6 +193,9 @@ This document summarizes the currently implemented and deployed behavior of the 
 - Group search, read and seen status, unread counts, message actions, member controls, attachments, typing indicators, and presence are complete for the current scope.
 - Password policy enforcement, compromised-password screening, authenticated Change Password, and separated invalid-login and expired-session handling are implemented.
 - Direct messages support explicit `Mark as read` controls and persistent unread-state updates.
+- Direct-message user blocking is implemented, persisted, deployed, browser-tested, and accepted.
+- Block and unblock controls retrieve the persisted backend state for the entered recipient.
+- Direct-message blocking is enforced bidirectionally without revealing which participant created the block.
 - Direct-message attachment downloads remain independent from read status.
 - Open registration, login, direct messaging, and private-group creation do not require invitations.
 - Joining another user's private group requires an invitation and explicit acceptance.

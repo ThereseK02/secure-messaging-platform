@@ -36,6 +36,9 @@
 - Authenticated Change Password workflow
 - Dashboard navigation to the protected Change Password page
 - Explicit Mark as read control for unread direct messages
+- Persisted direct-message user blocking
+- Direct-message block, unblock, and persisted status-check controls
+- Bidirectional backend enforcement when either participant has blocked the other
 - Owner Led governance mode
 - Decision acknowledgment workflow for finalized decisions
 - Append-only governance audit events
@@ -58,6 +61,8 @@
 - Defined online status as activity anywhere in the Secure Messaging Platform
 - Invalid login credentials now return an unauthorized response
 - Public login failures no longer trigger the expired-session workflow
+- Authenticated `403 Forbidden` responses no longer clear the frontend session or redirect to Login
+- Direct-message send failures display the backend-provided error when available
 - Successful password changes clear the frontend authentication state and redirect to Login
 - Compacted Owner Review, voting setup, vote resolution, and tie-break controls behind `Decision actions`
 - Kept secret-ballot Approve, Reject, and Abstain controls directly available during open voting
@@ -97,6 +102,9 @@
 - Group deletion is restricted to the group owner
 - Group deletion removes related members, messages, read records, attachments, and attachment keys
 - Clarified that attachment downloads do not automatically mark direct messages as read
+- Direct-message blocking derives the blocker identity from the authenticated Spring Security context
+- Direct-message blocking uses a neutral denial response that does not reveal which participant created the block
+- Blocking affects direct messaging only and does not change private-group membership or governance permissions
 - Documented open registration and direct messaging as independent from private-group invitations
 - Documented private-group access as invitation and explicit-acceptance only
 
@@ -118,6 +126,14 @@
 - Verified a valid passphrase registers successfully and authenticates normally
 - Verified the new Gana account stores a 60-character BCrypt hash with the $2a$ prefix
 - Verified registration errors use the application's custom notification styling
+- Verified direct-message block creation persists in PostgreSQL
+- Verified both communication directions are denied while either participant has created the block
+- Verified blocked direct-message attempts are not persisted
+- Verified unblocking removes the persisted relationship
+- Verified direct messaging succeeds after unblocking
+- Verified the frontend retrieves persisted block status after refresh
+- Verified changing recipients clears stale frontend block status
+- Verified a blocking-related `403 Forbidden` response does not log out the authenticated user
 - Added automated tests for login throttling, successful-attempt reset, username normalization, and blank usernames
 - Verified four failed attempts still allow a correct login
 - Verified the fifth failed attempt activates temporary blocking
