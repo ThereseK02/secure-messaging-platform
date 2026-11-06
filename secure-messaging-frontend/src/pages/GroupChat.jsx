@@ -34,6 +34,8 @@ export default function GroupChat() {
       useState(false);
   const [groupDecisions, setGroupDecisions] =
       useState([]);
+  const [activeGroupTab, setActiveGroupTab] = useState("messages");
+  const [pendingDecisionFocusId, setPendingDecisionFocusId] = useState(null);
   const [resolvingDecisionId, setResolvingDecisionId] =
       useState(null);
   const [openingVotingDecisionId, setOpeningVotingDecisionId] =
@@ -1223,12 +1225,34 @@ export default function GroupChat() {
     return searchableText.includes(normalizedGroupMessageSearch);
   });
 
+  const displayedGroupMessages = activeGroupTab === "decisions"
+      ? filteredGroupMessages.filter((msg) => getDecisionForMessage(msg.id))
+      : filteredGroupMessages;
+
   function getDecisionForMessage(messageId) {
     return groupDecisions.find(
         (decision) =>
             String(decision.sourceMessageId) ===
             String(messageId)
     );
+  }
+
+  function openDecisionInMessages(decision) {
+    const sourceMessage = messages.find(
+        (msg) => String(msg.id) === String(decision.sourceMessageId)
+    );
+
+    if (!sourceMessage) {
+      showNotification(
+          "error",
+          "The message linked to this decision is not available"
+      );
+      return;
+    }
+
+    setGroupMessageSearch("");
+    setPendingDecisionFocusId(String(sourceMessage.id));
+    setActiveGroupTab("messages");
   }
 
   function formatDecisionGovernanceMode(mode) {
@@ -1973,6 +1997,19 @@ export default function GroupChat() {
   }, [messages]);
 
   useEffect(() => {
+    if (activeGroupTab !== "messages" || !pendingDecisionFocusId) return;
+
+    const frameId = requestAnimationFrame(() => {
+      document
+          .getElementById(`group-message-${pendingDecisionFocusId}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setPendingDecisionFocusId(null);
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [activeGroupTab, pendingDecisionFocusId]);
+
+  useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [showConversation]);
 
@@ -2171,6 +2208,7 @@ export default function GroupChat() {
                                     }}
                                     onClick={() => {
                                       setSelectedGroupId(String(group.id));
+                                      setActiveGroupTab("messages");
                                       setSelectedGroupName(group.groupName);
                                       setSelectedGroupAdmin(group.createdBy || "");
                                       setGroupMessageSearch("");
@@ -2221,6 +2259,7 @@ export default function GroupChat() {
                     style={styles.backButton}
                     onClick={() => {
                       setShowConversation(false);
+                      setActiveGroupTab("messages");
                       setMessages([]);
                       setGroupDecisions([]);
                       setGroupAttachments([]);
@@ -2463,6 +2502,41 @@ export default function GroupChat() {
                 <p style={styles.groupContext}>
                   Group: {selectedGroupName} (#{selectedGroupId})
                 </p>
+                <div
+                    style={styles.groupTabRow}
+                    role="tablist"
+                    aria-label="Group sections"
+                >
+                  <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeGroupTab === "messages"}
+                      style={{
+                        ...styles.groupTabButton,
+                        ...(activeGroupTab === "messages"
+                            ? styles.groupTabButtonActive
+                            : {}),
+                      }}
+                      onClick={() => setActiveGroupTab("messages")}
+                  >
+                    Messages
+                  </button>
+
+                  <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeGroupTab === "decisions"}
+                      style={{
+                        ...styles.groupTabButton,
+                        ...(activeGroupTab === "decisions"
+                            ? styles.groupTabButtonActive
+                            : {}),
+                      }}
+                      onClick={() => setActiveGroupTab("decisions")}
+                  >
+                    Decisions ({groupDecisions.length})
+                  </button>
+                </div>
                 {decisionMessage && (
                     <section
                         style={styles.decisionGovernancePanel}
@@ -2562,6 +2636,93 @@ export default function GroupChat() {
                     </section>
                 )}
 
+                {activeGroupTab === "decisions" ? (
+                    <section
+                        style={styles.groupDecisionsPanel}
+                        role="tabpanel"
+                        aria-label="Group decisions"
+                    >
+                      <h2 style={styles.sectionTitle}>Group Decisions</h2>
+                      <p style={styles.groupDecisionsIntro}>
+                        Review decisions here. Open one to reach its voting,
+                        resolution, or acknowledgment controls.
+                      </p>
+                      <button
+                          type="button"
+                          style={styles.groupDecisionOpenButton}
+                          onClick={() => {
+                            setGroupMessageSearch("");
+                            setActiveGroupTab("messages");
+                          }}
+                      >
+                        Go to Messages to create a decision
+                      </button>
+
+                      {groupDecisions.length === 0 ? (
+                          <div style={styles.groupDecisionsEmptyState}>
+                            <p style={styles.groupDecisionsEmptyTitle}>
+                              No group decisions yet
+                            </p>
+                            <p style={styles.groupDecisionsIntro}>
+                              To start one, open Messages, select a group message,
+                              and choose Decision from its actions.
+                            </p>
+                          </div>
+                      ) : (
+                          <div style={styles.groupDecisionList}>
+                            {groupDecisions.map((decision) => {
+                              const sourceMessage = messages.find(
+                                  (msg) =>
+                                      String(msg.id) ===
+                                      String(decision.sourceMessageId)
+                              );
+
+                              return (
+                                  <article
+                                      key={decision.decisionId}
+                                      style={styles.groupDecisionCard}
+                                  >
+                                    <div style={styles.groupDecisionCardHeader}>
+                                      <span style={styles.messageDecisionBadge}>
+                                        {formatDecisionGovernanceMode(
+                                            decision.governanceMode
+                                        )}
+                                      </span>
+                                      <span style={styles.messageDecisionStatus}>
+                                        {formatDecisionStatus(decision.status)}
+                                      </span>
+                                    </div>
+
+                                    <p style={styles.groupDecisionSourceText}>
+                                      {sourceMessage?.message ||
+                                          "The source message is unavailable."}
+                                    </p>
+
+                                    <p style={styles.groupDecisionMeta}>
+                                      Decision #{decision.decisionId}
+                                      {sourceMessage?.sender
+                                          ? ` · Proposed from ${sourceMessage.sender}'s message`
+                                          : ""}
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        style={styles.groupDecisionOpenButton}
+                                        onClick={() =>
+                                          openDecisionInMessages(decision)
+                                        }
+                                        disabled={!sourceMessage}
+                                    >
+                                      Open decision controls
+                                    </button>
+                                  </article>
+                              );
+                            })}
+                          </div>
+                      )}
+                    </section>
+                ) : (
+                    <>
                 <h2 style={styles.sectionTitle}>Messages</h2>
 
                 <p style={styles.messageCount}>
@@ -2636,12 +2797,12 @@ export default function GroupChat() {
 
                   {messages.length === 0 ? (
                       <p style={styles.muted}>No messages yet.</p>
-                  ) : filteredGroupMessages.length === 0 ? (
+                  ) : displayedGroupMessages.length === 0 ? (
                       <p style={styles.muted}>No group messages match your search.</p>
                   ) : (
 
-                      filteredGroupMessages.map((msg, index) => {
-                        const previousMessage = filteredGroupMessages[index - 1];
+                      displayedGroupMessages.map((msg, index) => {
+                        const previousMessage = displayedGroupMessages[index - 1];
                         const sameSenderAsPrevious =
                             previousMessage && previousMessage.sender === msg.sender;
 
@@ -2659,8 +2820,8 @@ export default function GroupChat() {
                             editingMessageId === msg.id;
 
                         return (
-                            <div key={msg.id}>
-                              {shouldShowDateSeparator(filteredGroupMessages, index) && (
+                            <div key={msg.id} id={`group-message-${msg.id}`}>
+                              {shouldShowDateSeparator(displayedGroupMessages, index) && (
                                   <div style={styles.dateSeparator}>
                                     {getMessageDateLabel(msg.timestamp)}
                                   </div>
@@ -3791,6 +3952,9 @@ export default function GroupChat() {
                   </div>
                 </div>
 
+                    </>
+                )}
+
               </div>
 
             </div>
@@ -4083,6 +4247,101 @@ groupButton: {
     fontWeight: "700",
     textAlign: "center",
     marginBottom: "8px",
+  },
+  groupTabRow: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+    margin: "0 auto 14px",
+    paddingBottom: "10px",
+    borderBottom: "1px solid #1e293b",
+    width: "100%",
+  },
+  groupTabButton: {
+    border: "1px solid #475569",
+    borderRadius: "9px",
+    padding: "9px 16px",
+    backgroundColor: "#020617",
+    color: "#cbd5e1",
+    fontSize: "14px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+  groupTabButtonActive: {
+    borderColor: "#38bdf8",
+    backgroundColor: "#123c69",
+    color: "#f8fafc",
+  },
+  groupDecisionsPanel: {
+    flex: 1,
+    minHeight: 0,
+    overflowY: "auto",
+    padding: "8px 4px 16px",
+  },
+  groupDecisionsIntro: {
+    color: "#cbd5e1",
+    fontSize: "14px",
+    lineHeight: 1.5,
+    margin: "0 0 12px",
+    textAlign: "center",
+  },
+  groupDecisionsEmptyState: {
+    maxWidth: "600px",
+    margin: "28px auto",
+    padding: "22px",
+    border: "1px solid #334155",
+    borderRadius: "14px",
+    backgroundColor: "#020617",
+    textAlign: "center",
+  },
+  groupDecisionsEmptyTitle: {
+    color: "#f8fafc",
+    fontSize: "17px",
+    fontWeight: "700",
+    margin: "0 0 8px",
+  },
+  groupDecisionList: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+    gap: "12px",
+    marginTop: "16px",
+  },
+  groupDecisionCard: {
+    padding: "16px",
+    border: "1px solid #334155",
+    borderRadius: "12px",
+    backgroundColor: "#020617",
+    minWidth: 0,
+  },
+  groupDecisionCardHeader: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "8px",
+    marginBottom: "12px",
+  },
+  groupDecisionSourceText: {
+    color: "#f8fafc",
+    fontSize: "15px",
+    lineHeight: 1.5,
+    margin: "0 0 10px",
+    overflowWrap: "anywhere",
+  },
+  groupDecisionMeta: {
+    color: "#94a3b8",
+    fontSize: "12px",
+    margin: "0 0 14px",
+  },
+  groupDecisionOpenButton: {
+    border: "1px solid #38bdf8",
+    borderRadius: "8px",
+    padding: "8px 12px",
+    backgroundColor: "#123c69",
+    color: "#f8fafc",
+    fontSize: "13px",
+    fontWeight: "700",
+    cursor: "pointer",
   },
   messagesBox: {
     flex: 1,
