@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /send
+Disallow: /inbox
+Disallow: /groups
+Disallow: /change-password
+
+Sitemap: https://brain-secure-messaging.com/sitemap.xml

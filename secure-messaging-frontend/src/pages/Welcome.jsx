@@ -9,9 +9,9 @@ function Welcome() {
             <div style={styles.card}>
                 <img src={logo} alt="Secure Messaging Logo" style={styles.logo} />
 
-                <h1 style={styles.welcome}>Welcome to</h1>
+                <p style={styles.welcome}>Welcome to</p>
 
-                <h2 style={styles.title}>Secure Messaging Platform</h2>
+                <h1 style={styles.title}>Secure Messaging Platform</h1>
 
                 <p style={styles.tagline}>Think secure. Stay ahead.</p>
 
