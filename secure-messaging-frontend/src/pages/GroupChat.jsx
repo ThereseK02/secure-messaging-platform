@@ -2202,7 +2202,7 @@ export default function GroupChat() {
 
         <style>
           {`
- @media (max-width: 1199.98px) {
+ @media (max-width: 767.98px) {
    .group-chat-workspace {
      height: auto !important;
   }
@@ -2238,25 +2238,31 @@ export default function GroupChat() {
 
     .memberList {
       scrollbar-width: thin;
-      scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+      scrollbar-color: rgba(100, 116, 139, 0.16) transparent;
     }
 
     .memberList::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .memberList::-webkit-scrollbar-track {
+      width: 3px;
       background: transparent;
     }
+    .memberList::-webkit-scrollbar-track,
+    .memberList::-webkit-scrollbar-track-piece {
+      background: transparent;
+}
 
-    .memberList::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.28);
+     .memberList::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.16);
       border-radius: 999px;
     }
 
     .memberList:hover::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.5);
+      background: rgba(100, 116, 139, 0.3);
     }
+    .memberList::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+}
     
     .group-chat-workspace {
   margin-right: 0 !important;
@@ -2492,7 +2498,7 @@ export default function GroupChat() {
         {showConversation && (
             <div className="row g-3 group-chat-workspace" style={styles.chatLayout}>
 
-              <div className="col-12 col-xl-auto d-flex flex-column group-chat-sidebar" style={styles.chatSidebar}>
+              <div className="col-12 col-md-auto d-flex flex-column group-chat-sidebar" style={styles.chatSidebar}>
                 <button
                     style={styles.backButton}
                     onClick={() => {
