@@ -2232,6 +2232,35 @@ export default function GroupChat() {
     .memberList:hover::-webkit-scrollbar-thumb {
       background: rgba(100, 116, 139, 0.5);
     }
+    
+    .group-chat-workspace {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+@media (max-width: 991.98px) {
+  .group-chat-workspace {
+    height: auto !important;
+  }
+
+  .group-chat-sidebar {
+    height: auto !important;
+    max-height: 38vh;
+  }
+
+  .group-chat-main {
+    height: min(76vh, 780px) !important;
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .group-chat-main {
+    height: 72vh !important;
+    min-height: 460px;
+    padding: 12px !important;
+  }
+}
   `}
         </style>
 
@@ -2436,9 +2465,9 @@ export default function GroupChat() {
         )}
 
         {showConversation && (
-            <div style={styles.chatLayout}>
+            <div className="row g-3 group-chat-workspace" style={styles.chatLayout}>
 
-              <div style={styles.chatSidebar}>
+              <div className="col-12 col-lg-3 col-xl-2 d-flex flex-column group-chat-sidebar" style={styles.chatSidebar}>
 
                 <button
                     style={styles.backButton}
@@ -2684,7 +2713,7 @@ export default function GroupChat() {
 
               </div>
 
-              <div style={styles.chatMain}>
+              <div className="col-12 col-lg-9 col-xl-10 d-flex flex-column group-chat-main" style={styles.chatMain}>
                 <p style={styles.groupContext}>
                   Group: {selectedGroupName} (#{selectedGroupId})
                 </p>
@@ -4855,17 +4884,17 @@ groupButton: {
     boxShadow: "0 8px 20px rgba(56, 189, 248, 0.14)",
   },
   chatLayout: {
-    display: "flex",
-    gap: "20px",
     width: "100%",
-    maxWidth: "1200px",
-    height: "clamp(620px, 78vh, 760px)",
+    maxWidth: "none",
+    height: "clamp(560px, calc(100dvh - 180px), 920px)",
     alignItems: "stretch",
+    boxSizing: "border-box",
+    marginLeft: 0,
+    marginRight: 0,
   },
   chatSidebar: {
-    width: "260px",
-    minWidth: "260px",
     height: "100%",
+    minWidth: 0,
     justifyContent: "flex-start",
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
@@ -4877,10 +4906,10 @@ groupButton: {
     boxSizing: "border-box",
   },
   chatMain: {
-    flex: 1,
     display: "flex",
     flexDirection: "column",
     height: "100%",
+    minWidth: 0,
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
     borderRadius: "16px",
