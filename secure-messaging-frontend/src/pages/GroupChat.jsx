@@ -35,6 +35,7 @@ export default function GroupChat() {
   const [groupDecisions, setGroupDecisions] =
       useState([]);
   const [activeGroupTab, setActiveGroupTab] = useState("messages");
+  const [expandedDecisionId, setExpandedDecisionId] = useState(null);
   const [pendingDecisionFocusId, setPendingDecisionFocusId] = useState(null);
   const [resolvingDecisionId, setResolvingDecisionId] =
       useState(null);
@@ -1200,7 +1201,15 @@ export default function GroupChat() {
 
   const currentGroupRole = currentGroupMember?.role;
 
-  const normalizedGroupMessageSearch = groupMessageSearch.trim().toLowerCase();
+  const normalizeSearchText = (value) =>
+      String(value ?? "")
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLocaleLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+
+  const normalizedGroupMessageSearch = normalizeSearchText(groupMessageSearch);
 
   const filteredGroupMessages = messages.filter((msg) => {
     if (!normalizedGroupMessageSearch) {
@@ -1211,7 +1220,7 @@ export default function GroupChat() {
         (attachment) => String(attachment.groupMessageId) === String(msg.id)
     );
 
-    const searchableText = [
+    const searchableText = normalizeSearchText([
       msg.sender,
       msg.message,
       formatGroupMessageTimestamp(msg.timestamp),
@@ -1219,10 +1228,12 @@ export default function GroupChat() {
       ...messageAttachments.map((attachment) => attachment.filename),
     ]
         .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        .join(" "));
 
-    return searchableText.includes(normalizedGroupMessageSearch);
+    return normalizedGroupMessageSearch
+        .split(" ")
+        .filter(Boolean)
+        .every((term) => searchableText.includes(term));
   });
 
   const displayedGroupMessages = activeGroupTab === "decisions"
@@ -1253,6 +1264,179 @@ export default function GroupChat() {
     setGroupMessageSearch("");
     setPendingDecisionFocusId(String(sourceMessage.id));
     setActiveGroupTab("messages");
+  }
+
+  function renderDecisionCardControls(decision) {
+    const decisionId = decision.decisionId;
+    const isResolving = resolvingDecisionId === decisionId;
+    const isVoting = castingVoteDecisionId === decisionId;
+    const isOpeningVoting = openingVotingDecisionId === decisionId;
+    const isAcknowledging = acknowledgingDecisionId === decisionId;
+    const isFinalized = ["APPROVED", "REJECTED", "WITHDRAWN"].includes(
+        decision.status
+    );
+
+    if (isFinalized) {
+      return (
+          <div style={styles.decisionCardControlsContent}>
+            <p style={styles.decisionCardControlHint}>
+              Acknowledged by {Number(decision.acknowledgmentCount) || 0} of {Number(decision.requiredAcknowledgmentCount) || 0} required members.
+            </p>
+            {decision.acknowledgmentRequiredForCurrentUser && (
+                <button
+                    type="button"
+                    style={styles.decisionAcknowledgmentButton}
+                    onClick={() => acknowledgeGroupDecision(decision)}
+                    disabled={
+                      decision.acknowledgedByCurrentUser === true ||
+                      isAcknowledging
+                    }
+                >
+                  {isAcknowledging
+                      ? "Acknowledging..."
+                      : decision.acknowledgedByCurrentUser
+                        ? "Acknowledged"
+                        : "Acknowledge decision"}
+                </button>
+            )}
+          </div>
+      );
+    }
+
+    if (decision.governanceMode === "OWNER_REVIEW" && decision.status === "PROPOSED") {
+      return currentGroupRole === "OWNER" ? (
+          <div style={styles.decisionCardControlsContent}>
+            <p style={styles.decisionCardControlHint}>Review this proposal:</p>
+            <div style={styles.decisionCardActionRow}>
+              <button
+                  type="button"
+                  style={styles.approveDecisionButton}
+                  onClick={() => resolveOwnerReviewDecision(decision, "approve")}
+                  disabled={isResolving}
+              >{isResolving ? "Processing..." : "Approve"}</button>
+              <button
+                  type="button"
+                  style={styles.rejectDecisionButton}
+                  onClick={() => resolveOwnerReviewDecision(decision, "reject")}
+                  disabled={isResolving}
+              >{isResolving ? "Processing..." : "Reject"}</button>
+            </div>
+          </div>
+      ) : (
+          <p style={styles.decisionCardControlHint}>Waiting for the group owner to review this proposal.</p>
+      );
+    }
+
+    if (decision.governanceMode === "OWNER_LED" && decision.status === "DISCUSSION_OPEN") {
+      return currentGroupRole === "OWNER" ? (
+          <div style={styles.decisionCardControlsContent}>
+            <p style={styles.decisionCardControlHint}>Finalize this owner-led decision:</p>
+            <div style={styles.decisionCardActionRow}>
+              <button
+                  type="button"
+                  style={styles.approveDecisionButton}
+                  onClick={() => resolveOwnerLedDecision(decision, "approve")}
+                  disabled={isResolving}
+              >{isResolving ? "Processing..." : "Approve"}</button>
+              <button
+                  type="button"
+                  style={styles.rejectDecisionButton}
+                  onClick={() => resolveOwnerLedDecision(decision, "reject")}
+                  disabled={isResolving}
+              >{isResolving ? "Processing..." : "Reject"}</button>
+              <button
+                  type="button"
+                  style={styles.messageActionMenuButton}
+                  onClick={() => resolveOwnerLedDecision(decision, "withdraw")}
+                  disabled={isResolving}
+              >{isResolving ? "Processing..." : "Withdraw"}</button>
+            </div>
+          </div>
+      ) : (
+          <p style={styles.decisionCardControlHint}>The group owner will finalize this discussion.</p>
+      );
+    }
+
+    if (decision.governanceMode === "MEMBER_VOTE" && decision.status === "PROPOSED") {
+      return currentGroupRole === "OWNER" ? (
+          <div style={styles.decisionCardControlsContent}>
+            <label style={styles.memberVotingDeadlineLabel}>
+              Voting deadline
+              <input
+                  type="datetime-local"
+                  value={votingDeadlineInputs[decisionId] || ""}
+                  onChange={(event) => setVotingDeadlineInputs((current) => ({
+                    ...current,
+                    [decisionId]: event.target.value,
+                  }))}
+                  style={styles.memberVotingDeadlineInput}
+                  disabled={isOpeningVoting}
+              />
+            </label>
+            <button
+                type="button"
+                style={styles.openVotingButton}
+                onClick={() => openMemberVoting(decision)}
+                disabled={isOpeningVoting}
+            >{isOpeningVoting ? "Opening..." : "Open voting"}</button>
+          </div>
+      ) : (
+          <p style={styles.decisionCardControlHint}>Waiting for the group owner to open voting.</p>
+      );
+    }
+
+    if (decision.governanceMode === "MEMBER_VOTE" && decision.status === "VOTING_OPEN") {
+      return (
+          <div style={styles.decisionCardControlsContent}>
+            <p style={styles.decisionCardControlHint}>Cast or update your secret ballot:</p>
+            <div style={styles.decisionCardActionRow}>
+              {["APPROVE", "REJECT", "ABSTAIN"].map((choice) => (
+                  <button
+                      key={choice}
+                      type="button"
+                      style={styles.memberVotingChoiceButton}
+                      onClick={() => castMemberVote(decision, choice)}
+                      disabled={isVoting}
+                  >{isVoting ? "Recording..." : choice.charAt(0) + choice.slice(1).toLowerCase()}</button>
+              ))}
+              {currentGroupRole === "OWNER" && (
+                  <button
+                      type="button"
+                      style={styles.openVotingButton}
+                      onClick={() => resolveMemberVoting(decision)}
+                      disabled={isResolving}
+                  >{isResolving ? "Resolving..." : "Resolve voting"}</button>
+              )}
+            </div>
+          </div>
+      );
+    }
+
+    if (decision.governanceMode === "MEMBER_VOTE" && decision.status === "WAITING_FOR_TIE_BREAK") {
+      return currentGroupRole === "OWNER" ? (
+          <div style={styles.decisionCardControlsContent}>
+            <p style={styles.decisionCardControlHint}>Cast the owner tie-break:</p>
+            <div style={styles.decisionCardActionRow}>
+              <button
+                  type="button"
+                  style={styles.approveDecisionButton}
+                  onClick={() => resolveMemberVoteTieBreak(decision, "APPROVE")}
+                  disabled={isResolving}
+              >{isResolving ? "Resolving..." : "Tie-break approve"}</button>
+              <button
+                  type="button"
+                  style={styles.rejectDecisionButton}
+                  onClick={() => resolveMemberVoteTieBreak(decision, "REJECT")}
+                  disabled={isResolving}
+              >{isResolving ? "Resolving..." : "Tie-break reject"}</button>
+            </div>
+          </div>
+      ) : (
+          <p style={styles.decisionCardControlHint}>Waiting for the group owner to resolve the tie.</p>
+      );
+    }
+
+    return <p style={styles.decisionCardControlHint}>There are no available actions for this decision right now.</p>;
   }
 
   function formatDecisionGovernanceMode(mode) {
@@ -2209,6 +2393,7 @@ export default function GroupChat() {
                                     onClick={() => {
                                       setSelectedGroupId(String(group.id));
                                       setActiveGroupTab("messages");
+                                      setExpandedDecisionId(null);
                                       setSelectedGroupName(group.groupName);
                                       setSelectedGroupAdmin(group.createdBy || "");
                                       setGroupMessageSearch("");
@@ -2260,6 +2445,7 @@ export default function GroupChat() {
                     onClick={() => {
                       setShowConversation(false);
                       setActiveGroupTab("messages");
+                      setExpandedDecisionId(null);
                       setMessages([]);
                       setGroupDecisions([]);
                       setGroupAttachments([]);
@@ -2708,13 +2894,37 @@ export default function GroupChat() {
                                     <button
                                         type="button"
                                         style={styles.groupDecisionOpenButton}
-                                        onClick={() =>
-                                          openDecisionInMessages(decision)
+                                        aria-expanded={
+                                          expandedDecisionId === decision.decisionId
                                         }
-                                        disabled={!sourceMessage}
+                                        aria-controls={`decision-controls-${decision.decisionId}`}
+                                        onClick={() => setExpandedDecisionId(
+                                            expandedDecisionId === decision.decisionId
+                                                ? null
+                                                : decision.decisionId
+                                        )}
                                     >
-                                      Open decision controls
+                                      {expandedDecisionId === decision.decisionId
+                                          ? "Hide decision options"
+                                          : "Show decision options"}
                                     </button>
+                                    {expandedDecisionId === decision.decisionId && (
+                                        <div
+                                            id={`decision-controls-${decision.decisionId}`}
+                                            style={styles.decisionCardControls}
+                                        >
+                                          {renderDecisionCardControls(decision)}
+                                          {sourceMessage && (
+                                              <button
+                                                  type="button"
+                                                  style={styles.decisionSourceLinkButton}
+                                                  onClick={() => openDecisionInMessages(decision)}
+                                              >
+                                                View source message
+                                              </button>
+                                          )}
+                                        </div>
+                                    )}
                                   </article>
                               );
                             })}
@@ -2731,8 +2941,9 @@ export default function GroupChat() {
 
                 <div style={styles.groupSearchRow}>
                   <input
-                      type="text"
+                      type="search"
                       placeholder="Search group messages..."
+                      aria-label="Search group messages"
                       value={groupMessageSearch}
                       onChange={(event) => setGroupMessageSearch(event.target.value)}
                       style={styles.groupSearchInput}
@@ -4341,6 +4552,40 @@ groupButton: {
     color: "#f8fafc",
     fontSize: "13px",
     fontWeight: "700",
+    cursor: "pointer",
+  },
+  decisionCardControls: {
+    marginTop: "12px",
+    padding: "12px",
+    border: "1px solid #334155",
+    borderRadius: "10px",
+    backgroundColor: "#0b1220",
+  },
+  decisionCardControlsContent: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "10px",
+  },
+  decisionCardControlHint: {
+    color: "#cbd5e1",
+    fontSize: "13px",
+    lineHeight: 1.45,
+    margin: 0,
+  },
+  decisionCardActionRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  decisionSourceLinkButton: {
+    border: "none",
+    background: "transparent",
+    color: "#7dd3fc",
+    fontSize: "12px",
+    fontWeight: "700",
+    padding: "10px 0 0",
     cursor: "pointer",
   },
   messagesBox: {
