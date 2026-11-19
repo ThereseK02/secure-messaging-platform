@@ -2202,6 +2202,31 @@ export default function GroupChat() {
 
         <style>
           {`
+ @media (max-width: 1199.98px) {
+   .group-chat-workspace {
+     height: auto !important;
+  }
+
+   .group-chat-sidebar {
+     width: 100% !important;
+     min-width: 0 !important;
+     height: auto !important;
+     max-height: 38vh;
+  }
+
+   .group-chat-main {
+     height: min(76vh, 780px) !important;
+     min-height: 500px;
+ }
+
+@media (max-width: 575.98px) {
+  .group-chat-main {
+    height: 72vh !important;
+    min-height: 460px;
+    padding: 12px !important;
+  }
+}
+  
     .messagesBox::-webkit-scrollbar {
       display: none;
     }
@@ -2467,8 +2492,7 @@ export default function GroupChat() {
         {showConversation && (
             <div className="row g-3 group-chat-workspace" style={styles.chatLayout}>
 
-              <div className="col-12 col-lg-3 col-xl-2 d-flex flex-column group-chat-sidebar" style={styles.chatSidebar}>
-
+              <div className="col-12 col-xl-auto d-flex flex-column group-chat-sidebar" style={styles.chatSidebar}>
                 <button
                     style={styles.backButton}
                     onClick={() => {
@@ -2713,7 +2737,7 @@ export default function GroupChat() {
 
               </div>
 
-              <div className="col-12 col-lg-9 col-xl-10 d-flex flex-column group-chat-main" style={styles.chatMain}>
+              <div className="col-12 col-xl d-flex flex-column group-chat-main" style={styles.chatMain}>
                 <p style={styles.groupContext}>
                   Group: {selectedGroupName} (#{selectedGroupId})
                 </p>
@@ -4210,13 +4234,13 @@ const styles = {
     boxSizing: "border-box",
     backgroundColor: "#020617",
     color: "#ffffff",
-    padding: "clamp(18px, 2.5vh, 32px) clamp(12px, 3vw, 40px) clamp(24px, 4vh, 48px)",
+    padding: "clamp(12px, 1.5vh, 20px) clamp(12px, 3vw, 40px) clamp(12px, 2vh, 24px)",
     fontFamily: "Arial, sans-serif",
   },
   title: {
     color: "#38bdf8",
-    fontSize: "clamp(26px, 2.5vw, 34px)",
-    marginBottom: "4px",
+    fontSize: "clamp(21px, 1.8vw, 27px)",
+    marginBottom: "2px",
   },
     sectionTitleButton: {
     background: "transparent",
@@ -4258,9 +4282,9 @@ const styles = {
   },
   navButtonRow: {
     display: "flex",
-    gap: "16px",
-    marginBottom: "18px",
-    marginLeft: "26px",
+    gap: "10px",
+    marginBottom: "10px",
+    marginLeft: "16px",
     flexWrap: "wrap",
   },
 
@@ -4330,13 +4354,13 @@ const styles = {
     backgroundColor: "#1e3a8a",
     color: "#ffffff",
     border: "2px solid #38bdf8",
-    borderRadius: "14px",
-    padding: "14px 22px",
+    borderRadius: "10px",
+    padding: "9px 16px",
     fontWeight: "700",
-    fontSize: "16px",
+    fontSize: "14px",
     cursor: "pointer",
-    width: "180px",
-    height: "54px",
+    width: "148px",
+    height: "42px",
   },
 
   section: {
@@ -4886,7 +4910,7 @@ groupButton: {
   chatLayout: {
     width: "100%",
     maxWidth: "none",
-    height: "clamp(560px, calc(100dvh - 180px), 920px)",
+    height: "clamp(560px, calc(100dvh - 140px), 980px)",
     alignItems: "stretch",
     boxSizing: "border-box",
     marginLeft: 0,
@@ -4894,7 +4918,8 @@ groupButton: {
   },
   chatSidebar: {
     height: "100%",
-    minWidth: 0,
+    width: "260px",
+    minWidth: "260px",
     justifyContent: "flex-start",
     backgroundColor: "#0f172a",
     border: "1px solid #1e293b",
@@ -4905,6 +4930,7 @@ groupButton: {
     gap: "12px",
     boxSizing: "border-box",
   },
+
   chatMain: {
     display: "flex",
     flexDirection: "column",
