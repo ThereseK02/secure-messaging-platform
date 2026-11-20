@@ -2743,7 +2743,7 @@ export default function GroupChat() {
 
               </div>
 
-              <div className="col-12 col-xl d-flex flex-column group-chat-main" style={styles.chatMain}>
+              <div className="col-12 col-md d-flex flex-column group-chat-main" style={styles.chatMain}>
                 <p style={styles.groupContext}>
                   Group: {selectedGroupName} (#{selectedGroupId})
                 </p>
