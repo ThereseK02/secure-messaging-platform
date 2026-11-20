@@ -2988,11 +2988,10 @@ export default function GroupChat() {
                     </section>
                 ) : (
                     <>
-                <h2 style={styles.sectionTitle}>Messages</h2>
-
-                <p style={styles.messageCount}>
-                  {messages.length} messages
-                </p>
+                      <div style={styles.messageHeadingRow}>
+                        <h2 style={styles.messagesHeading}>Messages</h2>
+                        <p style={styles.messageCount}>{messages.length} messages</p>
+                      </div>
 
                 <div style={styles.groupSearchRow}>
                   <input
@@ -4275,8 +4274,8 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "10px",
-    marginTop: "4px",
-    marginBottom: "15px",
+    marginTop: "2px",
+    marginBottom: "6px",
   },
 
   liveIndicator: {
@@ -4291,12 +4290,12 @@ const styles = {
     backgroundColor: "#d6c6a8",
     border: "1px solid #f5e6c8",
     borderRadius: "999px",
-    padding: "6px 12px",
-    fontSize: "13px",
+    padding: "4px 10px",
+    fontSize: "12px",
     fontWeight: "700",
     textAlign: "center",
     width: "fit-content",
-    margin: "0 auto 10px auto",
+    margin: "0 auto 6px auto",
     cursor: "pointer",
   },
   navButtonRow: {
@@ -4312,20 +4311,22 @@ const styles = {
     gap: "10px",
     width: "100%",
     maxWidth: "720px",
-    margin: "10px auto 8px",
+    margin: "4px auto",
   },
 
   groupSearchInput: {
     flex: 1,
     minWidth: "220px",
-    padding: "10px 12px",
+    height: "36px",
+    padding: "7px 10px",
     borderRadius: "10px",
     border: "1px solid #38bdf8",
     backgroundColor: "#020617",
     color: "#ffffff",
-    fontSize: "14px",
+    fontSize: "13px",
     outline: "none",
     boxSizing: "border-box",
+
   },
 
   groupSearchClearButton: {
@@ -4337,7 +4338,25 @@ const styles = {
     fontWeight: "700",
     cursor: "pointer",
   },
-
+  messageHeadingRow: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginBottom: "2px",
+  },
+  messagesHeading: {
+    color: "#38bdf8",
+    fontSize: "22px",
+    lineHeight: 1.2,
+    margin: 0,
+  },
+  messageCount: {
+    color: "#f8fafc",
+    fontSize: "14px",
+    lineHeight: 1.2,
+    margin: 0,
+  },
   groupSearchSummary: {
     color: "#94a3b8",
     fontSize: "13px",
@@ -5590,5 +5609,4 @@ refreshButton: {
     fontSize: "12px",
     cursor: "pointer",
   },
-
-};
+ };
