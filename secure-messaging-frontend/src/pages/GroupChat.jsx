@@ -2202,71 +2202,48 @@ export default function GroupChat() {
 
         <style>
           {`
- @media (max-width: 767.98px) {
-   .group-chat-workspace {
-     height: auto !important;
-  }
-
-   .group-chat-sidebar {
-     width: 100% !important;
-     min-width: 0 !important;
-     height: auto !important;
-     max-height: 38vh;
-  }
-
-   .group-chat-main {
-     height: min(76vh, 780px) !important;
-     min-height: 500px;
- }
-
-@media (max-width: 575.98px) {
-  .group-chat-main {
-    height: 72vh !important;
-    min-height: 460px;
-    padding: 12px !important;
-  }
-}
-  
-    .messagesBox::-webkit-scrollbar {
-      display: none;
-    }
-
-    .messagesBox {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .memberList {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(100, 116, 139, 0.16) transparent;
-    }
-
-    .memberList::-webkit-scrollbar {
-      width: 3px;
-      background: transparent;
-    }
-    .memberList::-webkit-scrollbar-track,
-    .memberList::-webkit-scrollbar-track-piece {
-      background: transparent;
+.messagesBox::-webkit-scrollbar {
+  display: none;
 }
 
-     .memberList::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.16);
-      border-radius: 999px;
-    }
-
-    .memberList:hover::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.3);
-    }
-    .memberList::-webkit-scrollbar-button {
-      display: none;
-      width: 0;
-      height: 0;
+.messagesBox {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-    
-    .group-chat-workspace {
-  margin-right: 0 !important;
+
+.memberList {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.16) transparent;
+}
+
+.memberList::-webkit-scrollbar {
+  width: 3px;
+  background: transparent;
+}
+
+.memberList::-webkit-scrollbar-track,
+.memberList::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+
+.memberList::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.16);
+  border-radius: 999px;
+}
+
+.memberList:hover::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+}
+
+.memberList::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.group-chat-workspace {
   margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 @media (max-width: 991.98px) {
@@ -2285,6 +2262,22 @@ export default function GroupChat() {
   }
 }
 
+@media (max-width: 767.98px) {
+  .group-chat-workspace {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+  }
+
+  .group-chat-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .group-chat-main {
+    width: 100% !important;
+  }
+}
+
 @media (max-width: 575.98px) {
   .group-chat-main {
     height: 72vh !important;
@@ -2292,7 +2285,7 @@ export default function GroupChat() {
     padding: 12px !important;
   }
 }
-  `}
+`}
         </style>
 
   <h1 style={styles.title}>Group Chat</h1>
@@ -4921,6 +4914,9 @@ groupButton: {
     boxSizing: "border-box",
     marginLeft: 0,
     marginRight: 0,
+    display: "flex",
+    flexWrap: "nowrap",
+    gap: "16px",
   },
   chatSidebar: {
     height: "100%",
@@ -4939,6 +4935,7 @@ groupButton: {
 
   chatMain: {
     display: "flex",
+    flex: 1,
     flexDirection: "column",
     height: "100%",
     minWidth: 0,
