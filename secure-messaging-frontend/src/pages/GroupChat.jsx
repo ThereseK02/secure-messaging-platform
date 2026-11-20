@@ -2271,10 +2271,12 @@ export default function GroupChat() {
   .group-chat-sidebar {
     width: 100% !important;
     min-width: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   .group-chat-main {
     width: 100% !important;
+    flex: 0 0 auto !important;
   }
 }
 
@@ -2287,8 +2289,6 @@ export default function GroupChat() {
 }
 `}
         </style>
-
-  <h1 style={styles.title}>Group Chat</h1>
 
         {notification && (
             <div
@@ -2324,15 +2324,18 @@ export default function GroupChat() {
               {notification.text}
             </div>
         )}
+        <div style={styles.topHeader}>
+          <h1 style={styles.title}>Group Chat</h1>
 
-        <div style={styles.navButtonRow}>
-          <button style={styles.navButton} onClick={() => navigate("/dashboard")}>
-            Dashboard
-          </button>
+          <div style={styles.navButtonRow}>
+            <button style={styles.navButton} onClick={() => navigate("/dashboard")}>
+              Dashboard
+            </button>
 
-          <button style={styles.navButton} onClick={() => navigate("/inbox")}>
-            Inbox
-          </button>
+            <button style={styles.navButton} onClick={() => navigate("/inbox")}>
+              Inbox
+            </button>
+          </div>
         </div>
 
         {!showConversation && (
@@ -4238,8 +4241,25 @@ const styles = {
   },
   title: {
     color: "#38bdf8",
-    fontSize: "clamp(21px, 1.8vw, 27px)",
-    marginBottom: "2px",
+    fontSize: "24px",
+    lineHeight: 1.2,
+    margin: 0,
+    flex: "0 0 auto",
+  },
+  topHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: "12px",
+    width: "100%",
+    minHeight: "54px",
+    padding: "8px 14px",
+    marginBottom: "10px",
+    backgroundColor: "#0f172a",
+    border: "1px solid #1e293b",
+    borderRadius: "12px",
+    boxSizing: "border-box",
   },
     sectionTitleButton: {
     background: "transparent",
@@ -4282,9 +4302,8 @@ const styles = {
   navButtonRow: {
     display: "flex",
     gap: "10px",
-    marginBottom: "10px",
-    marginLeft: "16px",
     flexWrap: "wrap",
+    alignItems: "center",
   },
 
   groupSearchRow: {
@@ -4353,13 +4372,14 @@ const styles = {
     backgroundColor: "#1e3a8a",
     color: "#ffffff",
     border: "2px solid #38bdf8",
-    borderRadius: "10px",
-    padding: "9px 16px",
+    borderRadius: "8px",
+    boxSizing: "border-box",
+    padding: "6px 12px",
     fontWeight: "700",
-    fontSize: "14px",
+    fontSize: "13px",
     cursor: "pointer",
-    width: "148px",
-    height: "42px",
+    width: "120px",
+    height: "36px",
   },
 
   section: {
@@ -4909,12 +4929,13 @@ groupButton: {
   chatLayout: {
     width: "100%",
     maxWidth: "none",
-    height: "clamp(560px, calc(100dvh - 140px), 980px)",
+    height: "clamp(560px, calc(100dvh - 110px), 980px)",
     alignItems: "stretch",
     boxSizing: "border-box",
     marginLeft: 0,
     marginRight: 0,
     display: "flex",
+    flexDirection: "row",
     flexWrap: "nowrap",
     gap: "16px",
   },
@@ -4928,6 +4949,7 @@ groupButton: {
     borderRadius: "16px",
     padding: "16px",
     display: "flex",
+    flex: "0 0 260px",
     flexDirection: "column",
     gap: "12px",
     boxSizing: "border-box",
@@ -4935,7 +4957,7 @@ groupButton: {
 
   chatMain: {
     display: "flex",
-    flex: 1,
+    flex: "1 1 0%",
     flexDirection: "column",
     height: "100%",
     minWidth: 0,
